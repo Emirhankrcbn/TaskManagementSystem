@@ -3,6 +3,7 @@ using TaskManagement.API.Data;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +28,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 // AutoMapper konfigürasyonu
@@ -69,19 +69,54 @@ builder.Services.AddScoped<TaskManagement.API.Services.IJwtService, TaskManageme
 
 builder.Services.AddControllers(); // Projenin Controller kullanacağını belirtiyoruz
 
+// --- Swagger ve JWT Butonu Konfigürasyonu Başlangıç ---
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "TaskManagement API", Version = "v1" });
+
+    // Swagger'a Bearer Token (JWT) kullanacağını söylüyoruz
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "Lütfen token'ı şu formatta girin: 'Bearer {senin_token_kodun}'",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+// --- Swagger Konfigürasyonu Bitiş ---
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    
+    // Geliştirme ortamında Swagger arayüzünü aktif et
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TaskManagement API v1"));
 }
 
 app.UseHttpsRedirection();
 
 // --- HTTP İstek Hattı (Pipeline) ---
-
-app.UseHttpsRedirection();
 
 // 1. Önce kimlik kontrolü (Kişi kim? Token geçerli mi?)
 app.UseAuthentication(); 

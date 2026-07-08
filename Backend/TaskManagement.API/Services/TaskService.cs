@@ -20,7 +20,7 @@ namespace TaskManagement.API.Services
         public async Task<IEnumerable<TaskResponseDto>> GetAllTasksByUserIdAsync(Guid userId)
         {
             var tasks = await _context.Tasks
-                .Where(t => t.UserId == userId)
+                .Where(t => t.UserId == userId && t.IsDeleted == false) // Sadece aktif görevleri getir
                 .OrderByDescending(t => t.CreatedAt)
                 .ToListAsync();
 
@@ -30,10 +30,10 @@ namespace TaskManagement.API.Services
         public async Task<TaskResponseDto> GetTaskByIdAsync(Guid taskId, Guid userId)
         {
             var task = await _context.Tasks
-                .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId);
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false); // Silinmişse bulma
 
             if (task == null)
-                throw new Exception("Görev bulunamadı veya bu göreve erişim yetkiniz yok.");
+                throw new Exception("Görev bulunamadı, silinmiş olabilir veya bu göreve erişim yetkiniz yok.");
 
             return _mapper.Map<TaskResponseDto>(task);
         }
@@ -53,10 +53,10 @@ namespace TaskManagement.API.Services
         public async Task<TaskResponseDto> UpdateTaskAsync(Guid taskId, Guid userId, TaskUpdateDto taskUpdateDto)
         {
             var existingTask = await _context.Tasks
-                .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId);
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false); // Silinmiş görevi güncelletme
 
             if (existingTask == null)
-                throw new Exception("Güncellenecek görev bulunamadı.");
+                throw new Exception("Güncellenecek görev bulunamadı veya silinmiş.");
 
             existingTask.Title = taskUpdateDto.Title;
             existingTask.Description = taskUpdateDto.Description;
@@ -75,12 +75,13 @@ namespace TaskManagement.API.Services
         public async Task<bool> DeleteTaskAsync(Guid taskId, Guid userId)
         {
             var task = await _context.Tasks
-                .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId);
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false); // Zaten silinmişse tekrar silmeye çalışma
 
             if (task == null)
-                throw new Exception("Silinecek görev bulunamadı.");
+                throw new Exception("Silinecek görev bulunamadı veya zaten silinmiş.");
 
-            _context.Tasks.Remove(task);
+            task.IsDeleted = true; // Veriyi silmiyoruz, pasife çekiyoruz
+            _context.Tasks.Update(task);
             await _context.SaveChangesAsync();
 
             return true;
