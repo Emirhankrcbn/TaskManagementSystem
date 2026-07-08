@@ -14,5 +14,6 @@ namespace TaskManagement.API.Models
         // Navigation Properties
         public User? User { get; set; }
         public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
+        public bool IsDeleted { get; set; } = false;
     }
 }
