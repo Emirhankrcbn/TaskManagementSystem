@@ -6,11 +6,10 @@ namespace TaskManagement.API.DTOs
 {
     public class TaskCreateDto
     {
-        public string Title { get; set; } = string.Empty;
+        public required string Title { get; set; }
         public string? Description { get; set; }
-        public Priority Priority { get; set; }
-        public DateTime? DueDate { get; set; }
-        public Guid UserId { get; set; }
-        public Guid? CategoryId { get; set; }
+        public int? Priority { get; set; } // Opsiyonel yapılabilir
+        public DateTime? DueDate { get; set; } // Opsiyonel yapılabilir
+        public Guid? CategoryId { get; set; } 
     }
 }
