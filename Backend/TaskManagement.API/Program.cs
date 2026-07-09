@@ -116,6 +116,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// API'nin fiziksel dosyaları (resim, pdf vb.) sunmasına izin
+app.UseStaticFiles();
+
 // --- HTTP İstek Hattı (Pipeline) ---
 
 // 1. Önce kimlik kontrolü (Kişi kim? Token geçerli mi?)

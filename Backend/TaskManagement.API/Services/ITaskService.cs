@@ -6,10 +6,15 @@ namespace TaskManagement.API.Services
 {
     public interface ITaskService
     {
-        Task<IEnumerable<TaskResponseDto>> GetAllTasksByUserIdAsync(Guid userId);
+        Task<PagedResultDto<TaskResponseDto>> GetAllTasksByUserIdAsync(Guid userId, TaskFilterDto filter); // listeleme metodunun imzası
         Task<TaskResponseDto> GetTaskByIdAsync(Guid taskId, Guid userId);
-        Task<TaskResponseDto> CreateTaskAsync(TaskCreateDto taskCreateDto);
+        Task<TaskResponseDto> CreateTaskAsync(TaskCreateDto taskCreateDto, Guid userId);
         Task<TaskResponseDto> UpdateTaskAsync(Guid taskId, Guid userId, TaskUpdateDto taskUpdateDto);
         Task<bool> DeleteTaskAsync(Guid taskId, Guid userId);
+        Task<TaskAttachmentResponseDto> UploadAttachmentAsync(Guid taskId, Guid userId, IFormFile file);
+        Task<TaskCommentResponseDto> AddCommentAsync(Guid taskId, Guid userId, TaskCommentCreateDto commentDto); // yorum ekleme metodunun imzası
+        Task<List<TaskCommentResponseDto>> GetTaskCommentsAsync(Guid taskId, Guid userId); // yorumları listeleme (okuma) metodunun imzası
+        Task<TaskStatisticsDto> GetTaskStatisticsAsync(Guid userId);
+        Task<List<TaskResponseDto>> GetOverdueTasksAsync(Guid userId);
     }
 }

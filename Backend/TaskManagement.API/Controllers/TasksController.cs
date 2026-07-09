@@ -28,13 +28,13 @@ namespace TaskManagement.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllTasks()
+        public async Task<IActionResult> GetAllTasks([FromQuery] TaskFilterDto filter)
         {
-            var tasks = await _taskService.GetAllTasksByUserIdAsync(GetUserId());
-            return Ok(tasks); // 200 OK ile listeyi dönüyoruz
+            var result = await _taskService.GetAllTasksByUserIdAsync(GetUserId(), filter);
+            return Ok(result);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetTaskById(Guid id)
         {
             try
@@ -51,9 +51,8 @@ namespace TaskManagement.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTask([FromBody] TaskCreateDto taskCreateDto)
         {
-            // İleride TaskCreateDto içine UserId maplemeyi eklicem
-            var createdTask = await _taskService.CreateTaskAsync(taskCreateDto);
-            return CreatedAtAction(nameof(GetTaskById), new { id = createdTask.Id }, createdTask); // 201 Created
+            var result = await _taskService.CreateTaskAsync(taskCreateDto, GetUserId());
+            return CreatedAtAction(nameof(GetTaskById), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}")]
@@ -82,6 +81,46 @@ namespace TaskManagement.API.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
+        }
+
+        // Dosya yükleme için yeni bir endpointi
+        [HttpPost("{taskId}/attachments")]
+        [Consumes("multipart/form-data")] // Sadece dosya yükleme isteklerini kabul et
+        public async Task<IActionResult> UploadAttachment(Guid taskId, [FromForm] TaskAttachmentUploadDto uploadDto)
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var result = await _taskService.UploadAttachmentAsync(taskId, userId, uploadDto.File);
+            return Ok(result);
+        }
+
+        // Göreve yeni yorum ekleme
+        [HttpPost("{taskId}/comments")]
+        public async Task<IActionResult> AddComment(Guid taskId, [FromBody] TaskCommentCreateDto commentDto)
+        {
+            var result = await _taskService.AddCommentAsync(taskId, GetUserId(), commentDto);
+            return StatusCode(201, result); // 201 Created döner
+        }
+
+        // Görevin yorumlarını listeleme
+        [HttpGet("{taskId}/comments")]
+        public async Task<IActionResult> GetTaskComments(Guid taskId)
+        {
+            var result = await _taskService.GetTaskCommentsAsync(taskId, GetUserId());
+            return Ok(result); // 200 OK ile listeyi döner
+        }
+
+        [HttpGet("statistics")]
+        public async Task<IActionResult> GetTaskStatistics()
+        {
+            var result = await _taskService.GetTaskStatisticsAsync(GetUserId());
+            return Ok(result);
+        }
+
+        [HttpGet("overdue")]
+        public async Task<IActionResult> GetOverdueTasks()
+        {
+            var result = await _taskService.GetOverdueTasksAsync(GetUserId());
+            return Ok(result);
         }
     }
 }
