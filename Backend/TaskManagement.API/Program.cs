@@ -4,8 +4,20 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// --- Serilog Konfigürasyonu Başlangıç ---
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration
+        .WriteTo.Console() // Konsola yazmaya devam et
+        .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day) // Her gün için yeni bir .txt dosyası oluştur
+        .MinimumLevel.Information() // Sadece Information ve daha ciddi (Warning, Error) logları tut
+        .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning); // Microsoft'un gereksiz HTTP loglarını filtrele
+});
+// --- Serilog Konfigürasyonu Bitiş ---
 
 // AppSettings içerisinden aktif veritabanı sağlayıcısını oku
 var dbProvider = builder.Configuration.GetValue<string>("DatabaseSettings:Provider");
@@ -67,32 +79,34 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<TaskManagement.API.Services.IJwtService, TaskManagement.API.Services.JwtService>();
 // --- JWT Konfigürasyonu Bitiş ---
 
+builder.Services.AddResponseCaching();
+
 builder.Services.AddControllers(); // Projenin Controller kullanacağını belirtiyoruz
 
 // --- Swagger ve JWT Butonu Konfigürasyonu Başlangıç ---
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "TaskManagement API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskManagement API", Version = "v1" });
 
     // Swagger'a Bearer Token (JWT) kullanacağını söylüyoruz
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Lütfen token'ı şu formatta girin: 'Bearer {senin_token_kodun}'",
         Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
 
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 }
             },
@@ -102,7 +116,23 @@ builder.Services.AddSwaggerGen(c =>
 });
 // --- Swagger Konfigürasyonu Bitiş ---
 
+// --- CORS Konfigürasyonu Başlangıç ---
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // React/Vue portları
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+// --- CORS Konfigürasyonu Bitiş ---
+
 var app = builder.Build();
+
+// Hata yakalayıcı Middleware'imiz tüm istekleri en başta karşılasın
+app.UseMiddleware<TaskManagement.API.Middlewares.ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -118,6 +148,13 @@ app.UseHttpsRedirection();
 
 // API'nin fiziksel dosyaları (resim, pdf vb.) sunmasına izin
 app.UseStaticFiles();
+
+app.UseRouting(); // Yönlendirmeyi başlat
+
+// CORS politikasını devreye al (Mutlaka UseAuthentication'dan ÖNCE olmalı)
+app.UseCors("AllowFrontend");
+
+app.UseResponseCaching();
 
 // --- HTTP İstek Hattı (Pipeline) ---
 
