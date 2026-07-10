@@ -21,6 +21,7 @@ namespace TaskManagement.API.Services
         {
             // 1. Temel Sorguyu Başlat (Sadece aktif ve bu kullanıcıya ait görevler)
             var query = _context.Tasks
+                .AsNoTracking()
                 .Where(t => t.UserId == userId && t.IsDeleted == false)
                 .AsQueryable();
 
@@ -71,6 +72,7 @@ namespace TaskManagement.API.Services
         public async Task<TaskResponseDto> GetTaskByIdAsync(Guid taskId, Guid userId)
         {
             var task = await _context.Tasks
+                .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false); // Silinmişse bulma
 
             if (task == null)
@@ -211,12 +213,15 @@ namespace TaskManagement.API.Services
 
         public async Task<List<TaskCommentResponseDto>> GetTaskCommentsAsync(Guid taskId, Guid userId)
         {
-            // 1. Güvenlik: Kullanıcı bu görevi görmeye yetkili mi?
-            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false);
+            // 1. Güvenlik: Kullanıcı bu görevi görmeye yetkili mi
+            var task = await _context.Tasks
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false);
             if (task == null) throw new Exception("Görev bulunamadı.");
 
             // 2. Göreve ait tüm yorumları en yeniden en eskiye doğru sıralayarak getir
             var comments = await _context.TaskComments
+                .AsNoTracking()
                 .Where(c => c.TaskId == taskId)
                 .OrderByDescending(c => c.CreatedAt)
                 .Select(c => new TaskCommentResponseDto
@@ -224,7 +229,7 @@ namespace TaskManagement.API.Services
                     Id = c.Id,
                     TaskId = c.TaskId,
                     UserId = c.UserId,
-                    Content = c.Comment, // <-- DÜZELTME BURADA: Veritabanındaki 'Comment' verisini, kullanıcıya 'Content' olarak dönüyoruz
+                    Content = c.Comment,
                     CreatedAt = c.CreatedAt
                 }).ToListAsync();
 
@@ -236,7 +241,7 @@ namespace TaskManagement.API.Services
             // Kullanıcının silinmemiş tüm görevlerini kapsayan temel sorgu
             var baseQuery = _context.Tasks.Where(t => t.UserId == userId && t.IsDeleted == false);
 
-            // Verileri RAM'e çekmeden, doğrudan veritabanında (SQL 'SELECT COUNT') saydırıyoruz!
+            // Verileri RAM'e çekmeden, doğrudan veritabanında (SQL 'SELECT COUNT') saydırıyoruz
             var total = await baseQuery.CountAsync();
             
             // NOT: Status alanının (0: Bekliyor, 1: Devam Ediyor, 2: Tamamlandı) şeklinde
