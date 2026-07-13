@@ -18,7 +18,7 @@ namespace TaskManagement.API.Middlewares
         {
             try
             {
-                // Her şey yolundaysa isteği bir sonraki adıma geçir
+                // her şey yolundaysa isteği bir sonraki adıma geçir
                 await _next(context); 
             }
             catch (Exception ex)

@@ -42,7 +42,7 @@ namespace TaskManagement.API.Services
         public async Task<CategoryResponseDto> CreateCategoryAsync(Guid userId, CategoryCreateDto categoryCreateDto)
         {
             var categoryEntity = _mapper.Map<Category>(categoryCreateDto);
-            categoryEntity.UserId = userId; // Kategoriyi oluşturan kullanıcıya bağla
+            categoryEntity.UserId = userId; // kategoriyi oluşturan kullanıcıya bağla
 
             _context.Categories.Add(categoryEntity);
             await _context.SaveChangesAsync();
@@ -53,7 +53,7 @@ namespace TaskManagement.API.Services
         public async Task<CategoryResponseDto> UpdateCategoryAsync(Guid categoryId, Guid userId, CategoryUpdateDto categoryUpdateDto)
         {
             var existingCategory = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == categoryId && c.UserId == userId && c.IsDeleted == false); // Silinmiş kategoriyi güncelletme
+                .FirstOrDefaultAsync(c => c.Id == categoryId && c.UserId == userId && c.IsDeleted == false); // silinmiş kategoriyi güncelletme
 
             if (existingCategory == null)
                 throw new Exception("Güncellenecek kategori bulunamadı veya silinmiş.");
@@ -74,7 +74,7 @@ namespace TaskManagement.API.Services
             if (category == null)
                 throw new Exception("Silinecek kategori bulunamadı veya zaten silinmiş.");
 
-            category.IsDeleted = true; // Veriyi silmiyoruz, pasife çekiyoruz
+            category.IsDeleted = true; // veriyi silmiyoruz, pasife çekiyoruz
             _context.Categories.Update(category);
             await _context.SaveChangesAsync();
 
