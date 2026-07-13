@@ -156,7 +156,7 @@ app.UseCors("AllowFrontend");
 
 app.UseResponseCaching();
 
-// --- HTTP İstek Hattı (Pipeline) ---
+// --- HTTP istek hattı (Pipeline) ---
 
 // 1. Önce kimlik kontrolü (Kişi kim? Token geçerli mi?)
 app.UseAuthentication(); 
