@@ -262,9 +262,9 @@ namespace TaskManagement.API.Services
         public async Task<List<TaskResponseDto>> GetOverdueTasksAsync(Guid userId)
         {
             // Vadesi geçenleri bulma mantığı:
-            // 1. Kullanıcıya ait ve silinmemiş olacak
-            // 2. Bitiş tarihi (DueDate) şu anki zamandan (UtcNow) daha KÜÇÜK olacak
-            // 3. Görev henüz "Tamamlandı" statüsünde olmayacak (Status enum'unda 2'nin Tamamlandı olduğunu varsayıyoruz)
+            // 1. kullanıcıya ait ve silinmemiş olacak
+            // 2. bitiş tarihi (DueDate) şu anki zamandan (UtcNow) daha KÜÇÜK olacak
+            // 3. görev henüz "Tamamlandı" statüsünde olmayacak (Status enum'unda 2'nin tamamlandı varsayıyoruz)
             
             var overdueTasks = await _context.Tasks
                 .Where(t => t.UserId == userId && 

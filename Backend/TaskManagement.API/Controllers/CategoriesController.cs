@@ -27,7 +27,7 @@ namespace TaskManagement.API.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 60)] // Yanıtı 60 saniye boyunca önbellekte tut
+        [ResponseCache(Duration = 60)] // yanıtı 60 saniye boyunca önbellekte tut
         public async Task<IActionResult> GetAllCategories()
         {
             var categories = await _categoryService.GetAllCategoriesByUserIdAsync(GetUserId());
