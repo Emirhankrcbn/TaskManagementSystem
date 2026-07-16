@@ -1,35 +1,29 @@
 import { Component, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTable } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog'; // Dialog modülü
+import { MaterialModule } from '../../shared/material.module';
+
+ // Dialog modülü
+import { MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
-import { Task } from '../../core/models/task.model';
+import { Task, SubTask } from '../../core/models/task.model';
 
 @Component({
   selector: 'app-tasks',
   imports: [
     CommonModule,
-    MatTableModule, 
-    MatButtonModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
-    MatIconModule, 
-    MatSelectModule,
-    MatDialogModule, // Modül sisteme
     FormsModule,
-    MatCheckboxModule
+    MaterialModule
   ],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss'
 })
+
+// değişkenler
 export class Tasks implements OnInit {
+  isDarkMode = false;
+
   displayedColumns: string[] = ['select', 'id', 'title', 'status', 'actions'];
   selection = new SelectionModel<Task>(true, []);
   @ViewChild(MatTable) table!: MatTable<Task>;
@@ -44,6 +38,11 @@ export class Tasks implements OnInit {
   readonly dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef); // Sistemi manuel tetikleyecek servisi
   @ViewChild('deleteDialog') deleteDialog!: TemplateRef<any>;
+
+  @ViewChild('editTaskDialog') editTaskDialog!: TemplateRef<any>;
+  
+  currentEditTask: Task | null = null; // Ekranda düzenlenen görevin kopyasını tutar
+  newSubTaskTitle: string = '';        // alt görev inputu
 
   ngOnInit() {
     this.loadTasks();
@@ -93,12 +92,50 @@ export class Tasks implements OnInit {
   }
 
   editTask(task: Task) {
-    this.newTaskTitle = task.title; 
-    this.newTaskStatus = task.status; 
-    this.editingTaskId = task.id;   
+    // Referans kopmasın diye nesnenin güvenli bir kopyasını alıyoruz
+    this.currentEditTask = { ...task, subTasks: task.subTasks ? [...task.subTasks] : [] };
+
+    const dialogRef = this.dialog.open(this.editTaskDialog, {
+      width: '600px', // Detaylı form olduğu için geniş tutuyoruz
+      disableClose: true // Dışarı tıklayınca kapanmasın, illa butona basılsın
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'save' && this.currentEditTask) {
+        // Değişiklikleri ana listeye yansıt
+        this.dataSource = this.dataSource.map(t => 
+          t.id === this.currentEditTask!.id ? this.currentEditTask! : t
+        );
+        this.saveDataToStorage();
+        this.table.renderRows();
+        this.cdr.detectChanges();
+      }
+      this.currentEditTask = null; // İşlem bitince hafızayı temizle
+    });
   }
 
-  openDeleteConfirm(id: number) {
+  // --- ALT GÖREV (SUBTASK) FONKSİYONLARI ---
+  addSubTask() {
+    if (this.newSubTaskTitle.trim() === '' || !this.currentEditTask) return;
+    
+    const newSubTask: SubTask = {
+      id: Date.now(), // Basit bir benzersiz ID
+      title: this.newSubTaskTitle,
+      completed: false
+    };
+    
+    this.currentEditTask.subTasks!.push(newSubTask);
+    this.newSubTaskTitle = ''; // Input'u temizle
+  }
+
+  removeSubTask(subTaskId: number) {
+    if (!this.currentEditTask || !this.currentEditTask.subTasks) return;
+    this.currentEditTask.subTasks = this.currentEditTask.subTasks.filter(st => st.id !== subTaskId);
+  }
+
+  openDeleteConfirm(id: number, event: Event) {
+    event.stopPropagation(); 
+
     const dialogRef = this.dialog.open(this.deleteDialog, {
       width: '350px'
     });
@@ -108,8 +145,9 @@ export class Tasks implements OnInit {
         this.dataSource = this.dataSource.filter(task => task.id !== id);
         this.saveDataToStorage();
         
-        // EKRANI ZORLA YENİLEMEK İÇİN BUNU KULLANIYORUZ
+        // Tabloyu ve ekranı zorla güncelle
         this.table.renderRows(); 
+        this.cdr.detectChanges(); // ANGULAR'I UYANDIRAN KOD
       }
     });
   }
@@ -132,7 +170,6 @@ export class Tasks implements OnInit {
     this.selection.select(...this.dataSource);
   }
 
-  // --- TOPLU SİLME FONKSİYONU ---
   openBulkDeleteConfirm() {
     if (this.selection.selected.length === 0) return;
 
@@ -147,9 +184,20 @@ export class Tasks implements OnInit {
         this.selection.clear(); 
         this.saveDataToStorage();
         
-        // EKRANI ZORLA YENİLEMEK İÇİN BUNU KULLANIYORUZ
+        // Tabloyu ve ekranı zorla güncelle
         this.table.renderRows(); 
+        this.cdr.detectChanges(); // ANGULAR'I UYANDIRAN KOD
       }
     });
+  }
+
+    // dark mode toggle fonksiyonu
+  toggleTheme() {
+    this.isDarkMode = !this.isDarkMode;
+    if (this.isDarkMode) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
   }
 }

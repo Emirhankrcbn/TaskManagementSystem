@@ -1,9 +1,19 @@
-export interface User {
+// Alt görevler (Checklist) için interface
+export interface SubTask {
   id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: 'Admin' | 'User'; 
-  avatarUrl?: string; // "?" işareti bu alanın boş olabileceğini belirtir
-  createdAt: string | Date;
+  title: string;
+  completed: boolean;
+}
+
+export interface Task {
+  id: number;
+  title: string;
+  status: 'Bekliyor' | 'Devam Ediyor' | 'Tamamlandı' | 'İptal Edildi';
+  priority?: string;
+  
+  // --- DETAY ÖZELLİKLERİ ---
+  description?: string;      // Görev açıklaması
+  subTasks?: SubTask[];      // Alt başlıklar
+  startDate?: Date | null;   // Başlama tarihi
+  endDate?: Date | null;     // Bitiş tarihi
 }
