@@ -2,11 +2,16 @@
 
     <!-- üst kısım: başlık ve ekleme formu -->
     <div class="header-actions">
-    <!-- Başlık ve Toplu Silme Butonu Yanyana -->
+    <!-- Başlık, Tema Butonu ve Toplu Silme Butonu Yanyana -->
     <div style="display: flex; align-items: center; gap: 15px;">
       <h2>Görev Listesi</h2>
       
-      <!-- Bu buton sadece seçim yapıldığında (*ngIf) görünür -->
+      <!-- Tema değiştirme butonu -->
+      <button mat-icon-button (click)="toggleTheme()">
+        <mat-icon>{{ isDarkMode ? 'dark_mode' : 'light_mode' }}</mat-icon>
+      </button>
+      
+      <!-- Toplu silme butonu -->
       <button mat-stroked-button color="warn" *ngIf="selection.selected.length > 0" (click)="openBulkDeleteConfirm()">
         <mat-icon>delete_sweep</mat-icon>
         Seçili ({{selection.selected.length}}) Görevi Sil
@@ -90,8 +95,9 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef> İşlemler </th>
       <td mat-cell *matCellDef="let task">
+        <!-- Düzenle butonuna da aynı çakışmayı önlemek için stopPropagation eklenebilir ancak asıl sorunumuz sil butonunda -->
         <button mat-button color="primary" (click)="editTask(task)">Düzenle</button>
-        <button mat-button color="warn" (click)="openDeleteConfirm(task.id)">Sil</button>
+        <button mat-button color="warn" (click)="openDeleteConfirm(task.id, $event)">Sil</button>
       </td>
     </ng-container>
 
@@ -128,6 +134,85 @@
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close="cancel">İptal</button>
     <button mat-flat-button color="warn" mat-dialog-close="confirm">Evet, Hepsini Sil</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Kapsamlı Görev Düzenleme Penceresi -->
+<ng-template #editTaskDialog>
+  <h2 mat-dialog-title>Görev Detayları</h2>
+  
+  <mat-dialog-content class="edit-dialog-content" *ngIf="currentEditTask">
+    
+    <!-- Görev Adı -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Görev Adı</mat-label>
+      <input matInput [(ngModel)]="currentEditTask.title">
+    </mat-form-field>
+
+    <!-- Açıklama (Textarea) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Açıklama</mat-label>
+      <textarea matInput [(ngModel)]="currentEditTask.description" rows="3" placeholder="Görevle ilgili detayları buraya yazın..."></textarea>
+    </mat-form-field>
+
+    <!-- Durum ve Tarihler (Yanyana) -->
+    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+      
+      <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-label>Durum</mat-label>
+        <mat-select [(ngModel)]="currentEditTask.status">
+          <mat-option value="Bekliyor">Bekliyor</mat-option>
+          <mat-option value="Devam Ediyor">Devam Ediyor</mat-option>
+          <mat-option value="Tamamlandı">Tamamlandı</mat-option>
+          <mat-option value="İptal Edildi">İptal Edildi</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-label>Başlama Tarihi</mat-label>
+        <input matInput [matDatepicker]="startPicker" [(ngModel)]="currentEditTask.startDate">
+        <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-label>Bitiş Tarihi</mat-label>
+        <input matInput [matDatepicker]="endPicker" [(ngModel)]="currentEditTask.endDate">
+        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+      
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Alt Görevler (Checklist) Bölümü -->
+    <div class="subtasks-section" style="margin-top: 15px;">
+      <h3 style="margin-bottom: 10px;">Alt Görevler (Checklist)</h3>
+      
+      <!-- Alt görev ekleme inputu -->
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <mat-form-field appearance="outline" style="flex: 1;">
+          <mat-label>Yeni Alt Görev Ekle</mat-label>
+          <input matInput [(ngModel)]="newSubTaskTitle" (keyup.enter)="addSubTask()" placeholder="Örn: Veritabanı tablolarını oluştur">
+        </mat-form-field>
+        <button mat-flat-button color="primary" (click)="addSubTask()" style="height: 56px;">Ekle</button>
+      </div>
+
+      <!-- Eklenen Alt Görevlerin Listesi -->
+      <div *ngFor="let sub of currentEditTask.subTasks" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(128,128,128,0.2);">
+        <mat-checkbox [(ngModel)]="sub.completed" color="primary">{{ sub.title }}</mat-checkbox>
+        <button mat-icon-button color="warn" (click)="removeSubTask(sub.id)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close="cancel">İptal</button>
+    <button mat-flat-button color="accent" mat-dialog-close="save">Değişiklikleri Kaydet</button>
   </mat-dialog-actions>
 </ng-template>
 </div>

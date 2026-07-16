@@ -1,13 +1,16 @@
-import { Category } from './category.model';
+export interface SubTask {
+  id: number;
+  title: string;
+  completed: boolean;
+}
 
 export interface Task {
   id: number;
   title: string;
+  status: 'Bekliyor' | 'Devam Ediyor' | 'Tamamlandı' | 'İptal Edildi';
+  priority?: string;
   description?: string;
-  status: 'Bekliyor' | 'Devam Ediyor' | 'Tamamlandı' | 'İptal Edildi'; 
-  priority: 'Düşük' | 'Orta' | 'Yüksek';
-  categoryId?: number; 
-  category?: Category; // API'den kategori detayları gelirse diye
-  dueDate?: string | Date; 
-  createdAt?: string | Date;
+  subTasks?: SubTask[];
+  startDate?: Date | null;
+  endDate?: Date | null;
 }
