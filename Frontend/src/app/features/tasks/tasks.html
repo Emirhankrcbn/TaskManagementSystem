@@ -1,1 +1,133 @@
-<p>tasks works!</p>
+<div class="table-container">
+
+    <!-- üst kısım: başlık ve ekleme formu -->
+    <div class="header-actions">
+    <!-- Başlık ve Toplu Silme Butonu Yanyana -->
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <h2>Görev Listesi</h2>
+      
+      <!-- Bu buton sadece seçim yapıldığında (*ngIf) görünür -->
+      <button mat-stroked-button color="warn" *ngIf="selection.selected.length > 0" (click)="openBulkDeleteConfirm()">
+        <mat-icon>delete_sweep</mat-icon>
+        Seçili ({{selection.selected.length}}) Görevi Sil
+      </button>
+    </div>
+    
+    <!-- Yeni görev ekleme / güncelleme alanı -->
+    <div class="add-task-form">
+      <mat-form-field appearance="outline" class="task-input">
+        <mat-label>{{ editingTaskId ? 'Görevi Düzenle' : 'Yeni Görev Ekle' }}</mat-label>
+        <input matInput [(ngModel)]="newTaskTitle" placeholder="Görev adını yazın..." (keyup.enter)="saveTask()">
+      </mat-form-field>
+      
+      <!-- Yeni eklenen durum seçme menüsü -->
+      <mat-form-field appearance="outline" class="status-select">
+        <mat-label>Durum</mat-label>
+        <mat-select [(ngModel)]="newTaskStatus">
+          <mat-option value="Devam Ediyor">Devam Ediyor</mat-option>
+          <mat-option value="Tamamlandı">Tamamlandı</mat-option>
+          <mat-option value="İptal Edildi">İptal Edildi</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-flat-button [color]="editingTaskId ? 'accent' : 'primary'" class="add-btn" (click)="saveTask()">
+        <mat-icon>{{ editingTaskId ? 'save' : 'add' }}</mat-icon>
+        {{ editingTaskId ? 'Güncelle' : 'Ekle' }}
+      </button>
+    </div>
+  </div>
+  
+  <!-- mat-elevation-z8 sınıfı tabloya gölge efekti verir -->
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+    <!-- Çoklu Seçim Sütunu -->
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <!-- Tablo başlığındaki tümünü seç kutusu -->
+        <mat-checkbox (change)="$event ? toggleAllRows() : null"
+                      [checked]="selection.hasValue() && isAllSelected()"
+                      [indeterminate]="selection.hasValue() && !isAllSelected()">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <!-- Satırlardaki tekli seçim kutuları -->
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="$event ? selection.toggle(row) : null"
+                      [checked]="selection.isSelected(row)">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <!-- ID Sütunu -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef> No. </th>
+      <td mat-cell *matCellDef="let task"> {{task.id}} </td>
+    </ng-container>
+
+    <!-- Başlık Sütunu -->
+    <ng-container matColumnDef="title">
+      <th mat-header-cell *matHeaderCellDef> Görev Adı </th>
+      <td mat-cell *matCellDef="let task"> {{task.title}} </td>
+    </ng-container>
+
+    <!-- Durum Sütunu -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef> Durum </th>
+      <td mat-cell *matCellDef="let task"> 
+        <!-- [ngClass] ile durum metnine göre otomatik renk sınıfı atıyoruz -->
+        <span class="status-badge" 
+              [ngClass]="{
+                'status-completed': task.status === 'Tamamlandı',
+                'status-in-progress': task.status === 'Devam Ediyor',
+                'status-cancelled': task.status === 'İptal Edildi'
+              }">
+          {{task.status}}
+        </span> 
+      </td>
+    </ng-container>
+
+    <!-- İşlemler sütunu (Butonlar) -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> İşlemler </th>
+      <td mat-cell *matCellDef="let task">
+        <button mat-button color="primary" (click)="editTask(task)">Düzenle</button>
+        <button mat-button color="warn" (click)="openDeleteConfirm(task.id)">Sil</button>
+      </td>
+    </ng-container>
+
+    <!-- Tablonun başlık ve satır kısımlarını render eden yapı -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <!-- Silme onay penceresi -->
+<ng-template #deleteDialog>
+  <h2 mat-dialog-title>Görevi Sil</h2>
+  
+  <mat-dialog-content>
+    Bu görevi silmek istediğinize emin misiniz? <br>
+    <small style="color: gray;">Bu işlem geri alınamaz.</small>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <!-- mat-dialog-close ile pencere kapanırken TS dosyasına bir değer ('cancel' veya 'confirm') fırlatıyoruz -->
+    <button mat-button mat-dialog-close="cancel">İptal</button>
+    <button mat-flat-button color="warn" mat-dialog-close="confirm">Evet, Sil</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Toplu silme onay penceresi -->
+<ng-template #bulkDeleteDialog>
+  <h2 mat-dialog-title>Toplu Silme İşlemi</h2>
+  
+  <mat-dialog-content>
+    Seçili olan <strong>{{selection.selected.length}}</strong> görevi silmek istediğinize emin misiniz? <br>
+    <small style="color: gray;">Bu işlem geri alınamaz.</small>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close="cancel">İptal</button>
+    <button mat-flat-button color="warn" mat-dialog-close="confirm">Evet, Hepsini Sil</button>
+  </mat-dialog-actions>
+</ng-template>
+</div>

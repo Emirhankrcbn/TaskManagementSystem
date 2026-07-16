@@ -1,0 +1,76 @@
+.table-container {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto; /* tabloyu sayfanın tam ortasına hizalar */
+}
+
+h2 {
+  color: #333;
+  font-family: Roboto, sans-serif;
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%; /* tablonun bulunduğu kabı tamamen doldurmasını sağlar */
+}
+
+/* Rozetlerin temel şekli */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  min-width: 90px;
+}
+
+/* Tamamlandı */
+.status-completed {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* Devam Ediyor */
+.status-in-progress {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+/* İptal Edildi */
+.status-cancelled {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between; /* başlığı sola, formu sağa iter */
+  align-items: center; /* dikeyde ortalar */
+  margin-bottom: 20px;
+}
+
+/* mevcut h2 stilini flex yapısına uygun hale getiriyoruz */
+h2 {
+  margin-bottom: 0 !important; 
+}
+
+.add-task-form {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Input ve buton arasına boşluk bırakır */
+}
+
+.task-input {
+  width: 300px;
+  margin-bottom: -1.25em; /* material input'un altındaki varsayılan boşluğu kaldırır */
+}
+
+.add-btn {
+  height: 48px; /* butonun yüksekliğini input alanı ile eşitler */
+}
+
+.status-select {
+  width: 160px;
+  margin-bottom: -1.25em;
+}
