@@ -1,0 +1,15 @@
+/* Yönlendirme butonlarını sağa iter */
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Navbar arkaplanını ve yazı rengini zorunlu olarak kurumsal mavi yapar */
+mat-toolbar {
+  background-color: #1976d2 !important; 
+  color: white !important;
+}
+
+/* Butonların içindeki yazıların da beyaz görünmesini sağlar */
+mat-toolbar button {
+  color: white !important;
+}
