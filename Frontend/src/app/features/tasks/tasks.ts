@@ -10,13 +10,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog'; // Dialog
 import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
-
-
-export interface Task {
-  id: number;
-  title: string;
-  status: string;
-}
+import { Task } from '../../core/models/task.model';
 
 @Component({
   selector: 'app-tasks',
@@ -43,7 +37,7 @@ export class Tasks implements OnInit {
 
   dataSource: Task[] = [];
   newTaskTitle: string = '';
-  newTaskStatus: string = 'Devam Ediyor';
+  newTaskStatus: 'Bekliyor' | 'Devam Ediyor' | 'Tamamlandı' | 'İptal Edildi' = 'Devam Ediyor';
   editingTaskId: number | null = null; 
 
   // Dialog servisini ve Angular'ın değişiklik algılayıcısını hafızada tutacak değişkenler
@@ -61,9 +55,9 @@ export class Tasks implements OnInit {
       this.dataSource = JSON.parse(savedTasks);
     } else {
       this.dataSource = [
-        { id: 1, title: 'Angular Environment Konfigürasyonu', status: 'Tamamlandı' },
-        { id: 2, title: 'Navbar Tasarımı ve SCSS Ayarları', status: 'Tamamlandı' },
-        { id: 3, title: 'Görevler Tablosunun Çizilmesi', status: 'Devam Ediyor' }
+        { id: 1, title: 'Angular Environment Konfigürasyonu', status: 'Tamamlandı', priority: 'Yüksek' },
+        { id: 2, title: 'Navbar Tasarımı ve SCSS Ayarları', status: 'Tamamlandı', priority: 'Orta' },
+        { id: 3, title: 'Görevler Tablosunun Çizilmesi', status: 'Devam Ediyor', priority: 'Yüksek' }
       ];
     }
   }
@@ -87,7 +81,8 @@ export class Tasks implements OnInit {
       const newTask: Task = {
         id: this.dataSource.length > 0 ? Math.max(...this.dataSource.map(t => t.id)) + 1 : 1,
         title: this.newTaskTitle,
-        status: this.newTaskStatus
+        status: this.newTaskStatus,
+        priority: 'Orta'
       };
       this.dataSource = [...this.dataSource, newTask];
     }
