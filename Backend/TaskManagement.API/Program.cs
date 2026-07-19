@@ -121,13 +121,15 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // React/Vue portları
+       policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "http://localhost:4200") // Angular portu eklendi
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
 });
 // --- CORS Konfigürasyonu Bitiş ---
+
+
 
 var app = builder.Build();
 

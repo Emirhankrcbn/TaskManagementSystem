@@ -5,6 +5,11 @@
     <!-- Başlık, Tema Butonu ve Toplu Silme Butonu Yanyana -->
     <div style="display: flex; align-items: center; gap: 15px;">
       <h2>Görev Listesi</h2>
+
+      <!-- Kırmızı renkli (warn) ve tıklandığında onLogout fonksiyonunu tetikleyen buton -->
+      <button mat-flat-button color="warn" (click)="onLogout()">
+        Çıkış Yap
+      </button>
       
       <!-- Tema değiştirme butonu -->
       <button mat-icon-button (click)="toggleTheme()">

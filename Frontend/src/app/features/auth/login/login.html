@@ -6,6 +6,11 @@
 
     <mat-card-content>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+
+        <div class="register-prompt">
+          <span>Hesabın yok mu?</span>
+          <a mat-button color="accent" routerLink="/register">Hemen Kayıt Ol</a>
+        </div>
         
         <!-- E-posta alanı -->
         <mat-form-field appearance="outline" class="full-width">

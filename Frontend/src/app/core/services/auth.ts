@@ -13,7 +13,7 @@ export class AuthService {
   private tokenService = inject(TokenService);
   
   // Backend API adresimiz
-  private apiUrl = 'http://localhost:3000/api/auth'; 
+  private apiUrl = 'http://localhost:5182/api/auth';
   
   // Zamanlayıcıyı hafızada tutacağımız değişken
   private logoutTimer: any;
