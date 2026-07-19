@@ -23,16 +23,24 @@ export class Register {
 
   // Form elemanları: İsim, E-posta ve Şifre
   registerForm: FormGroup = this.fb.group({
-    name: ['', Validators.required],
+    username: ['', Validators.required],
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
   onSubmit(): void {
     if (this.registerForm.valid) {
-      const userData = this.registerForm.value;
+      const payload = {
+        username: this.registerForm.value.username,
+        firstName: this.registerForm.value.firstName,
+        lastName: this.registerForm.value.lastName,
+        email: this.registerForm.value.email,
+        password: this.registerForm.value.password
+      };
       
-      this.authService.register(userData).subscribe({
+      this.authService.register(payload).subscribe({
         next: (response) => {
           console.log('Kayıt başarılı!', response);
           // Kayıt başarılıysa giriş yapması için Login sayfasına yönlendiriyoruz

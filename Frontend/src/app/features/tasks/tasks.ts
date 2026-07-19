@@ -2,6 +2,7 @@ import { Component, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef } 
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MaterialModule } from '../../shared/material.module';
+import { AuthService } from '../../core/services/auth';
 
  // Dialog modülü
 import { MatDialog } from '@angular/material/dialog';
@@ -199,5 +200,13 @@ export class Tasks implements OnInit {
     } else {
       document.body.classList.remove('dark-theme');
     }
+  }
+
+  // AuthService'i içeri alıyoruz
+  private authService = inject(AuthService);
+
+  // Çıkış butonuna basıldığında çalışacak fonksiyon
+  onLogout(): void {
+    this.authService.logout();
   }
 }
