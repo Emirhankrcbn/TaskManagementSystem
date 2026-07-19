@@ -10,11 +10,13 @@ import { Router } from '@angular/router';
 export class AuthService {
   private router = inject(Router);
   private http = inject(HttpClient);
-  
-  // Backend API adresimiz (İleride environment dosyasına taşıyacağız)
-  private apiUrl = 'http://localhost:3000/api/auth'; 
-  private tokenKey = 'auth_token';
   private tokenService = inject(TokenService);
+  
+  // Backend API adresimiz
+  private apiUrl = 'http://localhost:3000/api/auth'; 
+  
+  // Zamanlayıcıyı hafızada tutacağımız değişken
+  private logoutTimer: any;
 
   constructor() { }
 
@@ -23,32 +25,43 @@ export class AuthService {
   }
 
   login(credentials: any): Observable<any> {
-  return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
-    tap(response => {
-      // Artık tokenService'i kullanıyoruz
-      if(response.token) {
-         this.tokenService.saveToken(response.token);
-      }
-    })
-  );
-}
-
-  logout(): void {
-  // Token'ı akıllı servisimizi kullanarak siliyoruz
-  this.tokenService.removeToken();
-  this.router.navigate(['/login']);
-}
-
-  private setToken(token: string): void {
-    localStorage.setItem(this.tokenKey, token);
+    return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
+      tap(response => {
+        if(response.token) {
+           this.tokenService.saveToken(response.token);
+           // Token kaydedildikten sonra otomatik çıkış sayacını başlat
+           this.startAutoLogout();
+        }
+      })
+    );
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+  // Otomatik çıkışı başlatan fonksiyon
+  startAutoLogout(): void {
+    const remainingTime = this.tokenService.getTokenRemainingTime();
+    
+    if (remainingTime > 0) {
+      // Süre dolduğunda logout fonksiyonunu otomatik tetikle
+      this.logoutTimer = setTimeout(() => {
+        console.warn('Oturum süresi doldu, otomatik çıkış yapılıyor.');
+        this.logout();
+      }, remainingTime);
+    }
+  }
+
+  logout(): void {
+    // Çıkış yapıldığında arka planda çalışan sayacı durdur
+    if (this.logoutTimer) {
+      clearTimeout(this.logoutTimer);
+    }
+
+    // Token'ı akıllı servisimizi kullanarak sil
+    this.tokenService.removeToken();
+    this.router.navigate(['/login']);
   }
 
   isLoggedIn(): boolean {
-  // Sadece token var mı diye değil, token GEÇERLİ Mİ diye bakıyoruz!
-  return this.tokenService.isValid();
-}
+    // token var mı, token GEÇERLİ Mİ diye bakıyoruz
+    return this.tokenService.isValid();
+  }
 }
