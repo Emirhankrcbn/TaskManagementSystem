@@ -26,31 +26,51 @@ export class TokenService {
   }
 
   // Token'ın geçerli olup olmadığını (süresinin dolup dolmadığını) kontrol etme
-  isValid(): boolean {
-    const token = this.getToken();
+    isValid(): boolean {
+        const token = this.getToken();
     
-    // Token yoksa zaten geçersizdir
-    if (!token) {
-      return false;
+        // Token yoksa zaten geçersizdir
+        if (!token) {
+            return false;
+        }
+
+        try {
+        // Token'ı çöz ve içindeki exp değerini al
+            const decoded: any = jwtDecode(token);
+      
+            if (decoded.exp === undefined) {
+                return true; // Süre sınırı yoksa geçerli say
+            }
+      
+            // decoded.exp saniye cinsindendir, milisaniyeye çevirip şu anki zamanla kıyaslıyoruz
+            const expirationDate = decoded.exp * 1000;
+            const now = new Date().getTime();
+      
+            return expirationDate > now; // Süre dolmadıysa true döner
+        }
+        catch (error) {
+            // Token bozuksa/çözülemiyorsa geçersiz say
+            console.error('Token çözülürken hata oluştu:', error);
+            return false;
+        }
     }
 
+    // Token'ın bitmesine kaç milisaniye kaldığını hesaplar
+  getTokenRemainingTime(): number {
+    const token = this.getToken();
+    if (!token) return 0;
+
     try {
-      // Token'ı çöz ve içindeki exp değerini al
       const decoded: any = jwtDecode(token);
-      
-      if (decoded.exp === undefined) {
-        return true; // Süre sınırı yoksa geçerli say
-      }
-      
-      // decoded.exp saniye cinsindendir, milisaniyeye çevirip şu anki zamanla kıyaslıyoruz
+      if (!decoded.exp) return 0;
+
       const expirationDate = decoded.exp * 1000;
       const now = new Date().getTime();
+      const remaining = expirationDate - now;
       
-      return expirationDate > now; // Süre dolmadıysa true döner
-    } catch (error) {
-      // Token bozuksa/çözülemiyorsa geçersiz say
-      console.error('Token çözülürken hata oluştu:', error);
-      return false;
+      return remaining > 0 ? remaining : 0;
+    } catch {
+      return 0;
     }
   }
 }
