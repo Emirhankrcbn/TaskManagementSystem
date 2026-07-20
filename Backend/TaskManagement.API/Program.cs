@@ -57,6 +57,7 @@ builder.Services.AddScoped<TaskManagement.API.Services.ICategoryService, TaskMan
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
 
+// JWT kimlik doğrulama ve yetkilendirme konfigürasyonu
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -153,20 +154,20 @@ app.UseStaticFiles();
 
 app.UseRouting(); // Yönlendirmeyi başlat
 
-// CORS politikasını devreye al (Mutlaka UseAuthentication'dan ÖNCE olmalı)
+// CORS politikasını devreye al
 app.UseCors("AllowFrontend");
 
 app.UseResponseCaching();
 
 // --- HTTP istek hattı (Pipeline) ---
 
-// 1. Önce kimlik kontrolü (Kişi kim? Token geçerli mi?)
+//  kimlik kontrolü (Kişi kim? Token geçerli mi?)
 app.UseAuthentication(); 
 
-// 2. Sonra yetki kontrolü (Bu işlemi yapmaya izni var mı?)
+//  yetki kontrolü (Bu işlemi yapmaya izni var mı?)
 app.UseAuthorization();  
 
-// 3. İstekleri Controller'lara yönlendir
+// İstekleri Controller'lara yönlendir
 app.MapControllers();    
 
 app.Run();
