@@ -48,7 +48,7 @@ namespace TaskManagement.API.Controllers
             }
             catch (Exception ex)
             {
-                // Şifre yanlışsa 401 Unauthorized (Yetkisiz) hatası dönüyoruz
+                // Şifre yanlışsa 401 Unauthorized (Yetkisiz) hatası dönüyo
                 return Unauthorized(new { error = ex.Message });
             }
         }

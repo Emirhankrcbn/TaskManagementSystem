@@ -32,6 +32,7 @@ export class Register {
 
   onSubmit(): void {
     if (this.registerForm.valid) {
+      // DTO/Olayload Mapping: Form verilerini backend'e uygun hale getir
       const payload = {
         username: this.registerForm.value.username,
         firstName: this.registerForm.value.firstName,
