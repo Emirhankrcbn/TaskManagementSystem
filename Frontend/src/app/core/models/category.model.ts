@@ -1,6 +1,8 @@
 export interface Category {
-  id: number;
+  id?: string; // Backend Guid gönderdiği için string olmalı. (Yeni eklemede boş olacağı için '?' koyduk)
   name: string;
-  colorCode: string; // Kategoriye özel renk (Örn: '#FF5733')
+  color: string;
   description?: string;
+  userId?: string; 
+  createdAt?: string; 
 }

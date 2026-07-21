@@ -10,7 +10,7 @@ export class CategoryService {
   private http = inject(HttpClient);
   
   // Backend API adresimiz
-  private apiUrl = 'http://localhost:3000/api/categories'; 
+  private apiUrl = 'http://localhost:5182/api/categories'; 
 
   constructor() { }
 
