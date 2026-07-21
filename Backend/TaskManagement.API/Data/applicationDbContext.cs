@@ -73,21 +73,6 @@ namespace TaskManagement.API.Data
                       .HasForeignKey(tc => tc.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
-
-            // seed data (demo kullanıcı)
-            modelBuilder.Entity<User>().HasData(new User
-            {
-                Id = Guid.Parse("d3b07384-d113-4467-89bc-980b6fb89b4f"),
-                Username = "demo_user",
-                Email = "demo@milsoft.com.tr",
-                // "123456" şifresinin BCrypt ile hashlenmiş örnek hali)
-                PasswordHash = "$2a$11$l135hQ1f3m3L/rD./U1H/eFhJ4x2t9x.z1w2y3u4v5w6x7y8z9A0B",
-                FirstName = "Demo",
-                LastName = "Kullanıcı",
-                CreatedAt = new DateTime(2026, 7, 3, 0, 0, 0, DateTimeKind.Utc),
-                UpdatedAt = new DateTime(2026, 7, 3, 0, 0, 0, DateTimeKind.Utc),
-                IsActive = true
-            });
         }
     }
 }

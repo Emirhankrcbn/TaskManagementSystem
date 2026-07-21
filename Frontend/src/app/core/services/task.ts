@@ -10,7 +10,7 @@ export class TaskService {
   private http = inject(HttpClient);
   
   // Backend API adresimiz (İleride environment dosyasına taşıyacağız)
-  private apiUrl = 'http://localhost:3000/api/tasks'; 
+  private apiUrl = 'http://localhost:5182/api/tasks';
 
   constructor() { }
 

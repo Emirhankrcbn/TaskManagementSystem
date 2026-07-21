@@ -1,0 +1,51 @@
+<div class="profile-container">
+  <h2>Profilim</h2>
+
+  <!-- Hata ve Başarı Mesajları -->
+  <div *ngIf="successMessage" class="alert success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert error">{{ errorMessage }}</div>
+
+  <div *ngIf="isLoading">Yükleniyor...</div>
+
+  <form *ngIf="!isLoading" [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+    
+    <div class="form-group">
+      <label for="username">Kullanıcı Adı</label>
+      <input id="username" type="text" formControlName="username" />
+    </div>
+
+    <div class="form-group">
+      <label for="firstName">Ad</label>
+      <input id="firstName" type="text" formControlName="firstName" />
+    </div>
+
+    <div class="form-group">
+      <label for="lastName">Soyad</label>
+      <input id="lastName" type="text" formControlName="lastName" />
+    </div>
+
+    <div class="form-group">
+      <label for="email">E-posta</label>
+      <input id="email" type="email" formControlName="email" />
+    </div>
+
+    <hr>
+    <h3>Şifre Değiştirme (İsteğe Bağlı)</h3>
+    <p><small>Şifrenizi değiştirmek istemiyorsanız bu alanları boş bırakın.</small></p>
+
+    <div class="form-group">
+      <label for="currentPassword">Mevcut Şifre</label>
+      <input id="currentPassword" type="password" formControlName="currentPassword" placeholder="Eski şifreniz" />
+    </div>
+
+    <div class="form-group">
+      <label for="newPassword">Yeni Şifre</label>
+      <input id="newPassword" type="password" formControlName="newPassword" placeholder="Yeni şifreniz" />
+    </div>
+
+    <button type="submit" [disabled]="profileForm.invalid || isLoading">
+      Profili Güncelle
+    </button>
+
+  </form>
+</div>

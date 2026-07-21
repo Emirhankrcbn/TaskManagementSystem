@@ -1,26 +1,31 @@
 import { Routes } from '@angular/router';
 import { Dashboard } from './features/dashboard/dashboard';
 import { Tasks } from './features/tasks/tasks';
-import { authGuard } from './core/guards/auth-guard'; // Guard'ı import ettim
+import { authGuard } from './core/guards/auth-guard'; 
 import { Login } from './features/auth/login/login';
 import { Register } from './features/auth/register/register';
 
-export const routes: Routes = [
-  // { path: 'login', component: LoginComponent },
-  // { path: 'register', component: RegisterComponent },
+// Profil bileşenini import ediyoruz
+import { Profile } from './features/profile/profile'; 
 
+export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { 
     path: 'dashboard', 
     component: Dashboard,
-    canActivate: [authGuard] // Güvenlik duvarını Dashboard'a ekledim
+    canActivate: [authGuard] 
   },
   { 
     path: 'tasks', 
     component: Tasks,
-    canActivate: [authGuard] // Güvenlik duvarını Tasks'a ekledim
+    canActivate: [authGuard] 
   },
-
+  // Profil URL'si ve güvenlik duvarı
+  { 
+    path: 'profile', 
+    component: Profile,
+    canActivate: [authGuard] 
+  },
   { path: 'login', component: Login },
   { path: 'register', component: Register }
 ];

@@ -53,20 +53,58 @@ namespace TaskManagement.API.Controllers
             }
         }
 
-        [Authorize] // Sadece token'ı olanlar profiline erişebilir
+        [Authorize] // Sadece geçerli token'ı olanlar buraya girebilir
         [HttpGet("profile")]
-        public IActionResult GetProfile()
+        public async Task<IActionResult> GetProfile()
         {
-            // Veritabanına gitmeye gerek bile yok, verileri kullanıcının token'ından (VIP Kartından) okuyoruz!
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var email = User.FindFirstValue(ClaimTypes.Email);
-
-            return Ok(new 
-            { 
-                Message = "Profil bilgileri token üzerinden başarıyla okundu.",
-                Id = userId, 
-                Email = email 
-            });
+            try
+            {
+                // 1. Kullanıcı ID'sini güvenli bir şekilde Token'dan (VIP Karttan) okuyoruz
+                var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+                // 2. ID'yi Guid formatına çeviriyoruz
+                if (Guid.TryParse(userIdString, out Guid userId))
+                {
+                    // 3. UserService'teki metodumuzu çağırarak veritabanında bu ID'ye sahip kullanıcı var mı kontrol ediyoruz
+                    var userProfile = await _userService.GetUserProfileAsync(userId);
+            
+                    // Kullanıcı veritabanında bulunduysa profili (DTO formatında) dönüyoruz
+                    return Ok(userProfile);
+                }
+        
+                return BadRequest(new { error = "Geçersiz kullanıcı kimliği." });
+            }
+            catch (Exception ex)
+            {
+                // Eğer UserService'teki "Kullanıcı bulunamadı" hatası fırlatılırsa 404 Not Found dönüyoruz
+                return NotFound(new { error = ex.Message });
+            }
         }
+
+        [Authorize]
+[HttpPut("profile")]
+public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto updateDto)
+{
+    try
+    {
+        // 1. Kullanıcı ID'sini Token'dan okuyoruz
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        if (Guid.TryParse(userIdString, out Guid userId))
+        {
+            // 2. UserService'teki güncelleme metodunu çağırıyoruz
+            var result = await _userService.UpdateUserProfileAsync(userId, updateDto);
+            
+            return Ok(new { message = result });
+        }
+
+        return BadRequest(new { error = "Geçersiz kullanıcı kimliği." });
+    }
+    catch (Exception ex)
+    {
+        // Kullanıcı bulunamazsa veya başka bir hata olursa
+        return BadRequest(new { error = ex.Message });
+    }
+}
     }
 }

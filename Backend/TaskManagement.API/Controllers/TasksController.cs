@@ -20,12 +20,17 @@ namespace TaskManagement.API.Controllers
             _taskService = taskService;
         }
 
-        // JWT Token'ın içinden giriş yapmış kullanıcının ID'sini çıkaran yardımcı metodumuz
         private Guid GetUserId()
-        {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return Guid.Parse(userIdStr!);
-        }
+{
+    var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    
+    // BURAYA BAKALIM:
+    Console.WriteLine("----------------------------------------");
+    Console.WriteLine("İSTEK ATAN KULLANICI ID (Token'dan): " + userIdStr);
+    Console.WriteLine("----------------------------------------");
+    
+    return Guid.Parse(userIdStr!);
+}
 
         [HttpGet]
         public async Task<IActionResult> GetAllTasks([FromQuery] TaskFilterDto filter)
