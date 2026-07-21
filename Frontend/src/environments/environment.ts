@@ -1,4 +1,4 @@
 export const environment = {
-  production: true,
-  apiUrl: 'https://api.gerceksunucu.com/api' // gerçek sunucuda kullanılacak adres
+  production: false,
+  apiUrl: 'http://localhost:5182/api' // Backend'in çalıştığı port buraya yazılmalı
 };

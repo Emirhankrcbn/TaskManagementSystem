@@ -13,6 +13,9 @@ namespace TaskManagement.API.Mappings
 
             // DTO -> Entity (Kullanıcıdan veritabanına)
             CreateMap<TaskCreateDto, TaskItem>();
+
+            // YENİ EKLENEN KURAL: Kullanıcı verisini DTO'ya çevir
+            CreateMap<User, UserResponseDto>();
         }
     }
 }

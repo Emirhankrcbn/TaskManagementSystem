@@ -36,6 +36,20 @@ export class AuthService {
     );
   }
 
+  // --- YENİ EKLENEN METOTLAR BAŞLANGICI ---
+
+  // Kullanıcı profil bilgilerini getirme
+  getProfile(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/profile`);
+  }
+
+  // Kullanıcı profil bilgilerini güncelleme
+  updateProfile(profileData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/profile`, profileData);
+  }
+
+  // --- YENİ EKLENEN METOTLAR BİTİŞİ ---
+
   // Otomatik çıkışı başlatan fonksiyon
   startAutoLogout(): void {
     const remainingTime = this.tokenService.getTokenRemainingTime();
