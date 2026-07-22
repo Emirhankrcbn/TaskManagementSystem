@@ -21,12 +21,13 @@ export class TaskService {
   }
 
   // 2. READ (Tüm Görevleri Getirme) - opsiyonel filtre desteği
-  getTasks(filter?: { priority?: number | null, categoryId?: string | null, searchTerm?: string | null, sortBy?: string | null, isDescending?: boolean | null }): Observable<Task[]> {
+  getTasks(filter?: { priority?: number | null, categoryId?: string | null, searchTerm?: string | null, status?: number | null, sortBy?: string | null, isDescending?: boolean | null }): Observable<Task[]> {
     let params = new HttpParams();
     if (filter) {
       if (filter.priority != null) params = params.set('priority', filter.priority.toString());
       if (filter.categoryId) params = params.set('categoryId', filter.categoryId);
       if (filter.searchTerm) params = params.set('searchTerm', filter.searchTerm);
+      if (filter.status != null) params = params.set('status', filter.status.toString());
       if (filter.sortBy) params = params.set('sortBy', filter.sortBy);
       if (filter.isDescending != null) params = params.set('isDescending', filter.isDescending ? 'true' : 'false');
     }

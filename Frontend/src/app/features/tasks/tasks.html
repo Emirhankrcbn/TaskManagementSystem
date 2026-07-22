@@ -20,6 +20,56 @@
     </div>
   </div>
   
+  <!-- FİLTRELEME VE ARAMA ÇUBUĞU -->
+  <div class="filter-bar">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+      <mat-label>Görev Ara</mat-label>
+      <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Başlık veya açıklamada ara...">
+      <mat-icon matPrefix style="margin-right:8px;">search</mat-icon>
+      <button mat-icon-button matSuffix *ngIf="searchTerm" (click)="searchTerm=''; onSearchChange()" aria-label="Aramayı temizle">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-field">
+      <mat-label>Durum</mat-label>
+      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onStatusFilterChange()">
+        <mat-option [value]="null">Tümü</mat-option>
+        <mat-option [value]="0">Bekliyor</mat-option>
+        <mat-option [value]="1">Devam Ediyor</mat-option>
+        <mat-option [value]="2">Tamamlandı</mat-option>
+        <mat-option [value]="3">İptal Edildi</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-field">
+      <mat-label>Öncelik</mat-label>
+      <mat-select [(ngModel)]="selectedPriority" (selectionChange)="onPriorityFilterChange()">
+        <mat-option [value]="null">Tümü</mat-option>
+        <mat-option [value]="1">Düşük</mat-option>
+        <mat-option [value]="2">Normal</mat-option>
+        <mat-option [value]="3">Yüksek</mat-option>
+        <mat-option [value]="4">Acil</mat-option>
+        <mat-option [value]="5">Kritik</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-field">
+      <mat-label>Kategori</mat-label>
+      <mat-select [(ngModel)]="selectedCategoryId" (selectionChange)="onCategoryFilterChange()">
+        <mat-option [value]="null">Tümü</mat-option>
+        <mat-option *ngFor="let cat of categories" [value]="cat.id">
+          {{ cat.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-stroked-button *ngIf="hasActiveFilters()" (click)="clearAllFilters()" class="clear-filters-btn">
+      <mat-icon>filter_alt_off</mat-icon>
+      Filtreleri Temizle
+    </button>
+  </div>
+
   <!-- FORM BAŞLIKTAN DIŞARI ÇIKARILDI VE KENDİ ALANINA ALINDI -->
   <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:12px;">
     <div class="add-task-form" style="display: flex; gap: 15px; align-items: center;">

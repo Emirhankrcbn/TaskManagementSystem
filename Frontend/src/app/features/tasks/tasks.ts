@@ -31,6 +31,10 @@ export class Tasks implements OnInit {
 
   dataSource: Task[] = [];
   selectedPriority: number | null = null; // filtre için seçilen öncelik
+  selectedStatus: number | null = null; // filtre için seçilen durum
+  selectedCategoryId: string | null = null; // filtre için seçilen kategori
+  searchTerm: string = ''; // başlık/açıklama içinde arama
+  private searchDebounceTimer: any = null;
   sortBy: string | null = null;
   isDesc: boolean = false;
   newTaskTitle: string = '';
@@ -71,7 +75,14 @@ export class Tasks implements OnInit {
 
   // --- GÖREV FONKSİYONLARI ---
   loadTasks() {
-    this.taskService.getTasks({ priority: this.selectedPriority, sortBy: this.sortBy, isDescending: this.isDesc }).subscribe({
+    this.taskService.getTasks({
+      priority: this.selectedPriority,
+      status: this.selectedStatus,
+      categoryId: this.selectedCategoryId,
+      searchTerm: this.searchTerm.trim() || null,
+      sortBy: this.sortBy,
+      isDescending: this.isDesc
+    }).subscribe({
       next: (data: any) => {
         console.log("Backend'den gelen ham veri:", data); 
 
@@ -112,6 +123,37 @@ export class Tasks implements OnInit {
 
   clearPriorityFilter() {
     this.selectedPriority = null;
+    this.loadTasks();
+  }
+
+  onStatusFilterChange() {
+    this.loadTasks();
+  }
+
+  onCategoryFilterChange() {
+    this.loadTasks();
+  }
+
+  // Kullanıcı yazarken her tuş vuruşunda istek atmamak için 400ms bekletiyoruz
+  onSearchChange() {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+    this.searchDebounceTimer = setTimeout(() => {
+      this.loadTasks();
+    }, 400);
+  }
+
+  hasActiveFilters(): boolean {
+    return this.selectedPriority != null || this.selectedStatus != null
+      || this.selectedCategoryId != null || this.searchTerm.trim() !== '';
+  }
+
+  clearAllFilters() {
+    this.selectedPriority = null;
+    this.selectedStatus = null;
+    this.selectedCategoryId = null;
+    this.searchTerm = '';
     this.loadTasks();
   }
 
