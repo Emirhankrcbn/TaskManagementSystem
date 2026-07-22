@@ -1,0 +1,213 @@
+.dashboard-page {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Roboto, sans-serif;
+}
+
+.dashboard-header {
+  margin-bottom: 24px;
+
+  h2 {
+    margin: 0 0 4px 0;
+    color: #333;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+/* --- KPI SATIRI --- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-tile {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px !important;
+
+  .stat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .stat-body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-value {
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.stat-total .stat-icon { color: #1976d2; }
+.stat-pending .stat-icon { color: #e65100; }
+.stat-inprogress .stat-icon { color: #1565c0; }
+.stat-completed .stat-icon { color: #2e7d32; }
+
+/* --- TAMAMLANMA ORANI --- */
+.completion-card {
+  padding: 18px 20px !important;
+  margin-bottom: 20px;
+
+  .completion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .completion-percent {
+    color: #1976d2;
+    font-weight: 600;
+  }
+
+  mat-progress-bar {
+    border-radius: 4px;
+    height: 8px;
+  }
+}
+
+/* --- SÜRESİ GEÇMİŞ GÖREVLER --- */
+.overdue-card {
+  padding: 18px 20px !important;
+  margin-bottom: 24px;
+
+  .overdue-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    h3 {
+      margin: 0;
+    }
+
+    .overdue-header-icon {
+      color: #c62828;
+    }
+  }
+
+  .empty-state.good {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0;
+    color: #2e7d32;
+  }
+
+  .overdue-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+
+    .overdue-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .overdue-title {
+      font-weight: 500;
+    }
+
+    .overdue-meta {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .overdue-days {
+      font-size: 12px;
+      font-weight: 600;
+      color: #c62828;
+      background-color: #ffebee;
+      padding: 4px 10px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+  }
+
+  .see-all-link {
+    display: inline-block;
+    margin-top: 12px;
+    color: #1976d2;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* --- HIZLI ERİŞİM --- */
+.quick-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* --- KOYU TEMA --- */
+/* mat-card global koyu tema kurallarında yer almıyor, bu yüzden burada elle karartıyoruz */
+:host-context(.dark-theme) {
+  .dashboard-header {
+    h2 { color: #ffffff; }
+    .subtitle { color: rgba(255, 255, 255, 0.6); }
+  }
+
+  mat-card {
+    background-color: #1e1e1e !important;
+    color: #ffffff !important;
+  }
+
+  .stat-tile {
+    .stat-label { color: rgba(255, 255, 255, 0.6); }
+  }
+
+  .overdue-card {
+    .overdue-row {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+      .overdue-meta { color: rgba(255, 255, 255, 0.6); }
+    }
+  }
+}

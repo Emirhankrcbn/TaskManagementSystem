@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Task, TaskAttachment } from '../models/task.model'; // Daha önce oluşturduğumuz model
+import { Task, TaskAttachment, TaskStatistics } from '../models/task.model'; // Daha önce oluşturduğumuz model
 import { HttpParams } from '@angular/common/http';
 
 @Injectable({
@@ -73,5 +73,15 @@ export class TaskService {
   // 5.3 Dosyanın indirilebileceği tam adresi üretir (backend statik dosya sunucusu üzerinden)
   getAttachmentUrl(filePath: string): string {
     return `${this.baseUrl}${filePath}`;
+  }
+
+  // 6. Görev istatistikleri (Dashboard için)
+  getStatistics(): Observable<TaskStatistics> {
+    return this.http.get<TaskStatistics>(`${this.apiUrl}/statistics`);
+  }
+
+  // 7. Süresi geçmiş görevler (Dashboard için)
+  getOverdueTasks(): Observable<Task[]> {
+    return this.http.get<Task[]>(`${this.apiUrl}/overdue`);
   }
 }

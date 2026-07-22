@@ -1,1 +1,100 @@
-<p>dashboard works!</p>
+<div class="dashboard-page">
+
+  <div class="dashboard-header">
+    <h2>Hoş geldin{{ displayName ? ', ' + displayName : '' }}</h2>
+    <p class="subtitle">Görevlerine genel bir bakış</p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- KPI Satırı -->
+    <div class="stat-grid">
+      <mat-card class="stat-tile stat-total">
+        <mat-icon class="stat-icon">assignment</mat-icon>
+        <div class="stat-body">
+          <span class="stat-value">{{ statistics.totalTasks }}</span>
+          <span class="stat-label">Toplam Görev</span>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-tile stat-pending">
+        <mat-icon class="stat-icon">schedule</mat-icon>
+        <div class="stat-body">
+          <span class="stat-value">{{ statistics.pendingTasks }}</span>
+          <span class="stat-label">Bekliyor</span>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-tile stat-inprogress">
+        <mat-icon class="stat-icon">autorenew</mat-icon>
+        <div class="stat-body">
+          <span class="stat-value">{{ statistics.inProgressTasks }}</span>
+          <span class="stat-label">Devam Ediyor</span>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-tile stat-completed">
+        <mat-icon class="stat-icon">check_circle</mat-icon>
+        <div class="stat-body">
+          <span class="stat-value">{{ statistics.completedTasks }}</span>
+          <span class="stat-label">Tamamlandı</span>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Tamamlanma Oranı -->
+    <mat-card class="completion-card">
+      <div class="completion-header">
+        <span>Tamamlanma Oranı</span>
+        <span class="completion-percent">%{{ completionPercent }}</span>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="completionPercent"></mat-progress-bar>
+    </mat-card>
+
+    <!-- Süresi Geçmiş Görevler -->
+    <mat-card class="overdue-card">
+      <div class="overdue-header">
+        <mat-icon class="overdue-header-icon" *ngIf="overdueTasks.length > 0">warning</mat-icon>
+        <h3>Süresi Geçmiş Görevler</h3>
+      </div>
+
+      <div *ngIf="overdueTasks.length === 0" class="empty-state good">
+        <mat-icon>check_circle</mat-icon>
+        <span>Harika! Süresi geçmiş göreviniz yok.</span>
+      </div>
+
+      <div *ngFor="let task of overdueTasks" class="overdue-row">
+        <div class="overdue-info">
+          <span class="overdue-title">{{ task.title }}</span>
+          <span class="overdue-meta">
+            <ng-container *ngIf="task.category">
+              <span class="color-dot" [style.backgroundColor]="task.category.color"></span>
+              {{ task.category.name }} ·
+            </ng-container>
+            Öncelik: {{ getPriorityLabel(task.priority) }}
+          </span>
+        </div>
+        <span class="overdue-days">{{ getDaysOverdue(task.dueDate) }} gün gecikti</span>
+      </div>
+
+      <a routerLink="/tasks" class="see-all-link" *ngIf="overdueTasks.length > 0">Tüm görevleri gör</a>
+    </mat-card>
+
+    <!-- Hızlı Erişim -->
+    <div class="quick-actions">
+      <button mat-flat-button color="primary" routerLink="/tasks">
+        <mat-icon>add_task</mat-icon>
+        Görevlere Git
+      </button>
+      <button mat-stroked-button routerLink="/categories">
+        <mat-icon>category</mat-icon>
+        Kategorileri Yönet
+      </button>
+    </div>
+
+  </ng-container>
+</div>
