@@ -30,9 +30,10 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'register', component: Register },
 
-  { 
-    path: 'categories', 
-    component: CategoriesComponent 
+  {
+    path: 'categories',
+    component: CategoriesComponent,
+    canActivate: [authGuard]
   },
   
 ];

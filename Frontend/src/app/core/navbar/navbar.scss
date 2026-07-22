@@ -3,13 +3,40 @@
   flex: 1 1 auto;
 }
 
+.brand {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 /* Navbar arkaplanını ve yazı rengini zorunlu olarak kurumsal mavi yapar */
 mat-toolbar {
-  background-color: #1976d2 !important; 
+  background-color: #1976d2 !important;
   color: white !important;
 }
 
 /* Butonların içindeki yazıların da beyaz görünmesini sağlar */
 mat-toolbar button {
   color: white !important;
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.user-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-name {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Koyu temada navbar biraz daha koyu bir maviye geçsin */
+:host-context(.dark-theme) mat-toolbar {
+  background-color: #0d47a1 !important;
 }
