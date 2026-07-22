@@ -31,6 +31,8 @@ export class Tasks implements OnInit {
 
   dataSource: Task[] = [];
   selectedPriority: number | null = null; // filtre için seçilen öncelik
+  sortBy: string | null = null;
+  isDesc: boolean = false;
   newTaskTitle: string = '';
   
   // DEĞİŞEN SATIR BURASI: Metinleri sildik, sadece sayı (number) yaptık.
@@ -69,7 +71,7 @@ export class Tasks implements OnInit {
 
   // --- GÖREV FONKSİYONLARI ---
   loadTasks() {
-    this.taskService.getTasks({ priority: this.selectedPriority }).subscribe({
+    this.taskService.getTasks({ priority: this.selectedPriority, sortBy: this.sortBy, isDescending: this.isDesc }).subscribe({
       next: (data: any) => {
         console.log("Backend'den gelen ham veri:", data); 
 
@@ -110,6 +112,16 @@ export class Tasks implements OnInit {
 
   clearPriorityFilter() {
     this.selectedPriority = null;
+    this.loadTasks();
+  }
+
+  togglePrioritySort() {
+    if (this.sortBy === 'Priority') {
+      this.isDesc = !this.isDesc;
+    } else {
+      this.sortBy = 'Priority';
+      this.isDesc = false; // default ascending
+    }
     this.loadTasks();
   }
 
