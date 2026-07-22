@@ -24,7 +24,7 @@ import { TaskService } from '../../core/services/task'; // Kendi dosya yoluna g�
 export class Tasks implements OnInit {
   isDarkMode = false;
 
-  displayedColumns: string[] = ['select', 'id', 'title', 'category', 'status', 'actions'];
+  displayedColumns: string[] = ['select', 'id', 'title', 'category', 'priority', 'status', 'actions'];
   selection = new SelectionModel<Task>(true, []);
   @ViewChild(MatTable) table!: MatTable<Task>;
   @ViewChild('bulkDeleteDialog') bulkDeleteDialog!: TemplateRef<any>;
@@ -36,6 +36,7 @@ export class Tasks implements OnInit {
   newTaskStatus: number = 1; 
   
   newTaskCategoryId: string | null = null; 
+  newTaskPriority: number = 2; // Default: Normal
   editingTaskId: string | null = null; 
 
   categories: Category[] = [];
@@ -126,7 +127,7 @@ export class Tasks implements OnInit {
       const newTask: any = {
         title: this.newTaskTitle,
         status: this.newTaskStatus, // HTML'den zaten sayı geliyor
-        priority: 1, // 'Orta' yerine Backend'in beklediği 1 enum değeri
+        priority: this.newTaskPriority || 2, // Backend enum: 1=Low,2=Normal,...
         categoryId: this.newTaskCategoryId || undefined
       };
 
@@ -137,6 +138,17 @@ export class Tasks implements OnInit {
         },
         error: (err) => console.error('Görev eklenirken hata:', err)
       });
+    }
+  }
+
+  getPriorityLabel(priority?: number | null): string {
+    switch (priority) {
+      case 1: return 'Düşük';
+      case 2: return 'Normal';
+      case 3: return 'Yüksek';
+      case 4: return 'Acil';
+      case 5: return 'Kritik';
+      default: return '—';
     }
   }
 

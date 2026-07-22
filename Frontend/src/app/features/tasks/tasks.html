@@ -39,6 +39,17 @@
       </mat-select>
     </mat-form-field>
 
+    <mat-form-field appearance="outline" class="priority-select" subscriptSizing="dynamic" style="flex: 1;">
+      <mat-label>Öncelik</mat-label>
+      <mat-select [(ngModel)]="newTaskPriority">
+        <mat-option [value]="1">Düşük</mat-option>
+        <mat-option [value]="2">Normal</mat-option>
+        <mat-option [value]="3">Yüksek</mat-option>
+        <mat-option [value]="4">Acil</mat-option>
+        <mat-option [value]="5">Kritik</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <mat-form-field appearance="outline" class="category-select" subscriptSizing="dynamic" style="flex: 1;">
   <mat-label>Kategori</mat-label>
   <mat-select [(ngModel)]="newTaskCategoryId">
@@ -98,6 +109,12 @@
         </ng-container>
         <ng-template #noCat>—</ng-template>
       </td>
+    </ng-container>
+
+    <!-- Öncelik Sütunu -->
+    <ng-container matColumnDef="priority">
+      <th mat-header-cell *matHeaderCellDef> Öncelik </th>
+      <td mat-cell *matCellDef="let task"> {{ getPriorityLabel(task.priority) }} </td>
     </ng-container>
 
     <!-- Durum Sütunu -->
@@ -186,6 +203,17 @@
           <mat-option [value]="1">Devam Ediyor</mat-option>
           <mat-option [value]="2">Tamamlandı</mat-option>
           <mat-option [value]="3">İptal Edildi</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-label>Öncelik</mat-label>
+        <mat-select [(ngModel)]="currentEditTask.priority">
+          <mat-option [value]="1">Düşük</mat-option>
+          <mat-option [value]="2">Normal</mat-option>
+          <mat-option [value]="3">Yüksek</mat-option>
+          <mat-option [value]="4">Acil</mat-option>
+          <mat-option [value]="5">Kritik</mat-option>
         </mat-select>
       </mat-form-field>
 
