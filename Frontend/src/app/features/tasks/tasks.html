@@ -254,24 +254,6 @@
         </button>
       </div>
       </div>
-
-      <!-- ÖNCELİK FİLTRESİ -->
-      <div style="display:flex; gap:10px; align-items:center;">
-        <mat-form-field appearance="outline" style="width:180px;">
-          <mat-label>Öncelik</mat-label>
-          <mat-select [(ngModel)]="selectedPriority" (selectionChange)="onPriorityFilterChange()">
-            <mat-option [value]="null">Tümü</mat-option>
-            <mat-option [value]="1">Düşük</mat-option>
-            <mat-option [value]="2">Normal</mat-option>
-            <mat-option [value]="3">Yüksek</mat-option>
-            <mat-option [value]="4">Acil</mat-option>
-            <mat-option [value]="5">Kritik</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <button mat-stroked-button (click)="clearPriorityFilter()">Temizle</button>
-      </div>
-    </div>
     
   </mat-dialog-content>
   
