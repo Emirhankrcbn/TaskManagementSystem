@@ -92,6 +92,36 @@ namespace TaskManagement.API.Controllers
             return Ok(result);
         }
 
+        // Göreve ait dosyaları listeleme
+        [HttpGet("{taskId}/attachments")]
+        public async Task<IActionResult> GetTaskAttachments(Guid taskId)
+        {
+            try
+            {
+                var result = await _taskService.GetTaskAttachmentsAsync(taskId, GetUserId());
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+        }
+
+        // Görevden dosya silme
+        [HttpDelete("{taskId}/attachments/{attachmentId}")]
+        public async Task<IActionResult> DeleteAttachment(Guid taskId, Guid attachmentId)
+        {
+            try
+            {
+                await _taskService.DeleteAttachmentAsync(taskId, attachmentId, GetUserId());
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
         // Göreve yeni yorum ekleme
         [HttpPost("{taskId}/comments")]
         public async Task<IActionResult> AddComment(Guid taskId, [FromBody] TaskCommentCreateDto commentDto)

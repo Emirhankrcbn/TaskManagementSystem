@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Tüm ortak Material modüllerini bir dizide topluyoruz
 const MaterialComponents = [
@@ -23,7 +24,8 @@ const MaterialComponents = [
   MatCheckboxModule,
   MatDatepickerModule,
   MatNativeDateModule,
-  MatDividerModule
+  MatDividerModule,
+  MatProgressSpinnerModule
 ];
 
 @NgModule({

@@ -311,7 +311,43 @@
         </button>
       </div>
       </div>
-    
+
+    <mat-divider></mat-divider>
+
+    <div class="attachments-section" style="margin-top: 15px;">
+      <h3 style="margin-bottom: 10px;">Dosya Ekleri</h3>
+
+      <div *ngIf="!currentEditTask.id" style="color: rgba(0,0,0,0.5); font-size: 13px;">
+        Dosya ekleyebilmek için önce görevi kaydedin.
+      </div>
+
+      <ng-container *ngIf="currentEditTask.id">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+          <button mat-stroked-button color="primary" (click)="fileInput.click()" [disabled]="isUploadingAttachment">
+            <mat-icon>attach_file</mat-icon>
+            Dosya Seç
+          </button>
+          <input #fileInput type="file" hidden (change)="onFileSelected($event)">
+          <mat-spinner *ngIf="isUploadingAttachment" diameter="20"></mat-spinner>
+        </div>
+
+        <div *ngFor="let file of attachments" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,0.2);">
+          <a [href]="getAttachmentUrl(file.filePath)" target="_blank" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit; overflow:hidden;">
+            <mat-icon>description</mat-icon>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ file.fileName }}</span>
+            <span style="color:rgba(0,0,0,0.5); font-size:12px; white-space:nowrap;">({{ formatFileSize(file.fileSize) }})</span>
+          </a>
+          <button mat-icon-button color="warn" (click)="deleteAttachment(file)" aria-label="Dosyayı sil">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div *ngIf="attachments.length === 0" style="color: rgba(0,0,0,0.5); font-size: 13px;">
+          Henüz eklenmiş dosya yok.
+        </div>
+      </ng-container>
+    </div>
+
   </mat-dialog-content>
   
   <mat-dialog-actions align="end">

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Task } from '../models/task.model'; // Daha önce oluşturduğumuz model
+import { Task, TaskAttachment } from '../models/task.model'; // Daha önce oluşturduğumuz model
 import { HttpParams } from '@angular/common/http';
 
 @Injectable({
@@ -9,9 +9,10 @@ import { HttpParams } from '@angular/common/http';
 })
 export class TaskService {
   private http = inject(HttpClient);
-  
+
   // Backend API adresi
-  private apiUrl = 'http://localhost:5182/api/tasks';
+  private baseUrl = 'http://localhost:5182';
+  private apiUrl = `${this.baseUrl}/api/tasks`;
 
   constructor() { }
 
@@ -50,5 +51,27 @@ export class TaskService {
   // Parametre string olarak güncellendi
   deleteTask(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  // 5. DOSYA EKLEME (Attachment Yükleme)
+  uploadAttachment(taskId: string, file: File): Observable<TaskAttachment> {
+    const formData = new FormData();
+    formData.append('File', file);
+    return this.http.post<TaskAttachment>(`${this.apiUrl}/${taskId}/attachments`, formData);
+  }
+
+  // 5.1 Göreve ait dosyaları listeleme
+  getAttachments(taskId: string): Observable<TaskAttachment[]> {
+    return this.http.get<TaskAttachment[]>(`${this.apiUrl}/${taskId}/attachments`);
+  }
+
+  // 5.2 Dosya silme
+  deleteAttachment(taskId: string, attachmentId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${taskId}/attachments/${attachmentId}`);
+  }
+
+  // 5.3 Dosyanın indirilebileceği tam adresi üretir (backend statik dosya sunucusu üzerinden)
+  getAttachmentUrl(filePath: string): string {
+    return `${this.baseUrl}${filePath}`;
   }
 }
