@@ -6,6 +6,15 @@ export interface SubTask {
   completed: boolean;
 }
 
+export interface TaskAttachment {
+  id: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  contentType: string;
+  uploadedAt: string;
+}
+
 export interface Task {
   id?: string;
   title: string;

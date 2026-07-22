@@ -12,6 +12,8 @@ namespace TaskManagement.API.Services
         Task<TaskResponseDto> UpdateTaskAsync(Guid taskId, Guid userId, TaskUpdateDto taskUpdateDto);
         Task<bool> DeleteTaskAsync(Guid taskId, Guid userId);
         Task<TaskAttachmentResponseDto> UploadAttachmentAsync(Guid taskId, Guid userId, IFormFile file);
+        Task<List<TaskAttachmentResponseDto>> GetTaskAttachmentsAsync(Guid taskId, Guid userId);
+        Task<bool> DeleteAttachmentAsync(Guid taskId, Guid attachmentId, Guid userId);
         Task<TaskCommentResponseDto> AddCommentAsync(Guid taskId, Guid userId, TaskCommentCreateDto commentDto); // yorum ekleme metodunun imzası
         Task<List<TaskCommentResponseDto>> GetTaskCommentsAsync(Guid taskId, Guid userId); // yorumları listeleme (okuma) metodunun imzası
         Task<TaskStatisticsDto> GetTaskStatisticsAsync(Guid userId);

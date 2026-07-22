@@ -162,16 +162,18 @@ namespace TaskManagement.API.Services
                 await file.CopyToAsync(stream);
             }
 
-            // 5. veritabanına sadece dosya yolunu yazma
+            // 5. veritabanına dosya yolu ve meta bilgilerini yazma
             var attachment = new Models.TaskAttachment
             {
                 TaskId = taskId,
                 FileName = file.FileName, // orijinal adı
                 FilePath = $"/uploads/{uniqueFileName}", // internetten erişilecek yol
+                FileSize = file.Length,
+                ContentType = file.ContentType,
                 UploadedAt = DateTime.UtcNow
             };
 
-            await _context.TaskAttachments.AddAsync(attachment); 
+            await _context.TaskAttachments.AddAsync(attachment);
             await _context.SaveChangesAsync();
 
             return new TaskAttachmentResponseDto
@@ -179,8 +181,56 @@ namespace TaskManagement.API.Services
                 Id = attachment.Id,
                 FileName = attachment.FileName,
                 FilePath = attachment.FilePath,
+                FileSize = attachment.FileSize,
+                ContentType = attachment.ContentType,
                 UploadedAt = attachment.UploadedAt
             };
+        }
+
+        public async Task<List<TaskAttachmentResponseDto>> GetTaskAttachmentsAsync(Guid taskId, Guid userId)
+        {
+            // Güvenlik: görev gerçekten bu kullanıcıya mı ait
+            var task = await _context.Tasks
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false);
+            if (task == null) throw new Exception("Görev bulunamadı veya yetkiniz yok.");
+
+            return await _context.TaskAttachments
+                .AsNoTracking()
+                .Where(a => a.TaskId == taskId)
+                .OrderByDescending(a => a.UploadedAt)
+                .Select(a => new TaskAttachmentResponseDto
+                {
+                    Id = a.Id,
+                    FileName = a.FileName,
+                    FilePath = a.FilePath,
+                    FileSize = a.FileSize,
+                    ContentType = a.ContentType,
+                    UploadedAt = a.UploadedAt
+                }).ToListAsync();
+        }
+
+        public async Task<bool> DeleteAttachmentAsync(Guid taskId, Guid attachmentId, Guid userId)
+        {
+            // Güvenlik: görev bu kullanıcıya mı ait
+            var task = await _context.Tasks
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false);
+            if (task == null) throw new Exception("Görev bulunamadı veya yetkiniz yok.");
+
+            var attachment = await _context.TaskAttachments
+                .FirstOrDefaultAsync(a => a.Id == attachmentId && a.TaskId == taskId);
+            if (attachment == null) throw new Exception("Silinecek dosya bulunamadı.");
+
+            var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", attachment.FilePath.TrimStart('/'));
+            if (File.Exists(physicalPath))
+            {
+                File.Delete(physicalPath);
+            }
+
+            _context.TaskAttachments.Remove(attachment);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<TaskCommentResponseDto> AddCommentAsync(Guid taskId, Guid userId, TaskCommentCreateDto commentDto)

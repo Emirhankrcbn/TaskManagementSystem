@@ -13,6 +13,8 @@ namespace TaskManagement.API.DTOs
         public Guid Id { get; set; }
         public required string FileName { get; set; } // string nesneleri için de aynı uyarıyı verir
         public required string FilePath { get; set; }
+        public long FileSize { get; set; }
+        public required string ContentType { get; set; }
         public DateTime UploadedAt { get; set; }
     }
 }
