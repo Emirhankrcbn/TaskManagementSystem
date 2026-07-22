@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Task } from '../models/task.model'; // Daha önce oluşturduğumuz model
+import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +20,15 @@ export class TaskService {
     return this.http.post<Task>(this.apiUrl, task);
   }
 
-  // 2. READ (Tüm Görevleri Getirme)
-  getTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>(this.apiUrl);
+  // 2. READ (Tüm Görevleri Getirme) - opsiyonel filtre desteği
+  getTasks(filter?: { priority?: number | null, categoryId?: string | null, searchTerm?: string | null }): Observable<Task[]> {
+    let params = new HttpParams();
+    if (filter) {
+      if (filter.priority != null) params = params.set('priority', filter.priority.toString());
+      if (filter.categoryId) params = params.set('categoryId', filter.categoryId);
+      if (filter.searchTerm) params = params.set('searchTerm', filter.searchTerm);
+    }
+    return this.http.get<Task[]>(this.apiUrl, { params });
   }
 
   // 2.1 READ SİNGLE (Tek Bir Görevin Detayını Getirme)

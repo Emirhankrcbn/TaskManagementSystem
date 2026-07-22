@@ -30,6 +30,7 @@ export class Tasks implements OnInit {
   @ViewChild('bulkDeleteDialog') bulkDeleteDialog!: TemplateRef<any>;
 
   dataSource: Task[] = [];
+  selectedPriority: number | null = null; // filtre için seçilen öncelik
   newTaskTitle: string = '';
   
   // DEĞİŞEN SATIR BURASI: Metinleri sildik, sadece sayı (number) yaptık.
@@ -68,7 +69,7 @@ export class Tasks implements OnInit {
 
   // --- GÖREV FONKSİYONLARI ---
   loadTasks() {
-    this.taskService.getTasks().subscribe({
+    this.taskService.getTasks({ priority: this.selectedPriority }).subscribe({
       next: (data: any) => {
         console.log("Backend'den gelen ham veri:", data); 
 
@@ -101,6 +102,15 @@ export class Tasks implements OnInit {
       },
       error: (err) => console.error('Görevler çekilirken hata oluştu:', err)
     });
+  }
+
+  onPriorityFilterChange() {
+    this.loadTasks();
+  }
+
+  clearPriorityFilter() {
+    this.selectedPriority = null;
+    this.loadTasks();
   }
 
   saveTask() {
