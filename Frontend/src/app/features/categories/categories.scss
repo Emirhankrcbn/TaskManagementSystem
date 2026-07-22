@@ -1,0 +1,195 @@
+.categories-page {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  // Sol Taraf: Form
+  .form-section {
+    flex: 1;
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    h2 {
+      margin-top: 0;
+      color: #333;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 0.5rem;
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+
+      label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #555;
+        font-size: 0.9rem;
+      }
+
+      input[type="text"] {
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+
+        &:focus {
+          outline: none;
+          border-color: #007bff;
+          box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+        }
+      }
+
+      .color-picker {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 40px;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+
+        &::-webkit-color-swatch {
+          border-radius: 6px;
+          border: 1px solid #ccc;
+        }
+
+        &::-moz-color-swatch {
+          border-radius: 6px;
+          border: 1px solid #ccc;
+        }
+      }
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover:not(:disabled) {
+        background-color: #0056b3;
+      }
+
+      &:disabled {
+        background-color: #a0c4ff;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  // Sağ Taraf: Liste
+  .list-section {
+    flex: 1.5;
+    background: #f9fafb;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+
+    h2 {
+      margin-top: 0;
+      color: #333;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #888;
+      font-style: italic;
+      background: white;
+      border-radius: 8px;
+      border: 1px dashed #ccc;
+    }
+
+    .category-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .color-dot {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          display: inline-block;
+          box-shadow: 0 0 0 2px white, 0 0 0 3px #ddd;
+        }
+
+        .cat-info {
+          display: flex;
+          flex-direction: column;
+
+          .cat-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1rem;
+          }
+
+          .cat-desc {
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 0.2rem;
+          }
+        }
+      }
+
+      .delete-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: #c82333;
+        }
+      }
+    }
+  }
+
+  // Mobil uyumluluk (Eğer ekran küçülürse yan yana değil alt alta dizsin)
+  @media (max-width: 768px) {
+    flex-direction: column;
+
+    .form-section, .list-section {
+      width: 100%;
+    }
+  }
+}

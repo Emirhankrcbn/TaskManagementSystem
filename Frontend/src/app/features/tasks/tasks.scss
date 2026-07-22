@@ -4,17 +4,25 @@
   margin: 0 auto; /* tabloyu sayfanın tam ortasına hizalar */
 }
 
-h2 {
-  color: #333;
-  font-family: Roboto, sans-serif;
+/* --- BAŞLIKLAR VE DÜZEN --- */
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 }
 
-table {
-  width: 100%; /* tablonun bulunduğu kabı tamamen doldurmasını sağlar */
+h2 {
+  color: #333;
+  font-family: Roboto, sans-serif;
+  margin-bottom: 0 !important; /* Çift yazılan kod birleştirildi */
 }
 
-/* Rozetlerin temel şekli */
+table {
+  width: 100%;
+}
+
+/* --- GÖREV DURUM ROZETLERİ (BADGES) --- */
 .status-badge {
   padding: 6px 12px;
   border-radius: 20px;
@@ -25,10 +33,10 @@ table {
   min-width: 90px;
 }
 
-/* Tamamlandı */
-.status-completed {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+/* Bekliyor (YENİ EKLENDİ - HTML'deki status-pending ile eşleşti) */
+.status-pending {
+  background-color: #fff3e0;
+  color: #e65100;
 }
 
 /* Devam Ediyor */
@@ -37,44 +45,42 @@ table {
   color: #1565c0;
 }
 
+/* Tamamlandı */
+.status-completed {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
 /* İptal Edildi */
 .status-cancelled {
   background-color: #ffebee;
   color: #c62828;
 }
 
-.header-actions {
-  display: flex;
-  justify-content: space-between; /* başlığı sola, formu sağa iter */
-  align-items: center; /* dikeyde ortalar */
-  margin-bottom: 20px;
-}
-
-/* mevcut h2 stilini flex yapısına uygun hale getiriyoruz */
-h2 {
-  margin-bottom: 0 !important; 
-}
-
+/* --- GÖREV EKLEME FORMU --- */
 .add-task-form {
-  display: flex;
-  align-items: center;
-  gap: 15px; /* Input ve buton arasına boşluk bırakır */
-}
+  display: flex !important;
+  align-items: center !important;
+  gap: 15px; 
+  margin-bottom: 25px;
 
-.task-input {
-  width: 300px;
-  margin-bottom: -1.25em; /* material input'un altındaki varsayılan boşluğu kaldırır */
+  /* Angular Material'ın alt tarafa koyduğu o inatçı görünmez boşluğu tamamen yok eder */
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper,
+  ::ng-deep .mat-form-field-subscript-wrapper {
+    height: 0 !important; /* Görünmez yapar ama DOM'da yer tuttuğu için menü koordinatları bozulmaz */
+    overflow: hidden !important;
+  }
+
+  mat-form-field {
+    margin-bottom: 0 !important;
+  }
 }
 
 .add-btn {
-  height: 48px; /* butonun yüksekliğini input alanı ile eşitler */
+  height: 56px; /* Material input alanı ile yüksekliği kusursuz eşitlendi */
 }
 
-.status-select {
-  width: 160px;
-  margin-bottom: -1.25em;
-}
-
+/* --- DÜZENLEME PENCERESİ (DİALOG) --- */
 .full-width {
   width: 100%;
 }

@@ -1,66 +1,71 @@
 <div class="table-container">
 
-    <!-- üst kısım: başlık ve ekleme formu -->
-    <div class="header-actions">
-    <!-- Başlık, Tema Butonu ve Toplu Silme Butonu Yanyana -->
+  <!-- SADECE BAŞLIK VE BUTONLAR BURADA (header-actions) -->
+  <div class="header-actions">
     <div style="display: flex; align-items: center; gap: 15px;">
       <h2>Görev Listesi</h2>
 
-      <!-- Kırmızı renkli (warn) ve tıklandığında onLogout fonksiyonunu tetikleyen buton -->
       <button mat-flat-button color="warn" (click)="onLogout()">
         Çıkış Yap
       </button>
       
-      <!-- Tema değiştirme butonu -->
       <button mat-icon-button (click)="toggleTheme()">
         <mat-icon>{{ isDarkMode ? 'dark_mode' : 'light_mode' }}</mat-icon>
       </button>
       
-      <!-- Toplu silme butonu -->
       <button mat-stroked-button color="warn" *ngIf="selection.selected.length > 0" (click)="openBulkDeleteConfirm()">
         <mat-icon>delete_sweep</mat-icon>
         Seçili ({{selection.selected.length}}) Görevi Sil
       </button>
     </div>
-    
-    <!-- Yeni görev ekleme / güncelleme alanı -->
-    <div class="add-task-form">
-      <mat-form-field appearance="outline" class="task-input">
-        <mat-label>{{ editingTaskId ? 'Görevi Düzenle' : 'Yeni Görev Ekle' }}</mat-label>
-        <input matInput [(ngModel)]="newTaskTitle" placeholder="Görev adını yazın..." (keyup.enter)="saveTask()">
-      </mat-form-field>
-      
-      <!-- Yeni eklenen durum seçme menüsü -->
-      <mat-form-field appearance="outline" class="status-select">
-        <mat-label>Durum</mat-label>
-        <mat-select [(ngModel)]="newTaskStatus">
-          <mat-option value="Devam Ediyor">Devam Ediyor</mat-option>
-          <mat-option value="Tamamlandı">Tamamlandı</mat-option>
-          <mat-option value="İptal Edildi">İptal Edildi</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <button mat-flat-button [color]="editingTaskId ? 'accent' : 'primary'" class="add-btn" (click)="saveTask()">
-        <mat-icon>{{ editingTaskId ? 'save' : 'add' }}</mat-icon>
-        {{ editingTaskId ? 'Güncelle' : 'Ekle' }}
-      </button>
-    </div>
   </div>
   
-  <!-- mat-elevation-z8 sınıfı tabloya gölge efekti verir -->
+  <!-- FORM BAŞLIKTAN DIŞARI ÇIKARILDI VE KENDİ ALANINA ALINDI -->
+  <div class="add-task-form" style="display: flex; gap: 15px; align-items: center; margin-bottom: 25px;">
+    
+    <mat-form-field appearance="outline" class="task-input" subscriptSizing="dynamic" style="flex: 2;">
+      <mat-label>{{ editingTaskId ? 'Görevi Düzenle' : 'Yeni Görev Ekle' }}</mat-label>
+      <input matInput [(ngModel)]="newTaskTitle" (keyup.enter)="saveTask()">
+    </mat-form-field>
+    
+    <mat-form-field appearance="outline" class="status-select" subscriptSizing="dynamic" style="flex: 1;">
+      <mat-label>Durum</mat-label>
+      <mat-select [(ngModel)]="newTaskStatus">
+        <!-- Backend ile uyumlu olması için metinler sayılara çevrildi -->
+        <mat-option [value]="0">Bekliyor</mat-option>
+        <mat-option [value]="1">Devam Ediyor</mat-option>
+        <mat-option [value]="2">Tamamlandı</mat-option>
+        <mat-option [value]="3">İptal Edildi</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="category-select" subscriptSizing="dynamic" style="flex: 1;">
+  <mat-label>Kategori</mat-label>
+  <mat-select [(ngModel)]="newTaskCategoryId">
+    <mat-option [value]="null">Kategori Yok</mat-option>
+    <mat-option *ngFor="let cat of categories" [value]="cat.id">
+      {{ cat.name }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+    <button mat-flat-button [color]="editingTaskId ? 'accent' : 'primary'" class="add-btn" (click)="saveTask()" style="height: 56px;">
+      <mat-icon>{{ editingTaskId ? 'save' : 'add' }}</mat-icon>
+      {{ editingTaskId ? 'Güncelle' : 'Ekle' }}
+    </button>
+  </div>
+  
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
     <!-- Çoklu Seçim Sütunu -->
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
-        <!-- Tablo başlığındaki tümünü seç kutusu -->
         <mat-checkbox (change)="$event ? toggleAllRows() : null"
                       [checked]="selection.hasValue() && isAllSelected()"
                       [indeterminate]="selection.hasValue() && !isAllSelected()">
         </mat-checkbox>
       </th>
       <td mat-cell *matCellDef="let row">
-        <!-- Satırlardaki tekli seçim kutuları -->
         <mat-checkbox (click)="$event.stopPropagation()"
                       (change)="$event ? selection.toggle(row) : null"
                       [checked]="selection.isSelected(row)">
@@ -68,10 +73,11 @@
       </td>
     </ng-container>
 
-    <!-- ID Sütunu -->
+    <!-- ID (Sıra No) Sütunu -->
     <ng-container matColumnDef="id">
       <th mat-header-cell *matHeaderCellDef> No. </th>
-      <td mat-cell *matCellDef="let task"> {{task.id}} </td>
+      <!-- Backend'den gelen karmaşık ID yerine, tablodaki indeks (sıra) numarasını +1 ekleyerek gösteriyoruz -->
+      <td mat-cell *matCellDef="let task; let i = index"> {{ i + 1 }} </td>
     </ng-container>
 
     <!-- Başlık Sütunu -->
@@ -80,33 +86,46 @@
       <td mat-cell *matCellDef="let task"> {{task.title}} </td>
     </ng-container>
 
+    <!-- Kategori Sütunu -->
+    <ng-container matColumnDef="category">
+      <th mat-header-cell *matHeaderCellDef> Kategori </th>
+      <td mat-cell *matCellDef="let task">
+        <ng-container *ngIf="task.category; else noCat">
+          <span style="display:inline-flex;align-items:center;gap:8px;">
+            <span style="width:12px;height:12px;border-radius:50%;display:inline-block;" [style.backgroundColor]="task.category.color"></span>
+            <span>{{ task.category.name }}</span>
+          </span>
+        </ng-container>
+        <ng-template #noCat>—</ng-template>
+      </td>
+    </ng-container>
+
     <!-- Durum Sütunu -->
     <ng-container matColumnDef="status">
       <th mat-header-cell *matHeaderCellDef> Durum </th>
       <td mat-cell *matCellDef="let task"> 
-        <!-- [ngClass] ile durum metnine göre otomatik renk sınıfı atıyoruz -->
+        <!-- Sayısal değere göre renk ve metin ataması yapıldı -->
         <span class="status-badge" 
               [ngClass]="{
-                'status-completed': task.status === 'Tamamlandı',
-                'status-in-progress': task.status === 'Devam Ediyor',
-                'status-cancelled': task.status === 'İptal Edildi'
+                'status-pending': task.status === 0,
+                'status-in-progress': task.status === 1,
+                'status-completed': task.status === 2,
+                'status-cancelled': task.status === 3
               }">
-          {{task.status}}
+          {{ task.status === 0 ? 'Bekliyor' : task.status === 1 ? 'Devam Ediyor' : task.status === 2 ? 'Tamamlandı' : 'İptal Edildi' }}
         </span> 
       </td>
     </ng-container>
 
-    <!-- İşlemler sütunu (Butonlar) -->
+    <!-- İşlemler Sütunu -->
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef> İşlemler </th>
       <td mat-cell *matCellDef="let task">
-        <!-- Düzenle butonuna da aynı çakışmayı önlemek için stopPropagation eklenebilir ancak asıl sorunumuz sil butonunda -->
         <button mat-button color="primary" (click)="editTask(task)">Düzenle</button>
         <button mat-button color="warn" (click)="openDeleteConfirm(task.id, $event)">Sil</button>
       </td>
     </ng-container>
 
-    <!-- Tablonun başlık ve satır kısımlarını render eden yapı -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
@@ -121,7 +140,6 @@
   </mat-dialog-content>
   
   <mat-dialog-actions align="end">
-    <!-- mat-dialog-close ile pencere kapanırken TS dosyasına bir değer ('cancel' veya 'confirm') fırlatıyoruz -->
     <button mat-button mat-dialog-close="cancel">İptal</button>
     <button mat-flat-button color="warn" mat-dialog-close="confirm">Evet, Sil</button>
   </mat-dialog-actions>
@@ -148,28 +166,26 @@
   
   <mat-dialog-content class="edit-dialog-content" *ngIf="currentEditTask">
     
-    <!-- Görev Adı -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Görev Adı</mat-label>
       <input matInput [(ngModel)]="currentEditTask.title">
     </mat-form-field>
 
-    <!-- Açıklama (Textarea) -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Açıklama</mat-label>
       <textarea matInput [(ngModel)]="currentEditTask.description" rows="3" placeholder="Görevle ilgili detayları buraya yazın..."></textarea>
     </mat-form-field>
 
-    <!-- Durum ve Tarihler (Yanyana) -->
     <div style="display: flex; gap: 15px; margin-bottom: 15px;">
       
       <mat-form-field appearance="outline" style="flex: 1;">
         <mat-label>Durum</mat-label>
         <mat-select [(ngModel)]="currentEditTask.status">
-          <mat-option value="Bekliyor">Bekliyor</mat-option>
-          <mat-option value="Devam Ediyor">Devam Ediyor</mat-option>
-          <mat-option value="Tamamlandı">Tamamlandı</mat-option>
-          <mat-option value="İptal Edildi">İptal Edildi</mat-option>
+          <!-- Düzenleme formundaki durumlar da sayılara çevrildi -->
+          <mat-option [value]="0">Bekliyor</mat-option>
+          <mat-option [value]="1">Devam Ediyor</mat-option>
+          <mat-option [value]="2">Tamamlandı</mat-option>
+          <mat-option [value]="3">İptal Edildi</mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -191,11 +207,9 @@
 
     <mat-divider></mat-divider>
 
-    <!-- Alt Görevler (Checklist) Bölümü -->
     <div class="subtasks-section" style="margin-top: 15px;">
       <h3 style="margin-bottom: 10px;">Alt Görevler (Checklist)</h3>
       
-      <!-- Alt görev ekleme inputu -->
       <div style="display: flex; gap: 10px; margin-bottom: 15px;">
         <mat-form-field appearance="outline" style="flex: 1;">
           <mat-label>Yeni Alt Görev Ekle</mat-label>
@@ -204,10 +218,9 @@
         <button mat-flat-button color="primary" (click)="addSubTask()" style="height: 56px;">Ekle</button>
       </div>
 
-      <!-- Eklenen Alt Görevlerin Listesi -->
       <div *ngFor="let sub of currentEditTask.subTasks" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(128,128,128,0.2);">
         <mat-checkbox [(ngModel)]="sub.completed" color="primary">{{ sub.title }}</mat-checkbox>
-        <button mat-icon-button color="warn" (click)="removeSubTask(sub.id)">
+        <button mat-icon-button color="warn" (click)="removeSubTask(sub.id!)">
           <mat-icon>close</mat-icon>
         </button>
       </div>

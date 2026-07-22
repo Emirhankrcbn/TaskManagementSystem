@@ -13,5 +13,9 @@ namespace TaskManagement.API.DTOs
         public Models.TaskStatus Status { get; set; }
         public DateTime? DueDate { get; set; }
         public DateTime CreatedAt { get; set; }
+        
+        // YENİ EKLENEN KISIMLAR
+        public Guid? CategoryId { get; set; }
+        public CategoryResponseDto? Category { get; set; }
     }
 }

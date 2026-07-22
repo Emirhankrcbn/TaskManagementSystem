@@ -482,3 +482,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Local secrets - gercek DB/JWT bilgileri buraya, repoya girmesin
+Backend/TaskManagement.API/appsettings.Development.json
+Backend/TaskManagement.API/appsettings.Local.json

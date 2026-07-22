@@ -22,6 +22,7 @@ namespace TaskManagement.API.Services
             // 1. Temel Sorguyu Başlat (Sadece aktif ve bu kullanıcıya ait görevler)
             var query = _context.Tasks
                 .AsNoTracking()
+                .Include(t => t.Category) // include category so AutoMapper maps it into DTO
                 .Where(t => t.UserId == userId && t.IsDeleted == false)
                 .AsQueryable();
 
@@ -73,6 +74,7 @@ namespace TaskManagement.API.Services
         {
             var task = await _context.Tasks
                 .AsNoTracking()
+                .Include(t => t.Category)
                 .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false); // Silinmişse bulma
 
             if (task == null)
@@ -270,7 +272,8 @@ namespace TaskManagement.API.Services
                 .Where(t => t.UserId == userId && 
                             t.IsDeleted == false && 
                             t.DueDate < DateTime.UtcNow && 
-                            (int)t.Status != 2) 
+                            (int)t.Status != 2)
+                .Include(t => t.Category)
                 .OrderBy(t => t.DueDate) // En çok geciken en üstte çıksın diye tarihe göre sıralıyoruz
                 .ToListAsync();
 
