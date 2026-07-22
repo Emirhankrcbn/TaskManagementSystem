@@ -1,16 +1,24 @@
+import { Category } from './category.model';
+
 export interface SubTask {
-  id: number;
+  id?: string;
   title: string;
   completed: boolean;
 }
 
 export interface Task {
-  id: number;
+  id?: string;
   title: string;
-  status: 'Bekliyor' | 'Devam Ediyor' | 'Tamamlandı' | 'İptal Edildi';
-  priority?: string;
+  
+  // METİN YERİNE SAYI OLARAK GÜNCELLENDİ (Backend Enum Uyumlu)
+  status: number; 
+  priority?: number; 
+  
   description?: string;
   subTasks?: SubTask[];
   startDate?: Date | null;
   endDate?: Date | null;
+  
+  categoryId?: string; 
+  category?: Category; 
 }

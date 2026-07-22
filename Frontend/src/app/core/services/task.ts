@@ -9,7 +9,7 @@ import { Task } from '../models/task.model'; // Daha önce oluşturduğumuz mode
 export class TaskService {
   private http = inject(HttpClient);
   
-  // Backend API adresimiz (İleride environment dosyasına taşıyacağız)
+  // Backend API adresi
   private apiUrl = 'http://localhost:5182/api/tasks';
 
   constructor() { }
@@ -25,17 +25,20 @@ export class TaskService {
   }
 
   // 2.1 READ SİNGLE (Tek Bir Görevin Detayını Getirme)
-  getTaskById(id: number): Observable<Task> {
+  // Parametre string olarak güncellendi
+  getTaskById(id: string): Observable<Task> {
     return this.http.get<Task>(`${this.apiUrl}/${id}`);
   }
 
   // 3. UPDATE (Görevi Güncelleme)
-  updateTask(id: number, task: Task): Observable<Task> {
+  // Parametre string olarak güncellendi
+  updateTask(id: string, task: Task): Observable<Task> {
     return this.http.put<Task>(`${this.apiUrl}/${id}`, task);
   }
 
   // 4. DELETE (Görevi Silme)
-  deleteTask(id: number): Observable<void> {
+  // Parametre string olarak güncellendi
+  deleteTask(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

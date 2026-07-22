@@ -7,11 +7,13 @@ namespace TaskManagement.API.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly IHostEnvironment _env;
 
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
         {
             _next = next;
             _logger = logger; // Hataları konsola yazdırmak için
+            _env = env;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -29,7 +31,7 @@ namespace TaskManagement.API.Middlewares
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; // 500 Hatası
@@ -38,7 +40,8 @@ namespace TaskManagement.API.Middlewares
             {
                 StatusCode = context.Response.StatusCode,
                 Message = "Sunucu tarafında beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
-                Detailed = exception.Message // Geliştirme aşamasında sorunu görebilmek için
+                // Detaylı hata mesajı sadece Development ortamında dönsün, production'da içeri sızdırmayalım
+                Detailed = _env.IsDevelopment() ? exception.Message : null
             };
 
             var json = JsonSerializer.Serialize(response);

@@ -25,7 +25,7 @@ export class CategoryService {
   }
 
   // Kategori silme
-  deleteCategory(id: number): Observable<void> {
+  deleteCategory(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

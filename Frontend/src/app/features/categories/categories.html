@@ -1,0 +1,49 @@
+<div class="categories-page">
+  <!-- Sol Taraf: Ekleme Formu -->
+  <div class="form-section">
+    <h2>Yeni Kategori Ekle</h2>
+    <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
+      
+      <div class="input-group">
+        <label>Kategori Adı</label>
+        <input type="text" formControlName="name" placeholder="Örn: Projeler" required>
+      </div>
+
+      <div class="input-group">
+        <label>Açıklama (İsteğe Bağlı)</label>
+        <input type="text" formControlName="description" placeholder="Örn: Takım projeleri...">
+      </div>
+
+      <div class="input-group">
+        <label>Renk Seçimi</label>
+        <input type="color" formControlName="color" class="color-picker">
+      </div>
+
+      <button mat-button class="submit-btn" type="submit" [disabled]="categoryForm.invalid || isLoading">
+        {{ isLoading ? 'Ekleniyor...' : 'Kategori Ekle' }}
+      </button>
+
+    </form>
+  </div>
+
+  <!-- Sağ Taraf: Kategori Listesi -->
+  <div class="list-section">
+    <h2>Mevcut Kategoriler</h2>
+    
+    <div *ngIf="categories.length === 0" class="empty-state">
+      Henüz hiçbir kategori eklemedin.
+    </div>
+
+    <div class="category-card" *ngFor="let cat of categories">
+      <div class="card-left">
+        <!-- Rengi yansıttığımız küçük yuvarlak -->
+        <span class="color-dot" [style.backgroundColor]="cat.color"></span>
+        <div class="cat-info">
+          <span class="cat-name">{{ cat.name }}</span>
+          <span class="cat-desc" *ngIf="cat.description">{{ cat.description }}</span>
+        </div>
+      </div>
+      <button class="delete-btn" (click)="deleteCategory(cat.id)">Sil</button>
+    </div>
+  </div>
+</div>
