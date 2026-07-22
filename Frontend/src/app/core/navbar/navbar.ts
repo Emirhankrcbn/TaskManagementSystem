@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
@@ -16,6 +16,7 @@ export class Navbar implements OnInit {
   authService = inject(AuthService);
   themeService = inject(ThemeService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   displayName: string = '';
   private profileLoaded = false;
@@ -24,7 +25,10 @@ export class Navbar implements OnInit {
     this.refreshUser();
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => this.refreshUser());
+    ).subscribe(() => {
+      this.refreshUser();
+      this.cdr.detectChanges();
+    });
   }
 
   private refreshUser() {
@@ -40,6 +44,7 @@ export class Navbar implements OnInit {
       next: (data) => {
         this.displayName = data.firstName ? `${data.firstName} ${data.lastName}` : data.username;
         this.profileLoaded = true;
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Kullanıcı bilgisi alınırken hata oluştu:', err)
     });

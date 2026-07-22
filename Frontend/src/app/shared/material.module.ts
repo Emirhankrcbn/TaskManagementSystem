@@ -13,6 +13,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 // Tüm ortak Material modüllerini bir dizide topluyoruz
 const MaterialComponents = [
@@ -29,7 +31,9 @@ const MaterialComponents = [
   MatDividerModule,
   MatProgressSpinnerModule,
   MatToolbarModule,
-  MatMenuModule
+  MatMenuModule,
+  MatCardModule,
+  MatProgressBarModule
 ];
 
 @NgModule({
