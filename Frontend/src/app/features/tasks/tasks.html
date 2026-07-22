@@ -5,21 +5,13 @@
     <div style="display: flex; align-items: center; gap: 15px;">
       <h2>Görev Listesi</h2>
 
-      <button mat-flat-button color="warn" (click)="onLogout()">
-        Çıkış Yap
-      </button>
-      
-      <button mat-icon-button (click)="toggleTheme()">
-        <mat-icon>{{ isDarkMode ? 'dark_mode' : 'light_mode' }}</mat-icon>
-      </button>
-      
       <button mat-stroked-button color="warn" *ngIf="selection.selected.length > 0" (click)="openBulkDeleteConfirm()">
         <mat-icon>delete_sweep</mat-icon>
         Seçili ({{selection.selected.length}}) Görevi Sil
       </button>
     </div>
   </div>
-  
+
   <!-- FİLTRELEME VE ARAMA ÇUBUĞU -->
   <div class="filter-bar">
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">

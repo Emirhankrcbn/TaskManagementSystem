@@ -2,7 +2,6 @@ import { Component, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef } 
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MaterialModule } from '../../shared/material.module';
-import { AuthService } from '../../core/services/auth';
 import { CategoryService } from '../../core/services/category'; // Kategori Servisi Eklendi
 import { Category } from '../../core/models/category.model'; // Kategori Modeli Eklendi
 import { MatDialog } from '@angular/material/dialog';
@@ -22,8 +21,6 @@ import { TaskService } from '../../core/services/task'; // Kendi dosya yoluna g√
   styleUrl: './tasks.scss'
 })
 export class Tasks implements OnInit {
-  isDarkMode = false;
-
   displayedColumns: string[] = ['select', 'id', 'title', 'category', 'priority', 'status', 'actions'];
   selection = new SelectionModel<Task>(true, []);
   @ViewChild(MatTable) table!: MatTable<Task>;
@@ -49,8 +46,7 @@ export class Tasks implements OnInit {
   categories: Category[] = [];
 
   readonly dialog = inject(MatDialog);
-  private cdr = inject(ChangeDetectorRef); 
-  private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
   private categoryService = inject(CategoryService); // Kategori Servisi enjekte edildi
   private taskService = inject(TaskService); // G√∂rev Servisi enjekte edildi
 
@@ -404,16 +400,4 @@ export class Tasks implements OnInit {
     });
   }
 
-  toggleTheme() {
-    this.isDarkMode = !this.isDarkMode;
-    if (this.isDarkMode) {
-      document.body.classList.add('dark-theme');
-    } else {
-      document.body.classList.remove('dark-theme');
-    }
-  }
-
-  onLogout(): void {
-    this.authService.logout();
-  }
 }
