@@ -201,6 +201,7 @@ export class Tasks implements OnInit {
         this.isCreating = false;
         this.loadTasks(); // Listeyi yenile
         this.createFormComponent.resetForm(); // Formu temizle
+        this.notification.showSuccess('Görev eklendi.');
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -258,6 +259,7 @@ export class Tasks implements OnInit {
         this.loadTasks();
         this.currentEditTask = null;
         this.activeDialogRef?.close('save');
+        this.notification.showSuccess('Görev güncellendi.');
       },
       error: (err) => {
         console.error('Görev güncellenirken backend tarafında hata oluştu:', err);
@@ -294,6 +296,7 @@ export class Tasks implements OnInit {
         this.isDeleting = false;
         this.loadTasks(); // Silindikten sonra güncel listeyi çek
         this.activeDialogRef?.close('confirm');
+        this.notification.showSuccess('Görev silindi.');
       },
       error: (err) => {
         console.error('Silme işlemi başarısız:', err);
@@ -326,6 +329,7 @@ export class Tasks implements OnInit {
 
     const selectedIds = this.selection.selected.map(task => task.id).filter(id => id != null) as string[];
     const deleteRequests = selectedIds.map(id => this.taskService.deleteTask(id));
+    const deletedCount = selectedIds.length;
 
     // Tüm silme isteklerinin tamamlanmasını bekliyoruz
     import('rxjs').then(({ forkJoin }) => {
@@ -335,6 +339,7 @@ export class Tasks implements OnInit {
           this.loadTasks(); // Listeyi veritabanından yeniden taze çekmek en güvenlisidir
           this.selection.clear();
           this.activeDialogRef?.close('confirm');
+          this.notification.showSuccess(`${deletedCount} görev silindi.`);
         },
         error: (err) => {
           console.error('Toplu silme sırasında bir hata oluştu:', err);
