@@ -1,0 +1,66 @@
+:host {
+  display: block;
+}
+
+mat-divider {
+  margin: 5px 0;
+}
+
+h3 {
+  margin-bottom: 10px;
+}
+
+.subtasks-section,
+.attachments-section {
+  margin-top: 15px;
+}
+
+.subtask-add-row,
+.attachment-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.subtask-row,
+.attachment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.attachment-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+}
+
+.attachment-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-size {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.hint-text {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+}
+
+:host-context(.dark-theme) {
+  .attachment-size,
+  .hint-text {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}

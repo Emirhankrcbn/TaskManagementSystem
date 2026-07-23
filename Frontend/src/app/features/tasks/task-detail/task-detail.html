@@ -1,0 +1,63 @@
+<app-task-form
+  [task]="task"
+  [categories]="categories"
+  [showSubmitButton]="false"
+  (valueChange)="onFormValueChange($event)">
+</app-task-form>
+
+<mat-divider></mat-divider>
+
+<div class="subtasks-section">
+  <h3>Alt Görevler (Checklist)</h3>
+
+  <div class="subtask-add-row">
+    <mat-form-field appearance="outline" style="flex: 1;">
+      <mat-label>Yeni Alt Görev Ekle</mat-label>
+      <input matInput [(ngModel)]="newSubTaskTitle" (keyup.enter)="addSubTask()" placeholder="Örn: Veritabanı tablolarını oluştur">
+    </mat-form-field>
+    <button mat-flat-button color="primary" (click)="addSubTask()" style="height: 56px;">Ekle</button>
+  </div>
+
+  <div *ngFor="let sub of subTasks" class="subtask-row">
+    <mat-checkbox [(ngModel)]="sub.completed" color="primary">{{ sub.title }}</mat-checkbox>
+    <button mat-icon-button color="warn" (click)="removeSubTask(sub.id!)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>
+
+<mat-divider></mat-divider>
+
+<div class="attachments-section">
+  <h3>Dosya Ekleri</h3>
+
+  <div *ngIf="!task?.id" class="hint-text">
+    Dosya ekleyebilmek için önce görevi kaydedin.
+  </div>
+
+  <ng-container *ngIf="task?.id">
+    <div class="attachment-upload-row">
+      <button mat-stroked-button color="primary" (click)="fileInput.click()" [disabled]="isUploadingAttachment">
+        <mat-icon>attach_file</mat-icon>
+        Dosya Seç
+      </button>
+      <input #fileInput type="file" hidden (change)="onFileSelected($event)">
+      <mat-spinner *ngIf="isUploadingAttachment" diameter="20"></mat-spinner>
+    </div>
+
+    <div *ngFor="let file of attachments" class="attachment-row">
+      <a [href]="getAttachmentUrl(file.filePath)" target="_blank" class="attachment-link">
+        <mat-icon>description</mat-icon>
+        <span class="attachment-name">{{ file.fileName }}</span>
+        <span class="attachment-size">({{ formatFileSize(file.fileSize) }})</span>
+      </a>
+      <button mat-icon-button color="warn" (click)="deleteAttachment(file)" aria-label="Dosyayı sil">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div *ngIf="attachments.length === 0" class="hint-text">
+      Henüz eklenmiş dosya yok.
+    </div>
+  </ng-container>
+</div>
