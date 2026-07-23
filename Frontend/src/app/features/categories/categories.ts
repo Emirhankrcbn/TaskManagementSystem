@@ -58,9 +58,10 @@ export class CategoriesComponent implements OnInit {
 
     this.categoryService.createCategory(newCategory).subscribe({
       next: (createdCategory) => {
-        this.categories.push(createdCategory); 
-        this.categoryForm.reset({ color: '#007bff' }); 
+        this.categories.push(createdCategory);
+        this.categoryForm.reset({ color: '#007bff' });
         this.isLoading = false;
+        this.notification.showSuccess('Kategori eklendi.');
         this.cdr.detectChanges(); // Başarılı olunca ekranı yenile
       },
       error: (err) => {
@@ -80,6 +81,7 @@ export class CategoriesComponent implements OnInit {
       next: () => {
         this.categories = this.categories.filter(c => c.id !== id);
         this.deletingId = null;
+        this.notification.showSuccess('Kategori silindi.');
         this.cdr.detectChanges(); // Silince ekranı yenile
       },
       error: (err) => {

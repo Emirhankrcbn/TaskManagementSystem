@@ -87,6 +87,7 @@ export class TaskDetail implements OnInit {
         this.attachments = [attachment, ...this.attachments];
         this.isUploadingAttachment = false;
         input.value = ''; // aynı dosyayı tekrar seçebilmek için input'u temizle
+        this.notification.showSuccess('Dosya yüklendi.');
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -106,6 +107,7 @@ export class TaskDetail implements OnInit {
     this.taskService.deleteAttachment(taskId, attachment.id).subscribe({
       next: () => {
         this.attachments = this.attachments.filter(a => a.id !== attachment.id);
+        this.notification.showSuccess('Dosya silindi.');
         this.cdr.detectChanges();
       },
       error: (err) => {

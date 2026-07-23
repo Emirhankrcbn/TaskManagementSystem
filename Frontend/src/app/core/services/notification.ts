@@ -15,4 +15,13 @@ export class NotificationService {
       verticalPosition: 'bottom'
     });
   }
+
+  showSuccess(message: string): void {
+    this.snackBar.open(message, undefined, {
+      duration: 3000,
+      panelClass: ['app-snackbar-success'],
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
+  }
 }
