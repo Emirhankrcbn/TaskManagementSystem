@@ -11,6 +11,7 @@ import { TaskService } from '../../core/services/task'; // Kendi dosya yoluna g�
 import { TaskList } from './task-list/task-list';
 import { TaskForm, TaskFormValue } from './task-form/task-form';
 import { TaskDetail } from './task-detail/task-detail';
+import { NotificationService } from '../../core/services/notification';
 
 @Component({
   selector: 'app-tasks',
@@ -56,6 +57,7 @@ export class Tasks implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private categoryService = inject(CategoryService); // Kategori Servisi enjekte edildi
   private taskService = inject(TaskService); // Görev Servisi enjekte edildi
+  private notification = inject(NotificationService);
 
   @ViewChild('deleteDialog') deleteDialog!: TemplateRef<any>;
   @ViewChild('editTaskDialog') editTaskDialog!: TemplateRef<any>;
@@ -74,7 +76,10 @@ export class Tasks implements OnInit {
   loadCategories() {
     this.categoryService.getCategories().subscribe({
       next: (data) => this.categories = data,
-      error: (err) => console.error('Kategoriler yüklenirken hata oluştu:', err)
+      error: (err) => {
+        console.error('Kategoriler yüklenirken hata oluştu:', err);
+        this.notification.showError('Kategoriler yüklenirken bir hata oluştu.');
+      }
     });
   }
 
@@ -121,6 +126,7 @@ export class Tasks implements OnInit {
       error: (err) => {
         console.error('Görevler çekilirken hata oluştu:', err);
         this.isLoadingTasks = false;
+        this.notification.showError('Görevler yüklenirken bir hata oluştu.');
         this.cdr.detectChanges();
       }
     });
@@ -200,6 +206,7 @@ export class Tasks implements OnInit {
       error: (err) => {
         console.error('Görev eklenirken hata:', err);
         this.isCreating = false;
+        this.notification.showError(err.error?.error || 'Görev eklenirken bir hata oluştu.');
         this.cdr.detectChanges();
       }
     });
@@ -291,6 +298,7 @@ export class Tasks implements OnInit {
       error: (err) => {
         console.error('Silme işlemi başarısız:', err);
         this.isDeleting = false;
+        this.notification.showError(err.error?.error || 'Görev silinirken bir hata oluştu.');
         this.cdr.detectChanges();
       }
     });
@@ -331,6 +339,7 @@ export class Tasks implements OnInit {
         error: (err) => {
           console.error('Toplu silme sırasında bir hata oluştu:', err);
           this.isBulkDeleting = false;
+          this.notification.showError('Görevler silinirken bir hata oluştu.');
           this.cdr.detectChanges();
         }
       });

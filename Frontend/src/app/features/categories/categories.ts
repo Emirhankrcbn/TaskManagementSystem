@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CategoryService } from '../../core/services/category';
 import { Category } from '../../core/models/category.model';
+import { NotificationService } from '../../core/services/notification';
 
 @Component({
   selector: 'app-categories',
@@ -14,6 +15,7 @@ export class CategoriesComponent implements OnInit {
   private fb = inject(FormBuilder);
   private categoryService = inject(CategoryService);
   private cdr = inject(ChangeDetectorRef); // Dedektifimiz eklendi
+  private notification = inject(NotificationService);
 
   categoryForm!: FormGroup;
   categories: Category[] = [];
@@ -42,6 +44,7 @@ export class CategoriesComponent implements OnInit {
       error: (err) => {
         console.error('Kategoriler yüklenirken hata oluştu:', err);
         this.isLoadingList = false;
+        this.notification.showError('Kategoriler yüklenirken bir hata oluştu.');
         this.cdr.detectChanges();
       }
     });
@@ -63,6 +66,7 @@ export class CategoriesComponent implements OnInit {
       error: (err) => {
         console.error('Kategori eklenirken hata oluştu:', err);
         this.isLoading = false;
+        this.notification.showError(err.error?.error || 'Kategori eklenirken bir hata oluştu.');
         this.cdr.detectChanges(); // Hata olsa bile ekranı yenile (Ekleniyor yazısı gitsin)
       }
     });
@@ -81,6 +85,7 @@ export class CategoriesComponent implements OnInit {
       error: (err) => {
         console.error('Kategori silinirken hata oluştu:', err);
         this.deletingId = null;
+        this.notification.showError(err.error?.error || 'Kategori silinirken bir hata oluştu.');
         this.cdr.detectChanges();
       }
     });

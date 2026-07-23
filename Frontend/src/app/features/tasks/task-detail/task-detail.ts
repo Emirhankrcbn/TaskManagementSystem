@@ -6,6 +6,7 @@ import { TaskForm, TaskFormValue } from '../task-form/task-form';
 import { TaskService } from '../../../core/services/task';
 import { Category } from '../../../core/models/category.model';
 import { Task, SubTask, TaskAttachment } from '../../../core/models/task.model';
+import { NotificationService } from '../../../core/services/notification';
 
 @Component({
   selector: 'app-task-detail',
@@ -22,6 +23,7 @@ export class TaskDetail implements OnInit {
 
   private taskService = inject(TaskService);
   private cdr = inject(ChangeDetectorRef);
+  private notification = inject(NotificationService);
 
   subTasks: SubTask[] = [];
   newSubTaskTitle: string = '';
@@ -65,7 +67,10 @@ export class TaskDetail implements OnInit {
         this.attachments = data;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Dosyalar yüklenirken hata oluştu:', err)
+      error: (err) => {
+        console.error('Dosyalar yüklenirken hata oluştu:', err);
+        this.notification.showError('Dosyalar yüklenirken bir hata oluştu.');
+      }
     });
   }
 
@@ -88,6 +93,7 @@ export class TaskDetail implements OnInit {
         console.error('Dosya yüklenirken hata oluştu:', err);
         this.isUploadingAttachment = false;
         input.value = '';
+        this.notification.showError(err.error?.error || 'Dosya yüklenirken bir hata oluştu.');
         this.cdr.detectChanges();
       }
     });
@@ -102,7 +108,10 @@ export class TaskDetail implements OnInit {
         this.attachments = this.attachments.filter(a => a.id !== attachment.id);
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Dosya silinirken hata oluştu:', err)
+      error: (err) => {
+        console.error('Dosya silinirken hata oluştu:', err);
+        this.notification.showError(err.error?.error || 'Dosya silinirken bir hata oluştu.');
+      }
     });
   }
 
