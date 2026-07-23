@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../../shared/material.module';
 import { CategoryService } from '../../core/services/category'; // Kategori Servisi Eklendi
 import { Category } from '../../core/models/category.model'; // Kategori Modeli Eklendi
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Task } from '../../core/models/task.model';
@@ -45,6 +45,13 @@ export class Tasks implements OnInit {
 
   categories: Category[] = [];
 
+  // --- LOADING STATE'LERİ ---
+  isLoadingTasks = true;
+  isCreating = false;
+  isSaving = false;
+  isDeleting = false;
+  isBulkDeleting = false;
+
   readonly dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef);
   private categoryService = inject(CategoryService); // Kategori Servisi enjekte edildi
@@ -54,6 +61,9 @@ export class Tasks implements OnInit {
   @ViewChild('editTaskDialog') editTaskDialog!: TemplateRef<any>;
 
   currentEditTask: Task | null = null;
+  saveError: string = '';
+  private activeDialogRef: MatDialogRef<any> | null = null;
+  private pendingDeleteId: string | null = null;
 
   ngOnInit() {
     this.loadTasks();
@@ -70,6 +80,7 @@ export class Tasks implements OnInit {
 
   // --- GÖREV FONKSİYONLARI ---
   loadTasks() {
+    this.isLoadingTasks = true;
     this.taskService.getTasks({
       priority: this.selectedPriority,
       status: this.selectedStatus,
@@ -103,10 +114,15 @@ export class Tasks implements OnInit {
         }
 
         // Tabloyu güvenle güncelle
+        this.isLoadingTasks = false;
         this.taskListComponent?.refreshTable();
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Görevler çekilirken hata oluştu:', err)
+      error: (err) => {
+        console.error('Görevler çekilirken hata oluştu:', err);
+        this.isLoadingTasks = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -162,6 +178,9 @@ export class Tasks implements OnInit {
 
   // Yeni görev oluşturma (TaskForm bileşeninden gelen değerle)
   onCreateTask(value: TaskFormValue) {
+    if (this.isCreating) return;
+    this.isCreating = true;
+
     const newTask: any = {
       title: value.title,
       description: value.description || undefined,
@@ -173,10 +192,16 @@ export class Tasks implements OnInit {
 
     this.taskService.createTask(newTask).subscribe({
       next: () => {
+        this.isCreating = false;
         this.loadTasks(); // Listeyi yenile
         this.createFormComponent.resetForm(); // Formu temizle
+        this.cdr.detectChanges();
       },
-      error: (err) => console.error('Görev eklenirken hata:', err)
+      error: (err) => {
+        console.error('Görev eklenirken hata:', err);
+        this.isCreating = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -184,59 +209,89 @@ export class Tasks implements OnInit {
     // 1. Tablodaki verinin anında (biz kaydet demeden) değişmesini engellemek için objenin kopyasını alıyoruz
     this.currentEditTask = { ...task };
     this.editFormValue = null;
+    this.saveError = '';
+    this.isSaving = false;
 
     // 2. Düzenleme penceresini açıyoruz
-    const dialogRef = this.dialog.open(this.editTaskDialog, {
+    this.activeDialogRef = this.dialog.open(this.editTaskDialog, {
       width: '600px', // Pencere genişliğini buradan ayarlayabilirsin
       maxWidth: '95vw' // Dar ekranlarda taşmasın
     });
 
-    // 3. Pencere kapandığında ne olacağını dinliyoruz
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'save') {
-        // GÜVENLİK KONTROLÜ: Eğer ID gerçekten varsa güncelleme isteği at
-        if (this.currentEditTask?.id && this.editFormValue) {
-          const updatedTask: any = {
-            title: this.editFormValue.title,
-            description: this.editFormValue.description || undefined,
-            status: this.editFormValue.status,
-            priority: this.editFormValue.priority,
-            categoryId: this.editFormValue.categoryId || undefined,
-            dueDate: this.editFormValue.dueDate || undefined
-          };
-
-          this.taskService.updateTask(this.currentEditTask.id, updatedTask).subscribe({
-            next: () => {
-              this.loadTasks();
-              this.currentEditTask = null;
-            },
-            error: (err) => console.error('Görev güncellenirken backend tarafında hata oluştu:', err)
-          });
-        }
-      } else {
+    // 3. Pencere kapandığında (İptal veya X ile) temizlik yapıyoruz
+    this.activeDialogRef.afterClosed().subscribe((result: string) => {
+      if (result !== 'save') {
         this.currentEditTask = null;
       }
       this.editFormValue = null;
+      this.saveError = '';
+    });
+  }
+
+  // Diyaloğun kendi "Değişiklikleri Kaydet" butonundan tetiklenir.
+  // Kayıt bitmeden diyaloğu kapatmıyoruz ki hata durumunda kullanıcı fark etsin.
+  saveEditedTask() {
+    if (!this.currentEditTask?.id || !this.editFormValue || this.isSaving) return;
+
+    this.isSaving = true;
+    this.saveError = '';
+
+    const updatedTask: any = {
+      title: this.editFormValue.title,
+      description: this.editFormValue.description || undefined,
+      status: this.editFormValue.status,
+      priority: this.editFormValue.priority,
+      categoryId: this.editFormValue.categoryId || undefined,
+      dueDate: this.editFormValue.dueDate || undefined
+    };
+
+    this.taskService.updateTask(this.currentEditTask.id, updatedTask).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.loadTasks();
+        this.currentEditTask = null;
+        this.activeDialogRef?.close('save');
+      },
+      error: (err) => {
+        console.error('Görev güncellenirken backend tarafında hata oluştu:', err);
+        this.saveError = err.error?.error || 'Görev güncellenirken bir hata oluştu.';
+        this.isSaving = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
   openDeleteConfirm(id: string, event: Event) {
-    event.stopPropagation(); 
+    event.stopPropagation();
+    this.isDeleting = false;
+    this.pendingDeleteId = id;
 
-    const dialogRef = this.dialog.open(this.deleteDialog, {
+    this.activeDialogRef = this.dialog.open(this.deleteDialog, {
       width: '350px',
       maxWidth: '95vw'
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
-        // BACKEND'DEN SİLME İŞLEMİ
-        this.taskService.deleteTask(id).subscribe({
-          next: () => {
-            this.loadTasks(); // Silindikten sonra güncel listeyi çek
-          },
-          error: (err) => console.error('Silme işlemi başarısız:', err)
-        });
+    this.activeDialogRef.afterClosed().subscribe(() => {
+      this.isDeleting = false;
+      this.pendingDeleteId = null;
+    });
+  }
+
+  // "Evet, Sil" butonundan tetiklenir; silme bitmeden diyalog kapanmaz
+  confirmDelete() {
+    if (!this.pendingDeleteId || this.isDeleting) return;
+
+    this.isDeleting = true;
+    this.taskService.deleteTask(this.pendingDeleteId).subscribe({
+      next: () => {
+        this.isDeleting = false;
+        this.loadTasks(); // Silindikten sonra güncel listeyi çek
+        this.activeDialogRef?.close('confirm');
+      },
+      error: (err) => {
+        console.error('Silme işlemi başarısız:', err);
+        this.isDeleting = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -244,35 +299,41 @@ export class Tasks implements OnInit {
   // --- ÇOKLU SEÇİM FONKSİYONLARI ---
   openBulkDeleteConfirm() {
     if (this.selection.selected.length === 0) return;
+    this.isBulkDeleting = false;
 
-    const dialogRef = this.dialog.open(this.bulkDeleteDialog, {
+    this.activeDialogRef = this.dialog.open(this.bulkDeleteDialog, {
       width: '400px',
       maxWidth: '95vw'
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
-        const selectedIds = this.selection.selected.map(task => task.id).filter(id => id != null) as string[];
-        
-        // Seçilen ID'leri backend'e silinmek üzere gönderiyoruz
-        // Eğer backend'de tekli silme kullanıyorsan her biri için delete isteği atabiliriz:
-        const deleteRequests = selectedIds.map(id => this.taskService.deleteTask(id));
+    this.activeDialogRef.afterClosed().subscribe(() => {
+      this.isBulkDeleting = false;
+    });
+  }
 
-        // Tüm silme isteklerinin tamamlanmasını bekliyoruz
-        import('rxjs').then(({ forkJoin }) => {
-          forkJoin(deleteRequests).subscribe({
-            next: () => {
-              // Backend'den onay gelince arayüzü güncelliyoruz
-              this.loadTasks(); // Listeyi veritabanından yeniden taze çekmek en güvenlisidir
-              this.selection.clear();
-              this.cdr.detectChanges();
-            },
-            error: (err) => {
-              console.error('Toplu silme sırasında bir hata oluştu:', err);
-            }
-          });
-        });
-      }
+  // "Evet, Hepsini Sil" butonundan tetiklenir; silme bitmeden diyalog kapanmaz
+  confirmBulkDelete() {
+    if (this.isBulkDeleting) return;
+    this.isBulkDeleting = true;
+
+    const selectedIds = this.selection.selected.map(task => task.id).filter(id => id != null) as string[];
+    const deleteRequests = selectedIds.map(id => this.taskService.deleteTask(id));
+
+    // Tüm silme isteklerinin tamamlanmasını bekliyoruz
+    import('rxjs').then(({ forkJoin }) => {
+      forkJoin(deleteRequests).subscribe({
+        next: () => {
+          this.isBulkDeleting = false;
+          this.loadTasks(); // Listeyi veritabanından yeniden taze çekmek en güvenlisidir
+          this.selection.clear();
+          this.activeDialogRef?.close('confirm');
+        },
+        error: (err) => {
+          console.error('Toplu silme sırasında bir hata oluştu:', err);
+          this.isBulkDeleting = false;
+          this.cdr.detectChanges();
+        }
+      });
     });
   }
 

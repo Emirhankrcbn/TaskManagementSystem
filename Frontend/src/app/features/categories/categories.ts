@@ -18,6 +18,8 @@ export class CategoriesComponent implements OnInit {
   categoryForm!: FormGroup;
   categories: Category[] = [];
   isLoading = false;
+  isLoadingList = true;
+  deletingId: string | null = null;
 
   ngOnInit(): void {
     this.categoryForm = this.fb.group({
@@ -30,12 +32,18 @@ export class CategoriesComponent implements OnInit {
   }
 
   loadCategories(): void {
+    this.isLoadingList = true;
     this.categoryService.getCategories().subscribe({
       next: (data) => {
         this.categories = data;
+        this.isLoadingList = false;
         this.cdr.detectChanges(); // Veri gelince ekranı yenile
       },
-      error: (err) => console.error('Kategoriler yüklenirken hata oluştu:', err)
+      error: (err) => {
+        console.error('Kategoriler yüklenirken hata oluştu:', err);
+        this.isLoadingList = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -61,14 +69,20 @@ export class CategoriesComponent implements OnInit {
   }
 
   deleteCategory(id: string | undefined): void {
-    if (!id) return;
-    
+    if (!id || this.deletingId) return;
+
+    this.deletingId = id;
     this.categoryService.deleteCategory(id).subscribe({
       next: () => {
         this.categories = this.categories.filter(c => c.id !== id);
+        this.deletingId = null;
         this.cdr.detectChanges(); // Silince ekranı yenile
       },
-      error: (err) => console.error('Kategori silinirken hata oluştu:', err)
+      error: (err) => {
+        console.error('Kategori silinirken hata oluştu:', err);
+        this.deletingId = null;
+        this.cdr.detectChanges();
+      }
     });
   }
 }

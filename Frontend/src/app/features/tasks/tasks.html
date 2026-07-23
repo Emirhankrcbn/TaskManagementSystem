@@ -64,10 +64,15 @@
 
   <!-- YENİ GÖREV EKLEME FORMU -->
   <div style="margin-bottom:12px;">
-    <app-task-form #createForm [categories]="categories" (save)="onCreateTask($event)"></app-task-form>
+    <app-task-form #createForm [categories]="categories" [isSubmitting]="isCreating" (save)="onCreateTask($event)"></app-task-form>
+  </div>
+
+  <div *ngIf="isLoadingTasks" class="list-loading-state">
+    <mat-spinner diameter="32"></mat-spinner>
   </div>
 
   <app-task-list
+    *ngIf="!isLoadingTasks"
     [tasks]="dataSource"
     [selection]="selection"
     [sortBy]="sortBy"
@@ -87,23 +92,29 @@
   </mat-dialog-content>
   
   <mat-dialog-actions align="end">
-    <button mat-button mat-dialog-close="cancel">İptal</button>
-    <button mat-flat-button color="warn" mat-dialog-close="confirm">Evet, Sil</button>
+    <button mat-button mat-dialog-close="cancel" [disabled]="isDeleting">İptal</button>
+    <button mat-flat-button color="warn" (click)="confirmDelete()" [disabled]="isDeleting" class="dialog-action-btn">
+      <mat-spinner *ngIf="isDeleting" diameter="18"></mat-spinner>
+      <span>{{ isDeleting ? 'Siliniyor...' : 'Evet, Sil' }}</span>
+    </button>
   </mat-dialog-actions>
 </ng-template>
 
 <!-- Toplu silme onay penceresi -->
 <ng-template #bulkDeleteDialog>
   <h2 mat-dialog-title>Toplu Silme İşlemi</h2>
-  
+
   <mat-dialog-content>
     Seçili olan <strong>{{selection.selected.length}}</strong> görevi silmek istediğinize emin misiniz? <br>
     <small style="color: gray;">Bu işlem geri alınamaz.</small>
   </mat-dialog-content>
-  
+
   <mat-dialog-actions align="end">
-    <button mat-button mat-dialog-close="cancel">İptal</button>
-    <button mat-flat-button color="warn" mat-dialog-close="confirm">Evet, Hepsini Sil</button>
+    <button mat-button mat-dialog-close="cancel" [disabled]="isBulkDeleting">İptal</button>
+    <button mat-flat-button color="warn" (click)="confirmBulkDelete()" [disabled]="isBulkDeleting" class="dialog-action-btn">
+      <mat-spinner *ngIf="isBulkDeleting" diameter="18"></mat-spinner>
+      <span>{{ isBulkDeleting ? 'Siliniyor...' : 'Evet, Hepsini Sil' }}</span>
+    </button>
   </mat-dialog-actions>
 </ng-template>
 
@@ -112,16 +123,21 @@
   <h2 mat-dialog-title>Görev Detayları</h2>
   
   <mat-dialog-content class="edit-dialog-content" *ngIf="currentEditTask">
+    <div *ngIf="saveError" class="alert error">{{ saveError }}</div>
+
     <app-task-detail
       [task]="currentEditTask"
       [categories]="categories"
       (valueChange)="editFormValue = $event">
     </app-task-detail>
   </mat-dialog-content>
-  
+
   <mat-dialog-actions align="end">
-    <button mat-button mat-dialog-close="cancel">İptal</button>
-    <button mat-flat-button color="accent" mat-dialog-close="save">Değişiklikleri Kaydet</button>
+    <button mat-button mat-dialog-close="cancel" [disabled]="isSaving">İptal</button>
+    <button mat-flat-button color="accent" (click)="saveEditedTask()" [disabled]="isSaving" class="dialog-action-btn">
+      <mat-spinner *ngIf="isSaving" diameter="18"></mat-spinner>
+      <span>{{ isSaving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet' }}</span>
+    </button>
   </mat-dialog-actions>
 </ng-template>
 </div>

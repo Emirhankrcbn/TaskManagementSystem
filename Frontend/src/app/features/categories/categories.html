@@ -29,8 +29,13 @@
   <!-- Sağ Taraf: Kategori Listesi -->
   <div class="list-section">
     <h2>Mevcut Kategoriler</h2>
-    
-    <div *ngIf="categories.length === 0" class="empty-state">
+
+    <div *ngIf="isLoadingList" class="loading-state">
+      <span class="spinner"></span>
+      Kategoriler yükleniyor...
+    </div>
+
+    <div *ngIf="!isLoadingList && categories.length === 0" class="empty-state">
       Henüz hiçbir kategori eklemedin.
     </div>
 
@@ -43,7 +48,9 @@
           <span class="cat-desc" *ngIf="cat.description">{{ cat.description }}</span>
         </div>
       </div>
-      <button class="delete-btn" (click)="deleteCategory(cat.id)">Sil</button>
+      <button class="delete-btn" [disabled]="deletingId === cat.id" (click)="deleteCategory(cat.id)">
+        {{ deletingId === cat.id ? 'Siliniyor...' : 'Sil' }}
+      </button>
     </div>
   </div>
 </div>

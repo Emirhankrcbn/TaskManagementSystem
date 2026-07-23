@@ -11,7 +11,9 @@
           <span>Hesabın yok mu?</span>
           <a mat-button color="accent" routerLink="/register">Hemen Kayıt Ol</a>
         </div>
-        
+
+        <div *ngIf="errorMessage" class="alert error">{{ errorMessage }}</div>
+
         <!-- E-posta alanı -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>E-posta</mat-label>
@@ -36,8 +38,9 @@
           </mat-error>
         </mat-form-field>
 
-        <button mat-flat-button color="primary" type="submit" [disabled]="loginForm.invalid" class="full-width">
-          Giriş Yap
+        <button mat-flat-button color="primary" type="submit" [disabled]="loginForm.invalid || isLoading" class="full-width submit-btn">
+          <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+          <span>{{ isLoading ? 'Giriş yapılıyor...' : 'Giriş Yap' }}</span>
         </button>
 
       </form>

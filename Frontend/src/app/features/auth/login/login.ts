@@ -9,11 +9,12 @@ import { RouterModule } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatInputModule, MatButtonModule, MatCardModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, MatInputModule, MatButtonModule, MatCardModule, MatProgressSpinnerModule, RouterModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -28,11 +29,16 @@ export class Login {
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
+  isLoading = false;
+  errorMessage = '';
+
   // Butona basıldığında çalışacak fonksiyon
   onSubmit(): void {
-    if (this.loginForm.valid) {
+    if (this.loginForm.valid && !this.isLoading) {
+      this.isLoading = true;
+      this.errorMessage = '';
       const credentials = this.loginForm.value;
-      
+
       this.authService.login(credentials).subscribe({
         next: (response) => {
           console.log('Giriş başarılı!', response);
@@ -41,6 +47,8 @@ export class Login {
         },
         error: (err) => {
           console.error('Giriş başarısız:', err);
+          this.errorMessage = err.error?.error || 'E-posta veya şifre hatalı.';
+          this.isLoading = false;
         }
       });
     }
