@@ -486,3 +486,7 @@ $RECYCLE.BIN/
 # Local secrets - gercek DB/JWT bilgileri buraya, repoya girmesin
 Backend/TaskManagement.API/appsettings.Development.json
 Backend/TaskManagement.API/appsettings.Local.json
+
+# Kullanicilarin yukledigi dosyalar - calisma zamani verisi, kaynak kod degil
+Backend/TaskManagement.API/wwwroot/uploads/*
+!Backend/TaskManagement.API/wwwroot/uploads/.gitkeep
