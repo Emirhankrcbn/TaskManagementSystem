@@ -1,5 +1,11 @@
+/* Dar ekranlarda tablo tüm sayfayı değil sadece kendi alanını yatay kaydırsın */
+.table-scroll {
+  overflow-x: auto;
+}
+
 table {
   width: 100%;
+  min-width: 640px;
 }
 
 .empty-state {

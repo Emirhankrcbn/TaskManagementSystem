@@ -9,13 +9,20 @@
 
   .field-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 15px;
     align-items: flex-start;
+  }
+
+  .field-col {
+    flex: 1 1 150px;
+    min-width: 150px;
   }
 
   &:not(.embedded) {
     /* Tek satırlık hızlı ekleme modu: alt boşluğu kaldırıp hizalamayı sadeleştiriyoruz */
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     gap: 15px;
 
@@ -38,5 +45,21 @@
   .add-btn {
     height: 56px;
     white-space: nowrap;
+  }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+  .task-form:not(.embedded) {
+    flex-direction: column;
+    align-items: stretch;
+
+    .field-row {
+      width: 100%;
+    }
+
+    .add-btn {
+      width: 100%;
+    }
   }
 }

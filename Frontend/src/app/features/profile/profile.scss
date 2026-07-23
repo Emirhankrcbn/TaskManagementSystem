@@ -150,3 +150,11 @@
     border-color: rgba(220, 53, 69, 0.4);
   }
 }
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+  .profile-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+}

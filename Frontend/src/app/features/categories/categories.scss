@@ -187,9 +187,17 @@
   // Mobil uyumluluk (Eğer ekran küçülürse yan yana değil alt alta dizsin)
   @media (max-width: 768px) {
     flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
 
     .form-section, .list-section {
       width: 100%;
+      padding: 1.25rem;
+    }
+
+    .list-section .category-card {
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
   }
 }

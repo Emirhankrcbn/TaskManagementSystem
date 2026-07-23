@@ -187,7 +187,8 @@ export class Tasks implements OnInit {
 
     // 2. Düzenleme penceresini açıyoruz
     const dialogRef = this.dialog.open(this.editTaskDialog, {
-      width: '600px' // Pencere genişliğini buradan ayarlayabilirsin
+      width: '600px', // Pencere genişliğini buradan ayarlayabilirsin
+      maxWidth: '95vw' // Dar ekranlarda taşmasın
     });
 
     // 3. Pencere kapandığında ne olacağını dinliyoruz
@@ -223,7 +224,8 @@ export class Tasks implements OnInit {
     event.stopPropagation(); 
 
     const dialogRef = this.dialog.open(this.deleteDialog, {
-      width: '350px'
+      width: '350px',
+      maxWidth: '95vw'
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -244,7 +246,8 @@ export class Tasks implements OnInit {
     if (this.selection.selected.length === 0) return;
 
     const dialogRef = this.dialog.open(this.bulkDeleteDialog, {
-      width: '400px'
+      width: '400px',
+      maxWidth: '95vw'
     });
 
     dialogRef.afterClosed().subscribe(result => {

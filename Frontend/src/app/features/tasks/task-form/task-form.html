@@ -11,7 +11,7 @@
   </mat-form-field>
 
   <div class="field-row">
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" style="flex: 1;">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-col">
       <mat-label>Durum</mat-label>
       <mat-select [(ngModel)]="status" (ngModelChange)="onFieldChange()">
         <mat-option [value]="0">Bekliyor</mat-option>
@@ -21,7 +21,7 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" style="flex: 1;">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-col">
       <mat-label>Öncelik</mat-label>
       <mat-select [(ngModel)]="priority" (ngModelChange)="onFieldChange()">
         <mat-option [value]="1">Düşük</mat-option>
@@ -32,7 +32,7 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" style="flex: 1;">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-col">
       <mat-label>Kategori</mat-label>
       <mat-select [(ngModel)]="categoryId" (ngModelChange)="onFieldChange()">
         <mat-option [value]="null">Kategori Yok</mat-option>
@@ -42,7 +42,7 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field *ngIf="!showSubmitButton" appearance="outline" subscriptSizing="dynamic" style="flex: 1;">
+    <mat-form-field *ngIf="!showSubmitButton" appearance="outline" subscriptSizing="dynamic" class="field-col">
       <mat-label>Bitiş Tarihi</mat-label>
       <input matInput [matDatepicker]="dueDatePicker" [(ngModel)]="dueDate" (ngModelChange)="onFieldChange()">
       <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>

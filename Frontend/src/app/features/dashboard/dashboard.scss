@@ -137,7 +137,19 @@
 /* --- HIZLI ERİŞİM --- */
 .quick-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+  .dashboard-page {
+    padding: 16px;
+  }
+
+  .quick-actions button {
+    flex: 1 1 auto;
+  }
 }
 
 /* --- KOYU TEMA --- */

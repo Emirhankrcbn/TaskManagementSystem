@@ -7,9 +7,15 @@
 /* --- BAŞLIKLAR VE DÜZEN --- */
 .header-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   margin-bottom: 20px;
+
+  > div {
+    flex-wrap: wrap;
+  }
 }
 
 h2 {
@@ -59,4 +65,21 @@ h2 {
   display: flex;
   flex-direction: column;
   padding-top: 10px;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+  .table-container {
+    padding: 16px;
+  }
+
+  .filter-bar {
+    .search-field {
+      min-width: 100%;
+    }
+
+    .filter-field {
+      min-width: 120px;
+    }
+  }
 }
