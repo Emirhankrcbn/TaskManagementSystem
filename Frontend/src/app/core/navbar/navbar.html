@@ -1,13 +1,34 @@
 <mat-toolbar color="primary" *ngIf="authService.isLoggedIn()">
+  <!-- Dar ekranlarda gezinme linkleri yerine hamburger menü -->
+  <button mat-icon-button class="menu-trigger" [matMenuTriggerFor]="mobileNav" aria-label="Menüyü aç">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <mat-menu #mobileNav="matMenu">
+    <button mat-menu-item routerLink="/dashboard" routerLinkActive="active">
+      <mat-icon>dashboard</mat-icon>
+      <span>Dashboard</span>
+    </button>
+    <button mat-menu-item routerLink="/tasks" routerLinkActive="active">
+      <mat-icon>checklist</mat-icon>
+      <span>Görevler</span>
+    </button>
+    <button mat-menu-item routerLink="/categories" routerLinkActive="active">
+      <mat-icon>category</mat-icon>
+      <span>Kategoriler</span>
+    </button>
+  </mat-menu>
+
   <span class="brand">Task Management System</span>
 
   <!-- Bu boşluk bırakıcı, menü elemanlarını sağa iter -->
   <span class="spacer"></span>
 
-  <!-- Yönlendirme butonlarımız -->
-  <button mat-button routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</button>
-  <button mat-button routerLink="/tasks" routerLinkActive="active" class="nav-link">Görevler</button>
-  <button mat-button routerLink="/categories" routerLinkActive="active" class="nav-link">Kategoriler</button>
+  <!-- Yönlendirme butonlarımız (geniş ekranlarda görünür) -->
+  <div class="desktop-nav-links">
+    <button mat-button routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</button>
+    <button mat-button routerLink="/tasks" routerLinkActive="active" class="nav-link">Görevler</button>
+    <button mat-button routerLink="/categories" routerLinkActive="active" class="nav-link">Kategoriler</button>
+  </div>
 
   <button mat-icon-button (click)="toggleTheme()" [attr.aria-label]="themeService.isDarkMode() ? 'Açık temaya geç' : 'Koyu temaya geç'">
     <mat-icon>{{ themeService.isDarkMode() ? 'dark_mode' : 'light_mode' }}</mat-icon>

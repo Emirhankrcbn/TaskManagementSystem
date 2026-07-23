@@ -1,3 +1,4 @@
+<div class="table-scroll">
 <table mat-table [dataSource]="tasks" class="mat-elevation-z8">
 
   <!-- Çoklu Seçim Sütunu -->
@@ -80,6 +81,7 @@
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
+</div>
 
 <div *ngIf="tasks.length === 0" class="empty-state">
   Gösterilecek görev yok.

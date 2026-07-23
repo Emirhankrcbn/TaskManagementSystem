@@ -8,6 +8,15 @@
   white-space: nowrap;
 }
 
+.desktop-nav-links {
+  display: flex;
+  align-items: center;
+}
+
+.menu-trigger {
+  display: none;
+}
+
 /* Navbar arkaplanını ve yazı rengini zorunlu olarak kurumsal mavi yapar */
 mat-toolbar {
   background-color: #1976d2 !important;
@@ -39,4 +48,34 @@ mat-toolbar button {
 /* Koyu temada navbar biraz daha koyu bir maviye geçsin */
 :host-context(.dark-theme) mat-toolbar {
   background-color: #0d47a1 !important;
+}
+
+/* --- RESPONSIVE: dar ekranlarda gezinme linkleri hamburger menüye taşınır --- */
+@media (max-width: 768px) {
+  mat-toolbar {
+    padding: 0 8px;
+    gap: 4px;
+  }
+
+  .desktop-nav-links {
+    display: none;
+  }
+
+  .menu-trigger {
+    display: inline-flex;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  .brand {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand {
+    display: none;
+  }
 }
