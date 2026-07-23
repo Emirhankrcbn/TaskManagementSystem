@@ -6,6 +6,7 @@ import { TaskService } from '../../core/services/task';
 import { AuthService } from '../../core/services/auth';
 import { Task, TaskStatistics } from '../../core/models/task.model';
 import { TaskCard } from '../tasks/task-card/task-card';
+import { NotificationService } from '../../core/services/notification';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,6 +18,7 @@ export class Dashboard implements OnInit {
   private taskService = inject(TaskService);
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
+  private notification = inject(NotificationService);
 
   isLoading = true;
   displayName: string = '';
@@ -56,6 +58,7 @@ export class Dashboard implements OnInit {
       error: (err) => {
         console.error('İstatistikler yüklenirken hata oluştu:', err);
         this.isLoading = false;
+        this.notification.showError('İstatistikler yüklenirken bir hata oluştu.');
         this.cdr.detectChanges();
       }
     });
@@ -67,7 +70,10 @@ export class Dashboard implements OnInit {
         this.overdueTasks = data;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Süresi geçmiş görevler yüklenirken hata oluştu:', err)
+      error: (err) => {
+        console.error('Süresi geçmiş görevler yüklenirken hata oluştu:', err);
+        this.notification.showError('Süresi geçmiş görevler yüklenirken bir hata oluştu.');
+      }
     });
   }
 
