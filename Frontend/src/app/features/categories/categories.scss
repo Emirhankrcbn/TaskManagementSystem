@@ -1,3 +1,9 @@
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .categories-page {
   display: flex;
   gap: 2rem;
@@ -120,6 +126,26 @@
       border: 1px dashed #ccc;
     }
 
+    .loading-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 3rem;
+      color: #888;
+      background: white;
+      border-radius: 8px;
+
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(0, 0, 0, 0.15);
+        border-top-color: #007bff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+    }
+
     .category-card {
       display: flex;
       justify-content: space-between;
@@ -176,9 +202,15 @@
         font-size: 0.9rem;
         cursor: pointer;
         transition: background-color 0.2s;
+        white-space: nowrap;
 
-        &:hover {
+        &:hover:not(:disabled) {
           background-color: #c82333;
+        }
+
+        &:disabled {
+          background-color: #e78a94;
+          cursor: not-allowed;
         }
       }
     }
@@ -242,6 +274,11 @@
       background: #1e1e1e;
       color: rgba(255, 255, 255, 0.6);
       border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .loading-state {
+      background: #1e1e1e;
+      color: rgba(255, 255, 255, 0.6);
     }
 
     .category-card {

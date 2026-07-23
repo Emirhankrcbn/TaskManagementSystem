@@ -49,8 +49,11 @@
           </mat-error>
         </mat-form-field>
 
-        <button mat-flat-button color="primary" type="submit" [disabled]="registerForm.invalid" class="full-width">
-          Kayıt Ol
+        <div *ngIf="errorMessage" class="alert error">{{ errorMessage }}</div>
+
+        <button mat-flat-button color="primary" type="submit" [disabled]="registerForm.invalid || isLoading" class="full-width submit-btn">
+          <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+          <span>{{ isLoading ? 'Kayıt olunuyor...' : 'Kayıt Ol' }}</span>
         </button>
 
       </form>

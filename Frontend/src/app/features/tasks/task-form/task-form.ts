@@ -25,6 +25,7 @@ export class TaskForm implements OnInit {
   @Input() task: Task | null = null; // dolu gelirse form düzenleme modunda açılır
   @Input() showSubmitButton: boolean = true;
   @Input() submitLabel: string = 'Ekle';
+  @Input() isSubmitting: boolean = false;
 
   // Standalone (oluşturma) modunda kullanılır: butona basınca tetiklenir
   @Output() save = new EventEmitter<TaskFormValue>();
@@ -70,7 +71,7 @@ export class TaskForm implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.title.trim() === '') return;
+    if (this.title.trim() === '' || this.isSubmitting) return;
     this.save.emit(this.getValue());
   }
 

@@ -49,9 +49,10 @@
       <mat-datepicker #dueDatePicker></mat-datepicker>
     </mat-form-field>
 
-    <button *ngIf="showSubmitButton" mat-flat-button color="primary" class="add-btn" (click)="onSubmit()">
-      <mat-icon>add</mat-icon>
-      {{ submitLabel }}
+    <button *ngIf="showSubmitButton" mat-flat-button color="primary" class="add-btn" [disabled]="isSubmitting" (click)="onSubmit()">
+      <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
+      <mat-icon *ngIf="!isSubmitting">add</mat-icon>
+      {{ isSubmitting ? 'Ekleniyor...' : submitLabel }}
     </button>
   </div>
 
