@@ -6,10 +6,11 @@ import { Category } from '../../core/models/category.model'; // Kategori Modeli 
 import { MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
-import { Task, SubTask, TaskAttachment } from '../../core/models/task.model';
+import { Task } from '../../core/models/task.model';
 import { TaskService } from '../../core/services/task'; // Kendi dosya yoluna göre ayarla
 import { TaskList } from './task-list/task-list';
 import { TaskForm, TaskFormValue } from './task-form/task-form';
+import { TaskDetail } from './task-detail/task-detail';
 
 @Component({
   selector: 'app-tasks',
@@ -18,7 +19,8 @@ import { TaskForm, TaskFormValue } from './task-form/task-form';
     FormsModule,
     MaterialModule,
     TaskList,
-    TaskForm
+    TaskForm,
+    TaskDetail
   ],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss'
@@ -50,12 +52,8 @@ export class Tasks implements OnInit {
 
   @ViewChild('deleteDialog') deleteDialog!: TemplateRef<any>;
   @ViewChild('editTaskDialog') editTaskDialog!: TemplateRef<any>;
-  
-  currentEditTask: Task | null = null;
-  newSubTaskTitle: string = '';
 
-  attachments: TaskAttachment[] = [];
-  isUploadingAttachment: boolean = false;
+  currentEditTask: Task | null = null;
 
   ngOnInit() {
     this.loadTasks();
@@ -186,10 +184,6 @@ export class Tasks implements OnInit {
     // 1. Tablodaki verinin anında (biz kaydet demeden) değişmesini engellemek için objenin kopyasını alıyoruz
     this.currentEditTask = { ...task };
     this.editFormValue = null;
-    this.attachments = [];
-    if (this.currentEditTask?.id) {
-      this.loadAttachments(this.currentEditTask.id);
-    }
 
     // 2. Düzenleme penceresini açıyoruz
     const dialogRef = this.dialog.open(this.editTaskDialog, {
@@ -222,85 +216,7 @@ export class Tasks implements OnInit {
         this.currentEditTask = null;
       }
       this.editFormValue = null;
-      this.attachments = [];
     });
-  }
-
-  // --- DOSYA EKİ (ATTACHMENT) FONKSİYONLARI ---
-  loadAttachments(taskId: string) {
-    this.taskService.getAttachments(taskId).subscribe({
-      next: (data) => this.attachments = data,
-      error: (err) => console.error('Dosyalar yüklenirken hata oluştu:', err)
-    });
-  }
-
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0 || !this.currentEditTask?.id) return;
-
-    const file = input.files[0];
-    const taskId = this.currentEditTask.id;
-    this.isUploadingAttachment = true;
-
-    this.taskService.uploadAttachment(taskId, file).subscribe({
-      next: (attachment) => {
-        this.attachments = [attachment, ...this.attachments];
-        this.isUploadingAttachment = false;
-        input.value = ''; // aynı dosyayı tekrar seçebilmek için input'u temizle
-      },
-      error: (err) => {
-        console.error('Dosya yüklenirken hata oluştu:', err);
-        this.isUploadingAttachment = false;
-        input.value = '';
-      }
-    });
-  }
-
-  deleteAttachment(attachment: TaskAttachment) {
-    if (!this.currentEditTask?.id) return;
-    const taskId = this.currentEditTask.id;
-
-    this.taskService.deleteAttachment(taskId, attachment.id).subscribe({
-      next: () => {
-        this.attachments = this.attachments.filter(a => a.id !== attachment.id);
-      },
-      error: (err) => console.error('Dosya silinirken hata oluştu:', err)
-    });
-  }
-
-  getAttachmentUrl(filePath: string): string {
-    return this.taskService.getAttachmentUrl(filePath);
-  }
-
-  formatFileSize(bytes: number): string {
-    if (!bytes) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let size = bytes;
-    let unitIndex = 0;
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
-  }
-
-  // --- ALT GÖREV (SUBTASK) FONKSİYONLARI ---
-  addSubTask() {
-    if (this.newSubTaskTitle.trim() === '' || !this.currentEditTask) return;
-    
-    const newSubTask: SubTask = {
-      id: Date.now().toString(), // Alt görev ID'sini de string yaptık
-      title: this.newSubTaskTitle,
-      completed: false
-    };
-    
-    this.currentEditTask.subTasks!.push(newSubTask);
-    this.newSubTaskTitle = ''; 
-  }
-
-  removeSubTask(subTaskId: string) { // subTaskId tipi string oldu
-    if (!this.currentEditTask || !this.currentEditTask.subTasks) return;
-    this.currentEditTask.subTasks = this.currentEditTask.subTasks.filter(st => st.id !== subTaskId);
   }
 
   openDeleteConfirm(id: string, event: Event) {
