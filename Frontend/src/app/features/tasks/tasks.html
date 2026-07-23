@@ -62,54 +62,11 @@
     </button>
   </div>
 
-  <!-- FORM BAŞLIKTAN DIŞARI ÇIKARILDI VE KENDİ ALANINA ALINDI -->
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:12px;">
-    <div class="add-task-form" style="display: flex; gap: 15px; align-items: center;">
-    
-    <mat-form-field appearance="outline" class="task-input" subscriptSizing="dynamic" style="flex: 2;">
-      <mat-label>{{ editingTaskId ? 'Görevi Düzenle' : 'Yeni Görev Ekle' }}</mat-label>
-      <input matInput [(ngModel)]="newTaskTitle" (keyup.enter)="saveTask()">
-    </mat-form-field>
-    
-    <mat-form-field appearance="outline" class="status-select" subscriptSizing="dynamic" style="flex: 1;">
-      <mat-label>Durum</mat-label>
-      <mat-select [(ngModel)]="newTaskStatus">
-        <!-- Backend ile uyumlu olması için metinler sayılara çevrildi -->
-        <mat-option [value]="0">Bekliyor</mat-option>
-        <mat-option [value]="1">Devam Ediyor</mat-option>
-        <mat-option [value]="2">Tamamlandı</mat-option>
-        <mat-option [value]="3">İptal Edildi</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="priority-select" subscriptSizing="dynamic" style="flex: 1;">
-      <mat-label>Öncelik</mat-label>
-      <mat-select [(ngModel)]="newTaskPriority">
-        <mat-option [value]="1">Düşük</mat-option>
-        <mat-option [value]="2">Normal</mat-option>
-        <mat-option [value]="3">Yüksek</mat-option>
-        <mat-option [value]="4">Acil</mat-option>
-        <mat-option [value]="5">Kritik</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="category-select" subscriptSizing="dynamic" style="flex: 1;">
-  <mat-label>Kategori</mat-label>
-  <mat-select [(ngModel)]="newTaskCategoryId">
-    <mat-option [value]="null">Kategori Yok</mat-option>
-    <mat-option *ngFor="let cat of categories" [value]="cat.id">
-      {{ cat.name }}
-    </mat-option>
-  </mat-select>
-</mat-form-field>
-
-    <button mat-flat-button [color]="editingTaskId ? 'accent' : 'primary'" class="add-btn" (click)="saveTask()" style="height: 56px;">
-      <mat-icon>{{ editingTaskId ? 'save' : 'add' }}</mat-icon>
-      {{ editingTaskId ? 'Güncelle' : 'Ekle' }}
-    </button>
-    </div>
+  <!-- YENİ GÖREV EKLEME FORMU -->
+  <div style="margin-bottom:12px;">
+    <app-task-form #createForm [categories]="categories" (save)="onCreateTask($event)"></app-task-form>
   </div>
-  
+
   <app-task-list
     [tasks]="dataSource"
     [selection]="selection"
@@ -155,66 +112,13 @@
   <h2 mat-dialog-title>Görev Detayları</h2>
   
   <mat-dialog-content class="edit-dialog-content" *ngIf="currentEditTask">
-    
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Görev Adı</mat-label>
-      <input matInput [(ngModel)]="currentEditTask.title">
-    </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Açıklama</mat-label>
-      <textarea matInput [(ngModel)]="currentEditTask.description" rows="3" placeholder="Görevle ilgili detayları buraya yazın..."></textarea>
-    </mat-form-field>
-
-    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-      
-      <mat-form-field appearance="outline" style="flex: 1;">
-        <mat-label>Durum</mat-label>
-        <mat-select [(ngModel)]="currentEditTask.status">
-          <!-- Düzenleme formundaki durumlar da sayılara çevrildi -->
-          <mat-option [value]="0">Bekliyor</mat-option>
-          <mat-option [value]="1">Devam Ediyor</mat-option>
-          <mat-option [value]="2">Tamamlandı</mat-option>
-          <mat-option [value]="3">İptal Edildi</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="flex: 1;">
-        <mat-label>Öncelik</mat-label>
-        <mat-select [(ngModel)]="currentEditTask.priority">
-          <mat-option [value]="1">Düşük</mat-option>
-          <mat-option [value]="2">Normal</mat-option>
-          <mat-option [value]="3">Yüksek</mat-option>
-          <mat-option [value]="4">Acil</mat-option>
-          <mat-option [value]="5">Kritik</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="flex: 1;">
-        <mat-label>Kategori</mat-label>
-        <mat-select [(ngModel)]="currentEditTask.categoryId">
-          <mat-option [value]="null">Kategori Yok</mat-option>
-          <mat-option *ngFor="let cat of categories" [value]="cat.id">
-            {{ cat.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="flex: 1;">
-        <mat-label>Başlama Tarihi</mat-label>
-        <input matInput [matDatepicker]="startPicker" [(ngModel)]="currentEditTask.startDate">
-        <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
-        <mat-datepicker #startPicker></mat-datepicker>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="flex: 1;">
-        <mat-label>Bitiş Tarihi</mat-label>
-        <input matInput [matDatepicker]="endPicker" [(ngModel)]="currentEditTask.endDate">
-        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
-        <mat-datepicker #endPicker></mat-datepicker>
-      </mat-form-field>
-      
-    </div>
+    <app-task-form
+      [task]="currentEditTask"
+      [categories]="categories"
+      [showSubmitButton]="false"
+      (valueChange)="editFormValue = $event">
+    </app-task-form>
 
     <mat-divider></mat-divider>
 

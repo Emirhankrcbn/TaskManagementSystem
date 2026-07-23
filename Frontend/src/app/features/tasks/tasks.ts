@@ -9,6 +9,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { Task, SubTask, TaskAttachment } from '../../core/models/task.model';
 import { TaskService } from '../../core/services/task'; // Kendi dosya yoluna göre ayarla
 import { TaskList } from './task-list/task-list';
+import { TaskForm, TaskFormValue } from './task-form/task-form';
 
 @Component({
   selector: 'app-tasks',
@@ -16,7 +17,8 @@ import { TaskList } from './task-list/task-list';
     CommonModule,
     FormsModule,
     MaterialModule,
-    TaskList
+    TaskList,
+    TaskForm
   ],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss'
@@ -24,6 +26,7 @@ import { TaskList } from './task-list/task-list';
 export class Tasks implements OnInit {
   selection = new SelectionModel<Task>(true, []);
   @ViewChild(TaskList) taskListComponent!: TaskList;
+  @ViewChild('createForm') createFormComponent!: TaskForm;
   @ViewChild('bulkDeleteDialog') bulkDeleteDialog!: TemplateRef<any>;
 
   dataSource: Task[] = [];
@@ -34,14 +37,9 @@ export class Tasks implements OnInit {
   private searchDebounceTimer: any = null;
   sortBy: string | null = null;
   isDesc: boolean = false;
-  newTaskTitle: string = '';
-  
-  // DEĞİŞEN SATIR BURASI: Metinleri sildik, sadece sayı (number) yaptık.
-  newTaskStatus: number = 1; 
-  
-  newTaskCategoryId: string | null = null; 
-  newTaskPriority: number = 2; // Default: Normal
-  editingTaskId: string | null = null; 
+
+  // Düzenleme diyaloğundaki TaskForm'un güncel değeri (kaydet anında okunur)
+  editFormValue: TaskFormValue | null = null;
 
   categories: Category[] = [];
 
@@ -164,54 +162,30 @@ export class Tasks implements OnInit {
     this.loadTasks();
   }
 
-  saveTask() {
-    if (this.newTaskTitle.trim() === '') return;
+  // Yeni görev oluşturma (TaskForm bileşeninden gelen değerle)
+  onCreateTask(value: TaskFormValue) {
+    const newTask: any = {
+      title: value.title,
+      description: value.description || undefined,
+      status: value.status,
+      priority: value.priority || 2, // Backend enum: 1=Low,2=Normal,...
+      categoryId: value.categoryId || undefined,
+      dueDate: value.dueDate || undefined
+    };
 
-    if (this.editingTaskId) {
-      // GÜNCELLEME İŞLEMİ
-      const updatedTask = {
-        title: this.newTaskTitle,
-        status: this.newTaskStatus, // HTML'den zaten 0, 1, 2, 3 olarak geliyor, direkt yolluyoruz
-        categoryId: this.newTaskCategoryId || undefined
-      };
-
-      this.taskService.updateTask(this.editingTaskId, updatedTask).subscribe({
-        next: () => {
-          this.loadTasks(); // Listeyi yenile
-          this.editingTaskId = null;
-          this.resetForm(); // Formu temizle
-        },
-        error: (err) => console.error('Görev güncellenirken hata:', err)
-      });
-    } else {
-      // YENİ EKLEME İŞLEMİ
-      const newTask: any = {
-        title: this.newTaskTitle,
-        status: this.newTaskStatus, // HTML'den zaten sayı geliyor
-        priority: this.newTaskPriority || 2, // Backend enum: 1=Low,2=Normal,...
-        categoryId: this.newTaskCategoryId || undefined
-      };
-
-      this.taskService.createTask(newTask).subscribe({
-        next: () => {
-          this.loadTasks(); // Listeyi yenile
-          this.resetForm(); // Formu temizle
-        },
-        error: (err) => console.error('Görev eklenirken hata:', err)
-      });
-    }
-  }
-
-  // Formu temizlemek için küçük bir yardımcı fonksiyon
-  resetForm() {
-    this.newTaskTitle = ''; 
-    this.newTaskStatus = 1; 
-    this.newTaskCategoryId = null;
+    this.taskService.createTask(newTask).subscribe({
+      next: () => {
+        this.loadTasks(); // Listeyi yenile
+        this.createFormComponent.resetForm(); // Formu temizle
+      },
+      error: (err) => console.error('Görev eklenirken hata:', err)
+    });
   }
 
   editTask(task: any) {
     // 1. Tablodaki verinin anında (biz kaydet demeden) değişmesini engellemek için objenin kopyasını alıyoruz
     this.currentEditTask = { ...task };
+    this.editFormValue = null;
     this.attachments = [];
     if (this.currentEditTask?.id) {
       this.loadAttachments(this.currentEditTask.id);
@@ -226,8 +200,17 @@ export class Tasks implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'save') {
         // GÜVENLİK KONTROLÜ: Eğer ID gerçekten varsa güncelleme isteği at
-        if (this.currentEditTask && this.currentEditTask.id) {
-          this.taskService.updateTask(this.currentEditTask.id, this.currentEditTask).subscribe({
+        if (this.currentEditTask?.id && this.editFormValue) {
+          const updatedTask: any = {
+            title: this.editFormValue.title,
+            description: this.editFormValue.description || undefined,
+            status: this.editFormValue.status,
+            priority: this.editFormValue.priority,
+            categoryId: this.editFormValue.categoryId || undefined,
+            dueDate: this.editFormValue.dueDate || undefined
+          };
+
+          this.taskService.updateTask(this.currentEditTask.id, updatedTask).subscribe({
             next: () => {
               this.loadTasks();
               this.currentEditTask = null;
@@ -238,6 +221,7 @@ export class Tasks implements OnInit {
       } else {
         this.currentEditTask = null;
       }
+      this.editFormValue = null;
       this.attachments = [];
     });
   }

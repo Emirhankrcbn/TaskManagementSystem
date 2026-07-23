@@ -1,0 +1,58 @@
+<div class="task-form" [class.embedded]="!showSubmitButton">
+
+  <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+    <mat-label>Görev Adı</mat-label>
+    <input matInput [(ngModel)]="title" (ngModelChange)="onFieldChange()" (keyup.enter)="onSubmit()">
+  </mat-form-field>
+
+  <mat-form-field *ngIf="!showSubmitButton" appearance="outline" class="full-width" subscriptSizing="dynamic">
+    <mat-label>Açıklama</mat-label>
+    <textarea matInput [(ngModel)]="description" (ngModelChange)="onFieldChange()" rows="3" placeholder="Görevle ilgili detayları buraya yazın..."></textarea>
+  </mat-form-field>
+
+  <div class="field-row">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" style="flex: 1;">
+      <mat-label>Durum</mat-label>
+      <mat-select [(ngModel)]="status" (ngModelChange)="onFieldChange()">
+        <mat-option [value]="0">Bekliyor</mat-option>
+        <mat-option [value]="1">Devam Ediyor</mat-option>
+        <mat-option [value]="2">Tamamlandı</mat-option>
+        <mat-option [value]="3">İptal Edildi</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" style="flex: 1;">
+      <mat-label>Öncelik</mat-label>
+      <mat-select [(ngModel)]="priority" (ngModelChange)="onFieldChange()">
+        <mat-option [value]="1">Düşük</mat-option>
+        <mat-option [value]="2">Normal</mat-option>
+        <mat-option [value]="3">Yüksek</mat-option>
+        <mat-option [value]="4">Acil</mat-option>
+        <mat-option [value]="5">Kritik</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" style="flex: 1;">
+      <mat-label>Kategori</mat-label>
+      <mat-select [(ngModel)]="categoryId" (ngModelChange)="onFieldChange()">
+        <mat-option [value]="null">Kategori Yok</mat-option>
+        <mat-option *ngFor="let cat of categories" [value]="cat.id">
+          {{ cat.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="!showSubmitButton" appearance="outline" subscriptSizing="dynamic" style="flex: 1;">
+      <mat-label>Bitiş Tarihi</mat-label>
+      <input matInput [matDatepicker]="dueDatePicker" [(ngModel)]="dueDate" (ngModelChange)="onFieldChange()">
+      <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #dueDatePicker></mat-datepicker>
+    </mat-form-field>
+
+    <button *ngIf="showSubmitButton" mat-flat-button color="primary" class="add-btn" (click)="onSubmit()">
+      <mat-icon>add</mat-icon>
+      {{ submitLabel }}
+    </button>
+  </div>
+
+</div>
