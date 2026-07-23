@@ -1,6 +1,5 @@
 import { Component, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule, MatTable } from '@angular/material/table';
 import { MaterialModule } from '../../shared/material.module';
 import { CategoryService } from '../../core/services/category'; // Kategori Servisi Eklendi
 import { Category } from '../../core/models/category.model'; // Kategori Modeli Eklendi
@@ -9,21 +8,22 @@ import { FormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Task, SubTask, TaskAttachment } from '../../core/models/task.model';
 import { TaskService } from '../../core/services/task'; // Kendi dosya yoluna göre ayarla
+import { TaskList } from './task-list/task-list';
 
 @Component({
   selector: 'app-tasks',
   imports: [
     CommonModule,
     FormsModule,
-    MaterialModule
+    MaterialModule,
+    TaskList
   ],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss'
 })
 export class Tasks implements OnInit {
-  displayedColumns: string[] = ['select', 'id', 'title', 'category', 'priority', 'status', 'actions'];
   selection = new SelectionModel<Task>(true, []);
-  @ViewChild(MatTable) table!: MatTable<Task>;
+  @ViewChild(TaskList) taskListComponent!: TaskList;
   @ViewChild('bulkDeleteDialog') bulkDeleteDialog!: TemplateRef<any>;
 
   dataSource: Task[] = [];
@@ -107,9 +107,7 @@ export class Tasks implements OnInit {
         }
 
         // Tabloyu güvenle güncelle
-        if (this.table) {
-          this.table.renderRows();
-        }
+        this.taskListComponent?.refreshTable();
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Görevler çekilirken hata oluştu:', err)
@@ -201,17 +199,6 @@ export class Tasks implements OnInit {
         },
         error: (err) => console.error('Görev eklenirken hata:', err)
       });
-    }
-  }
-
-  getPriorityLabel(priority?: number | null): string {
-    switch (priority) {
-      case 1: return 'Düşük';
-      case 2: return 'Normal';
-      case 3: return 'Yüksek';
-      case 4: return 'Acil';
-      case 5: return 'Kritik';
-      default: return '—';
     }
   }
 
@@ -353,20 +340,6 @@ export class Tasks implements OnInit {
   }
 
   // --- ÇOKLU SEÇİM FONKSİYONLARI ---
-  isAllSelected() {
-    const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.length;
-    return numSelected === numRows;
-  }
-
-  toggleAllRows() {
-    if (this.isAllSelected()) {
-      this.selection.clear();
-      return;
-    }
-    this.selection.select(...this.dataSource);
-  }
-
   openBulkDeleteConfirm() {
     if (this.selection.selected.length === 0) return;
 
