@@ -48,9 +48,26 @@
           <span class="cat-desc" *ngIf="cat.description">{{ cat.description }}</span>
         </div>
       </div>
-      <button class="delete-btn" [disabled]="deletingId === cat.id" (click)="deleteCategory(cat.id)">
+      <button class="delete-btn" [disabled]="deletingId === cat.id" (click)="openDeleteConfirm(cat)">
         {{ deletingId === cat.id ? 'Siliniyor...' : 'Sil' }}
       </button>
     </div>
   </div>
 </div>
+
+<!-- Kategori silme onay penceresi -->
+<ng-template #deleteCategoryDialog>
+  <h2 mat-dialog-title>Kategoriyi Sil</h2>
+
+  <mat-dialog-content>
+    <strong>{{ categoryToDelete?.name }}</strong> kategorisini silmek istediğinize emin misiniz? <br>
+    <small style="color: gray;">Bu işlem geri alınamaz. Bu kategorideki görevler kategorisiz kalır.</small>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close [disabled]="deletingId === categoryToDelete?.id">İptal</button>
+    <button mat-flat-button color="warn" (click)="confirmDeleteCategory()" [disabled]="deletingId === categoryToDelete?.id">
+      {{ deletingId === categoryToDelete?.id ? 'Siliniyor...' : 'Evet, Sil' }}
+    </button>
+  </mat-dialog-actions>
+</ng-template>

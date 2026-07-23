@@ -51,7 +51,7 @@
         <span class="attachment-name">{{ file.fileName }}</span>
         <span class="attachment-size">({{ formatFileSize(file.fileSize) }})</span>
       </a>
-      <button mat-icon-button color="warn" (click)="deleteAttachment(file)" aria-label="Dosyayı sil">
+      <button mat-icon-button color="warn" (click)="openDeleteAttachmentConfirm(file)" aria-label="Dosyayı sil">
         <mat-icon>close</mat-icon>
       </button>
     </div>
@@ -61,3 +61,20 @@
     </div>
   </ng-container>
 </div>
+
+<!-- Dosya silme onay penceresi -->
+<ng-template #deleteAttachmentDialog>
+  <h2 mat-dialog-title>Dosyayı Sil</h2>
+
+  <mat-dialog-content>
+    <strong>{{ attachmentToDelete?.fileName }}</strong> dosyasını silmek istediğinize emin misiniz? <br>
+    <small style="color: gray;">Bu işlem geri alınamaz.</small>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close [disabled]="isDeletingAttachment">İptal</button>
+    <button mat-flat-button color="warn" (click)="confirmDeleteAttachment()" [disabled]="isDeletingAttachment">
+      {{ isDeletingAttachment ? 'Siliniyor...' : 'Evet, Sil' }}
+    </button>
+  </mat-dialog-actions>
+</ng-template>

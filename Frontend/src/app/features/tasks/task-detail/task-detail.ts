@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MaterialModule } from '../../../shared/material.module';
 import { TaskForm, TaskFormValue } from '../task-form/task-form';
 import { TaskService } from '../../../core/services/task';
@@ -24,12 +25,18 @@ export class TaskDetail implements OnInit {
   private taskService = inject(TaskService);
   private cdr = inject(ChangeDetectorRef);
   private notification = inject(NotificationService);
+  private dialog = inject(MatDialog);
+
+  @ViewChild('deleteAttachmentDialog') deleteAttachmentDialog!: TemplateRef<any>;
 
   subTasks: SubTask[] = [];
   newSubTaskTitle: string = '';
 
   attachments: TaskAttachment[] = [];
   isUploadingAttachment: boolean = false;
+  isDeletingAttachment: boolean = false;
+  attachmentToDelete: TaskAttachment | null = null;
+  private activeDialogRef: MatDialogRef<any> | null = null;
 
   ngOnInit(): void {
     this.subTasks = this.task?.subTasks ? [...this.task.subTasks] : [];
@@ -100,19 +107,39 @@ export class TaskDetail implements OnInit {
     });
   }
 
-  deleteAttachment(attachment: TaskAttachment): void {
-    if (!this.task?.id) return;
-    const taskId = this.task.id;
+  openDeleteAttachmentConfirm(attachment: TaskAttachment): void {
+    this.attachmentToDelete = attachment;
+    this.isDeletingAttachment = false;
+    this.activeDialogRef = this.dialog.open(this.deleteAttachmentDialog, {
+      width: '350px',
+      maxWidth: '95vw'
+    });
 
+    this.activeDialogRef.afterClosed().subscribe(() => {
+      this.attachmentToDelete = null;
+    });
+  }
+
+  // "Evet, Sil" butonundan tetiklenir; silme bitmeden diyalog kapanmaz
+  confirmDeleteAttachment(): void {
+    if (!this.task?.id || !this.attachmentToDelete || this.isDeletingAttachment) return;
+    const taskId = this.task.id;
+    const attachment = this.attachmentToDelete;
+
+    this.isDeletingAttachment = true;
     this.taskService.deleteAttachment(taskId, attachment.id).subscribe({
       next: () => {
         this.attachments = this.attachments.filter(a => a.id !== attachment.id);
+        this.isDeletingAttachment = false;
         this.notification.showSuccess('Dosya silindi.');
+        this.activeDialogRef?.close();
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Dosya silinirken hata oluştu:', err);
+        this.isDeletingAttachment = false;
         this.notification.showError(err.error?.error || 'Dosya silinirken bir hata oluştu.');
+        this.cdr.detectChanges();
       }
     });
   }

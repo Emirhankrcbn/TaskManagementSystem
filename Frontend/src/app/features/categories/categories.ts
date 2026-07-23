@@ -1,13 +1,15 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; // ChangeDetectorRef eklendi
+import { Component, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef } from '@angular/core'; // ChangeDetectorRef eklendi
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 import { CategoryService } from '../../core/services/category';
 import { Category } from '../../core/models/category.model';
 import { NotificationService } from '../../core/services/notification';
 
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatButtonModule],
   templateUrl: './categories.html',
   styleUrl: './categories.scss',
 })
@@ -16,12 +18,18 @@ export class CategoriesComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private cdr = inject(ChangeDetectorRef); // Dedektifimiz eklendi
   private notification = inject(NotificationService);
+  private dialog = inject(MatDialog);
+
+  @ViewChild('deleteCategoryDialog') deleteCategoryDialog!: TemplateRef<any>;
 
   categoryForm!: FormGroup;
   categories: Category[] = [];
   isLoading = false;
   isLoadingList = true;
   deletingId: string | null = null;
+
+  categoryToDelete: Category | null = null;
+  private activeDialogRef: MatDialogRef<any> | null = null;
 
   ngOnInit(): void {
     this.categoryForm = this.fb.group({
@@ -73,7 +81,21 @@ export class CategoriesComponent implements OnInit {
     });
   }
 
-  deleteCategory(id: string | undefined): void {
+  openDeleteConfirm(cat: Category): void {
+    this.categoryToDelete = cat;
+    this.activeDialogRef = this.dialog.open(this.deleteCategoryDialog, {
+      width: '350px',
+      maxWidth: '95vw'
+    });
+
+    this.activeDialogRef.afterClosed().subscribe(() => {
+      this.categoryToDelete = null;
+    });
+  }
+
+  // "Evet, Sil" butonundan tetiklenir; silme bitmeden diyalog kapanmaz
+  confirmDeleteCategory(): void {
+    const id = this.categoryToDelete?.id;
     if (!id || this.deletingId) return;
 
     this.deletingId = id;
@@ -82,6 +104,7 @@ export class CategoriesComponent implements OnInit {
         this.categories = this.categories.filter(c => c.id !== id);
         this.deletingId = null;
         this.notification.showSuccess('Kategori silindi.');
+        this.activeDialogRef?.close();
         this.cdr.detectChanges(); // Silince ekranı yenile
       },
       error: (err) => {
