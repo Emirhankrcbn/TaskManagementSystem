@@ -120,53 +120,6 @@
     color: #2e7d32;
   }
 
-  .overdue-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-
-    &:last-of-type {
-      border-bottom: none;
-    }
-
-    .overdue-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .overdue-title {
-      font-weight: 500;
-    }
-
-    .overdue-meta {
-      font-size: 12px;
-      color: rgba(0, 0, 0, 0.6);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .color-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .overdue-days {
-      font-size: 12px;
-      font-weight: 600;
-      color: #c62828;
-      background-color: #ffebee;
-      padding: 4px 10px;
-      border-radius: 12px;
-      white-space: nowrap;
-    }
-  }
-
   .see-all-link {
     display: inline-block;
     margin-top: 12px;
@@ -202,12 +155,5 @@
 
   .stat-tile {
     .stat-label { color: rgba(255, 255, 255, 0.6); }
-  }
-
-  .overdue-card {
-    .overdue-row {
-      border-bottom-color: rgba(255, 255, 255, 0.1);
-      .overdue-meta { color: rgba(255, 255, 255, 0.6); }
-    }
   }
 }

@@ -5,10 +5,11 @@ import { MaterialModule } from '../../shared/material.module';
 import { TaskService } from '../../core/services/task';
 import { AuthService } from '../../core/services/auth';
 import { Task, TaskStatistics } from '../../core/models/task.model';
+import { TaskCard } from '../tasks/task-card/task-card';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink, MaterialModule],
+  imports: [CommonModule, RouterLink, MaterialModule, TaskCard],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -73,17 +74,6 @@ export class Dashboard implements OnInit {
   get completionPercent(): number {
     if (this.statistics.totalTasks === 0) return 0;
     return Math.round((this.statistics.completedTasks / this.statistics.totalTasks) * 100);
-  }
-
-  getPriorityLabel(priority?: number | null): string {
-    switch (priority) {
-      case 1: return 'Düşük';
-      case 2: return 'Normal';
-      case 3: return 'Yüksek';
-      case 4: return 'Acil';
-      case 5: return 'Kritik';
-      default: return '—';
-    }
   }
 
   getDaysOverdue(dueDate?: string | null): number {
