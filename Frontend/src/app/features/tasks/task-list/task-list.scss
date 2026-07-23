@@ -1,0 +1,48 @@
+table {
+  width: 100%;
+}
+
+.empty-state {
+  padding: 18px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* --- GÖREV DURUM ROZETLERİ (BADGES) --- */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  min-width: 90px;
+}
+
+/* Bekliyor */
+.status-pending {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+/* Devam Ediyor */
+.status-in-progress {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+/* Tamamlandı */
+.status-completed {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* İptal Edildi */
+.status-cancelled {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+:host-context(.dark-theme) .empty-state {
+  color: rgba(255, 255, 255, 0.6);
+}

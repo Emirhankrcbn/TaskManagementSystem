@@ -1,0 +1,86 @@
+<table mat-table [dataSource]="tasks" class="mat-elevation-z8">
+
+  <!-- Çoklu Seçim Sütunu -->
+  <ng-container matColumnDef="select">
+    <th mat-header-cell *matHeaderCellDef>
+      <mat-checkbox (change)="$event ? toggleAllRows() : null"
+                    [checked]="selection.hasValue() && isAllSelected()"
+                    [indeterminate]="selection.hasValue() && !isAllSelected()">
+      </mat-checkbox>
+    </th>
+    <td mat-cell *matCellDef="let row">
+      <mat-checkbox (click)="$event.stopPropagation()"
+                    (change)="$event ? selection.toggle(row) : null"
+                    [checked]="selection.isSelected(row)">
+      </mat-checkbox>
+    </td>
+  </ng-container>
+
+  <!-- ID (Sıra No) Sütunu -->
+  <ng-container matColumnDef="id">
+    <th mat-header-cell *matHeaderCellDef> No. </th>
+    <!-- Backend'den gelen karmaşık ID yerine, tablodaki indeks (sıra) numarasını +1 ekleyerek gösteriyoruz -->
+    <td mat-cell *matCellDef="let task; let i = index"> {{ i + 1 }} </td>
+  </ng-container>
+
+  <!-- Başlık Sütunu -->
+  <ng-container matColumnDef="title">
+    <th mat-header-cell *matHeaderCellDef> Görev Adı </th>
+    <td mat-cell *matCellDef="let task"> {{task.title}} </td>
+  </ng-container>
+
+  <!-- Kategori Sütunu -->
+  <ng-container matColumnDef="category">
+    <th mat-header-cell *matHeaderCellDef> Kategori </th>
+    <td mat-cell *matCellDef="let task">
+      <ng-container *ngIf="task.category; else noCat">
+        <span style="display:inline-flex;align-items:center;gap:8px;">
+          <span style="width:12px;height:12px;border-radius:50%;display:inline-block;" [style.backgroundColor]="task.category.color"></span>
+          <span>{{ task.category.name }}</span>
+        </span>
+      </ng-container>
+      <ng-template #noCat>—</ng-template>
+    </td>
+  </ng-container>
+
+  <!-- Öncelik Sütunu -->
+  <ng-container matColumnDef="priority">
+    <th mat-header-cell *matHeaderCellDef (click)="onTogglePrioritySort()" style="cursor:pointer; user-select:none"> Öncelik
+      <mat-icon style="vertical-align:middle; font-size:16px;">{{ sortBy === 'Priority' ? (isDesc ? 'arrow_downward' : 'arrow_upward') : 'swap_vert' }}</mat-icon>
+    </th>
+    <td mat-cell *matCellDef="let task"> {{ getPriorityLabel(task.priority) }} </td>
+  </ng-container>
+
+  <!-- Durum Sütunu -->
+  <ng-container matColumnDef="status">
+    <th mat-header-cell *matHeaderCellDef> Durum </th>
+    <td mat-cell *matCellDef="let task">
+      <!-- Sayısal değere göre renk ve metin ataması yapıldı -->
+      <span class="status-badge"
+            [ngClass]="{
+              'status-pending': task.status === 0,
+              'status-in-progress': task.status === 1,
+              'status-completed': task.status === 2,
+              'status-cancelled': task.status === 3
+            }">
+        {{ task.status === 0 ? 'Bekliyor' : task.status === 1 ? 'Devam Ediyor' : task.status === 2 ? 'Tamamlandı' : 'İptal Edildi' }}
+      </span>
+    </td>
+  </ng-container>
+
+  <!-- İşlemler Sütunu -->
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef> İşlemler </th>
+    <td mat-cell *matCellDef="let task">
+      <button mat-button color="primary" (click)="onEdit(task)">Düzenle</button>
+      <button mat-button color="warn" (click)="onDelete(task.id, $event)">Sil</button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+
+<div *ngIf="tasks.length === 0" class="empty-state">
+  Gösterilecek görev yok.
+</div>
