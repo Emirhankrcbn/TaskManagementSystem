@@ -12,6 +12,9 @@
     <div class="form-group">
       <label for="username">Kullanıcı Adı</label>
       <input id="username" type="text" formControlName="username" />
+      <small class="field-error" *ngIf="profileForm.get('username')?.invalid && profileForm.get('username')?.touched">
+        Kullanıcı adı zorunludur.
+      </small>
     </div>
 
     <div class="form-group">
@@ -27,6 +30,12 @@
     <div class="form-group">
       <label for="email">E-posta</label>
       <input id="email" type="email" formControlName="email" />
+      <small class="field-error" *ngIf="profileForm.get('email')?.hasError('required') && profileForm.get('email')?.touched">
+        E-posta alanı zorunludur.
+      </small>
+      <small class="field-error" *ngIf="profileForm.get('email')?.hasError('email') && profileForm.get('email')?.touched">
+        Geçerli bir e-posta adresi giriniz.
+      </small>
     </div>
 
     <hr>
@@ -36,11 +45,17 @@
     <div class="form-group">
       <label for="currentPassword">Mevcut Şifre</label>
       <input id="currentPassword" type="password" formControlName="currentPassword" placeholder="Eski şifreniz" />
+      <small class="field-error" *ngIf="profileForm.hasError('currentPasswordRequired') && profileForm.get('newPassword')?.touched">
+        Yeni şifre belirlemek için mevcut şifrenizi girmelisiniz.
+      </small>
     </div>
 
     <div class="form-group">
       <label for="newPassword">Yeni Şifre</label>
       <input id="newPassword" type="password" formControlName="newPassword" placeholder="Yeni şifreniz" />
+      <small class="field-error" *ngIf="profileForm.get('newPassword')?.hasError('minlength') && profileForm.get('newPassword')?.touched">
+        Yeni şifre en az 6 karakter olmalıdır.
+      </small>
     </div>
 
     <button type="submit" [disabled]="profileForm.invalid || isLoading">
