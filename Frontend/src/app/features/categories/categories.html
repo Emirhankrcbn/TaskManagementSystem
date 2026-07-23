@@ -7,6 +7,9 @@
       <div class="input-group">
         <label>Kategori Adı</label>
         <input type="text" formControlName="name" placeholder="Örn: Projeler" required>
+        <small class="field-error" *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched">
+          Kategori adı zorunludur.
+        </small>
       </div>
 
       <div class="input-group">

@@ -59,6 +59,13 @@
         box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
       }
     }
+
+    .field-error {
+      display: block;
+      margin-top: 0.4rem;
+      color: #c0392b;
+      font-size: 0.85rem;
+    }
   }
 
   button {
@@ -135,6 +142,10 @@
       &:focus {
         border-color: #3498db;
       }
+    }
+
+    .field-error {
+      color: #f79aa4;
     }
   }
 

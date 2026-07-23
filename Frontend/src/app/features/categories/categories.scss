@@ -55,6 +55,12 @@
         }
       }
 
+      .field-error {
+        margin-top: 0.4rem;
+        color: #c0392b;
+        font-size: 0.85rem;
+      }
+
       .color-picker {
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -258,6 +264,10 @@
         &:focus {
           border-color: #007bff;
         }
+      }
+
+      .field-error {
+        color: #f79aa4;
       }
     }
   }

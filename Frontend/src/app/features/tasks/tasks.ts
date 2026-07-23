@@ -241,6 +241,11 @@ export class Tasks implements OnInit {
   saveEditedTask() {
     if (!this.currentEditTask?.id || !this.editFormValue || this.isSaving) return;
 
+    if (!this.editFormValue.title?.trim()) {
+      this.saveError = 'Görev adı zorunludur.';
+      return;
+    }
+
     this.isSaving = true;
     this.saveError = '';
 

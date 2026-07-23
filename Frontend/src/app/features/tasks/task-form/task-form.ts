@@ -38,6 +38,7 @@ export class TaskForm implements OnInit {
   priority: number = 2;
   categoryId: string | null = null;
   dueDate: Date | string | null = null;
+  submitted: boolean = false;
 
   ngOnInit(): void {
     if (this.task) {
@@ -71,6 +72,7 @@ export class TaskForm implements OnInit {
   }
 
   onSubmit(): void {
+    this.submitted = true;
     if (this.title.trim() === '' || this.isSubmitting) return;
     this.save.emit(this.getValue());
   }
@@ -82,6 +84,7 @@ export class TaskForm implements OnInit {
     this.priority = 2;
     this.categoryId = null;
     this.dueDate = null;
+    this.submitted = false;
     this.emitValue();
   }
 }

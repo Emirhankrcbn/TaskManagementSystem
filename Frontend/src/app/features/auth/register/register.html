@@ -11,18 +11,27 @@
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Kullanıcı Adı</mat-label>
           <input matInput formControlName="username" placeholder="Kullanıcı adınızı belirleyin" required>
+          <mat-error *ngIf="registerForm.get('username')?.hasError('required')">
+            Kullanıcı adı zorunludur.
+          </mat-error>
         </mat-form-field>
 
         <!-- Ad Alanı -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Ad</mat-label>
           <input matInput formControlName="firstName" placeholder="Adınızı girin" required>
+          <mat-error *ngIf="registerForm.get('firstName')?.hasError('required')">
+            Ad alanı zorunludur.
+          </mat-error>
         </mat-form-field>
 
         <!-- Soyad Alanı -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Soyad</mat-label>
           <input matInput formControlName="lastName" placeholder="Soyadınızı girin" required>
+          <mat-error *ngIf="registerForm.get('lastName')?.hasError('required')">
+            Soyad alanı zorunludur.
+          </mat-error>
         </mat-form-field>
 
         <!-- E-posta Alanı -->

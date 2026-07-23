@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { AuthService } from '../../core/services/auth';
 
 @Component({
@@ -25,11 +25,21 @@ export class Profile implements OnInit {
       firstName: [''],
       lastName: [''],
       email: ['', [Validators.required, Validators.email]],
-      currentPassword: [''], 
-      newPassword: ['']
-    });
+      currentPassword: [''],
+      newPassword: ['', Validators.minLength(6)]
+    }, { validators: Profile.currentPasswordRequiredWhenChangingPassword });
 
     this.loadUserProfile();
+  }
+
+  // Yeni şifre girildiyse mevcut şifre de girilmiş olmalı
+  private static currentPasswordRequiredWhenChangingPassword(group: AbstractControl): ValidationErrors | null {
+    const newPassword = group.get('newPassword')?.value;
+    const currentPassword = group.get('currentPassword')?.value;
+    if (newPassword && !currentPassword) {
+      return { currentPasswordRequired: true };
+    }
+    return null;
   }
 
   loadUserProfile(): void {

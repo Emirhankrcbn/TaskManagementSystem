@@ -2,7 +2,8 @@
 
   <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
     <mat-label>Görev Adı</mat-label>
-    <input matInput [(ngModel)]="title" (ngModelChange)="onFieldChange()" (keyup.enter)="onSubmit()">
+    <input matInput [(ngModel)]="title" #titleModel="ngModel" required (ngModelChange)="onFieldChange()" (keyup.enter)="onSubmit()">
+    <mat-error *ngIf="titleModel.invalid && (titleModel.touched || submitted)">Görev adı zorunludur.</mat-error>
   </mat-form-field>
 
   <mat-form-field *ngIf="!showSubmitButton" appearance="outline" class="full-width" subscriptSizing="dynamic">
