@@ -82,6 +82,15 @@
     (sortChange)="onSortChange($event)">
   </app-task-list>
 
+  <app-pagination
+    *ngIf="!isLoadingTasks"
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [totalCount]="totalCount"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-pagination>
+
   <!-- Silme onay penceresi -->
 <ng-template #deleteDialog>
   <h2 mat-dialog-title>Görevi Sil</h2>

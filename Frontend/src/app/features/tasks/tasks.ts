@@ -12,6 +12,7 @@ import { TaskList } from './task-list/task-list';
 import { TaskForm, TaskFormValue } from './task-form/task-form';
 import { TaskDetail } from './task-detail/task-detail';
 import { NotificationService } from '../../core/services/notification';
+import { Pagination } from '../../shared/pagination/pagination';
 
 @Component({
   selector: 'app-tasks',
@@ -21,7 +22,8 @@ import { NotificationService } from '../../core/services/notification';
     MaterialModule,
     TaskList,
     TaskForm,
-    TaskDetail
+    TaskDetail,
+    Pagination
   ],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss'
@@ -40,6 +42,12 @@ export class Tasks implements OnInit {
   private searchDebounceTimer: any = null;
   sortBy: string | null = null;
   isDesc: boolean = false;
+
+  // --- SAYFALAMA ---
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalCount: number = 0;
+  totalPages: number = 1;
 
   // Düzenleme diyaloğundaki TaskForm'un güncel değeri (kaydet anında okunur)
   editFormValue: TaskFormValue | null = null;
@@ -92,34 +100,23 @@ export class Tasks implements OnInit {
       categoryId: this.selectedCategoryId,
       searchTerm: this.searchTerm.trim() || null,
       sortBy: this.sortBy,
-      isDescending: this.isDesc
+      isDescending: this.isDesc,
+      pageNumber: this.currentPage,
+      pageSize: this.pageSize
     }).subscribe({
-      next: (data: any) => {
-        console.log("Backend'den gelen ham veri:", data); 
-
-        // 1. İhtimal: Backend Pagination (Sayfalama) yapısı kullanıyor, veriler 'items' içinde!
-        if (data && data.items && Array.isArray(data.items)) {
-          this.dataSource = data.items;
-        }
-        // 2. İhtimal: C# ReferenceHandler.Preserve kullanıyorsa veriler $values içindedir
-        else if (data && data.$values) {
-          this.dataSource = data.$values;
-        } 
-        // 3. İhtimal: Özel bir API kılıfı
-        else if (data && data.data) {
-          this.dataSource = data.data;
-        } 
-        // 4. İhtimal: Gelen veri zaten tertemiz bir diziyse
-        else if (Array.isArray(data)) {
-          this.dataSource = data;
-        } 
-        // Bulamazsa boş dizi ata
-        else {
-          this.dataSource = [];
-        }
-
-        // Tabloyu güvenle güncelle
+      next: (data) => {
+        this.dataSource = data.items;
+        this.totalCount = data.totalCount;
+        this.totalPages = data.totalPages || 1;
         this.isLoadingTasks = false;
+
+        // Mevcut sayfa artık aralık dışında kaldıysa (örn. son öğe silindi), son geçerli sayfaya dön
+        if (this.currentPage > this.totalPages && this.totalPages > 0) {
+          this.currentPage = this.totalPages;
+          this.loadTasks();
+          return;
+        }
+
         this.taskListComponent?.refreshTable();
         this.cdr.detectChanges();
       },
@@ -132,20 +129,29 @@ export class Tasks implements OnInit {
     });
   }
 
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.loadTasks();
+  }
+
   onPriorityFilterChange() {
+    this.currentPage = 1;
     this.loadTasks();
   }
 
   clearPriorityFilter() {
     this.selectedPriority = null;
+    this.currentPage = 1;
     this.loadTasks();
   }
 
   onStatusFilterChange() {
+    this.currentPage = 1;
     this.loadTasks();
   }
 
   onCategoryFilterChange() {
+    this.currentPage = 1;
     this.loadTasks();
   }
 
@@ -155,6 +161,7 @@ export class Tasks implements OnInit {
       clearTimeout(this.searchDebounceTimer);
     }
     this.searchDebounceTimer = setTimeout(() => {
+      this.currentPage = 1;
       this.loadTasks();
     }, 400);
   }
@@ -169,6 +176,7 @@ export class Tasks implements OnInit {
     this.selectedStatus = null;
     this.selectedCategoryId = null;
     this.searchTerm = '';
+    this.currentPage = 1;
     this.loadTasks();
   }
 
@@ -180,6 +188,7 @@ export class Tasks implements OnInit {
       this.sortBy = field;
       this.isDesc = false; // yeni sütun seçilince artan sıralamayla başla
     }
+    this.currentPage = 1;
     this.loadTasks();
   }
 
