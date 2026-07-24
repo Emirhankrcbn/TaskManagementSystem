@@ -48,6 +48,9 @@ namespace TaskManagement.API.Services
             {
                 "duedate" => filter.IsDescending ? query.OrderByDescending(t => t.DueDate) : query.OrderBy(t => t.DueDate),
                 "priority" => filter.IsDescending ? query.OrderByDescending(t => t.Priority) : query.OrderBy(t => t.Priority),
+                "title" => filter.IsDescending ? query.OrderByDescending(t => t.Title) : query.OrderBy(t => t.Title),
+                "status" => filter.IsDescending ? query.OrderByDescending(t => t.Status) : query.OrderBy(t => t.Status),
+                "category" => filter.IsDescending ? query.OrderByDescending(t => t.Category!.Name) : query.OrderBy(t => t.Category!.Name),
                 _ => filter.IsDescending ? query.OrderByDescending(t => t.CreatedAt) : query.OrderBy(t => t.CreatedAt) // Varsayılan sıralama
             };
 
