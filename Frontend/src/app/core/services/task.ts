@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Task, TaskAttachment, TaskStatistics } from '../models/task.model'; // Daha önce oluşturduğumuz model
+import { Task, TaskAttachment, TaskStatistics, PagedResult } from '../models/task.model'; // Daha önce oluşturduğumuz model
 import { HttpParams } from '@angular/common/http';
 
 @Injectable({
@@ -21,8 +21,11 @@ export class TaskService {
     return this.http.post<Task>(this.apiUrl, task);
   }
 
-  // 2. READ (Tüm Görevleri Getirme) - opsiyonel filtre desteği
-  getTasks(filter?: { priority?: number | null, categoryId?: string | null, searchTerm?: string | null, status?: number | null, sortBy?: string | null, isDescending?: boolean | null }): Observable<Task[]> {
+  // 2. READ (Tüm Görevleri Getirme) - opsiyonel filtre + sayfalama desteği
+  getTasks(filter?: {
+    priority?: number | null, categoryId?: string | null, searchTerm?: string | null, status?: number | null,
+    sortBy?: string | null, isDescending?: boolean | null, pageNumber?: number | null, pageSize?: number | null
+  }): Observable<PagedResult<Task>> {
     let params = new HttpParams();
     if (filter) {
       if (filter.priority != null) params = params.set('priority', filter.priority.toString());
@@ -31,8 +34,10 @@ export class TaskService {
       if (filter.status != null) params = params.set('status', filter.status.toString());
       if (filter.sortBy) params = params.set('sortBy', filter.sortBy);
       if (filter.isDescending != null) params = params.set('isDescending', filter.isDescending ? 'true' : 'false');
+      if (filter.pageNumber != null) params = params.set('pageNumber', filter.pageNumber.toString());
+      if (filter.pageSize != null) params = params.set('pageSize', filter.pageSize.toString());
     }
-    return this.http.get<Task[]>(this.apiUrl, { params });
+    return this.http.get<PagedResult<Task>>(this.apiUrl, { params });
   }
 
   // 2.1 READ SİNGLE (Tek Bir Görevin Detayını Getirme)

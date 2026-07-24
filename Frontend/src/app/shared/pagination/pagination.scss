@@ -1,0 +1,29 @@
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 4px;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination-page {
+  font-size: 14px;
+  min-width: 100px;
+  text-align: center;
+}
+
+:host-context(.dark-theme) .pagination-info {
+  color: rgba(255, 255, 255, 0.6);
+}

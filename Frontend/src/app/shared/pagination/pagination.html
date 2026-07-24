@@ -1,0 +1,17 @@
+<div class="pagination" *ngIf="totalCount > 0">
+  <span class="pagination-info">
+    {{ totalCount }} kayıttan {{ rangeStart }}-{{ rangeEnd }} arası gösteriliyor
+  </span>
+
+  <div class="pagination-controls">
+    <button mat-icon-button [disabled]="currentPage === 1" (click)="previous()" aria-label="Önceki sayfa">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <span class="pagination-page">Sayfa {{ currentPage }} / {{ totalPages }}</span>
+
+    <button mat-icon-button [disabled]="currentPage === totalPages" (click)="next()" aria-label="Sonraki sayfa">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+</div>
