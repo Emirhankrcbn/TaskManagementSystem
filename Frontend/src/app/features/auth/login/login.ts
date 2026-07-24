@@ -23,7 +23,7 @@ export class Login {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // Form elemanlarını ve doğrulama kuralları
+  // form elemanlarını ve doğrulama kuralları
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]]
