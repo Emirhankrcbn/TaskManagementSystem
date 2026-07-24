@@ -1,0 +1,31 @@
+<div class="board" cdkDropListGroup>
+  <div class="board-column" *ngFor="let column of columns">
+    <div class="board-column-header" [ngClass]="'status-' + column.status">
+      <span>{{ column.title }}</span>
+      <span class="board-column-count">{{ column.tasks.length }}</span>
+    </div>
+
+    <div
+      class="board-column-body"
+      cdkDropList
+      [cdkDropListData]="column.tasks"
+      (cdkDropListDropped)="drop($event, column.status)">
+
+      <div class="board-card" *ngFor="let task of column.tasks" cdkDrag>
+        <div class="board-card-title">{{ task.title }}</div>
+        <div class="board-card-meta">
+          <ng-container *ngIf="task.category">
+            <span class="color-dot" [style.backgroundColor]="task.category.color"></span>
+            {{ task.category.name }}
+          </ng-container>
+          <span *ngIf="!task.category">Kategori yok</span>
+        </div>
+        <div class="board-card-priority">Öncelik: {{ getPriorityLabel(task.priority) }}</div>
+      </div>
+
+      <div class="board-column-empty" *ngIf="column.tasks.length === 0">
+        Görev yok
+      </div>
+    </div>
+  </div>
+</div>

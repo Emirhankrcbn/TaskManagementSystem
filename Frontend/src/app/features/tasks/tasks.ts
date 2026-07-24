@@ -13,6 +13,7 @@ import { TaskForm, TaskFormValue } from './task-form/task-form';
 import { TaskDetail } from './task-detail/task-detail';
 import { NotificationService } from '../../core/services/notification';
 import { Pagination } from '../../shared/pagination/pagination';
+import { TaskBoard, TaskStatusChange } from './task-board/task-board';
 
 @Component({
   selector: 'app-tasks',
@@ -23,7 +24,8 @@ import { Pagination } from '../../shared/pagination/pagination';
     TaskList,
     TaskForm,
     TaskDetail,
-    Pagination
+    Pagination,
+    TaskBoard
   ],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss'
@@ -48,6 +50,11 @@ export class Tasks implements OnInit {
   pageSize: number = 10;
   totalCount: number = 0;
   totalPages: number = 1;
+
+  // --- GÖRÜNÜM MODU (Tablo / Pano) ---
+  viewMode: 'table' | 'board' = 'table';
+  private readonly tablePageSize = 10;
+  private readonly boardPageSize = 1000; // Pano tüm eşleşen görevleri sütunlarda göstersin diye sayfalamayı pratikte devre dışı bırakır
 
   // Düzenleme diyaloğundaki TaskForm'un güncel değeri (kaydet anında okunur)
   editFormValue: TaskFormValue | null = null;
@@ -132,6 +139,40 @@ export class Tasks implements OnInit {
   onPageChange(page: number) {
     this.currentPage = page;
     this.loadTasks();
+  }
+
+  onViewModeChange(mode: 'table' | 'board') {
+    if (this.viewMode === mode) return;
+    this.viewMode = mode;
+    this.pageSize = mode === 'board' ? this.boardPageSize : this.tablePageSize;
+    this.currentPage = 1;
+    this.loadTasks();
+  }
+
+  // Pano görünümünde bir kart başka bir sütuna sürüklenince tetiklenir
+  onBoardStatusChange(change: TaskStatusChange) {
+    if (!change.task.id) return;
+
+    const updatedTask: any = {
+      title: change.task.title,
+      description: change.task.description || undefined,
+      status: change.newStatus,
+      priority: change.task.priority,
+      categoryId: change.task.categoryId || undefined,
+      dueDate: change.task.dueDate || undefined
+    };
+
+    this.taskService.updateTask(change.task.id, updatedTask).subscribe({
+      next: () => {
+        this.notification.showSuccess('Durum güncellendi.');
+        this.loadTasks();
+      },
+      error: (err) => {
+        console.error('Durum güncellenirken hata oluştu:', err);
+        this.notification.showError(err.error?.error || 'Durum güncellenirken bir hata oluştu.');
+        this.loadTasks(); // sürüklenen kartı gerçek duruma geri döndür
+      }
+    });
   }
 
   onPriorityFilterChange() {
