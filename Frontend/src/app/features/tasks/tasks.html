@@ -10,6 +10,17 @@
         Seçili ({{selection.selected.length}}) Görevi Sil
       </button>
     </div>
+
+    <div class="view-toggle">
+      <button mat-stroked-button [color]="viewMode === 'table' ? 'primary' : undefined" (click)="onViewModeChange('table')">
+        <mat-icon>view_list</mat-icon>
+        Tablo
+      </button>
+      <button mat-stroked-button [color]="viewMode === 'board' ? 'primary' : undefined" (click)="onViewModeChange('board')">
+        <mat-icon>view_column</mat-icon>
+        Pano
+      </button>
+    </div>
   </div>
 
   <!-- FİLTRELEME VE ARAMA ÇUBUĞU -->
@@ -71,25 +82,31 @@
     <mat-spinner diameter="32"></mat-spinner>
   </div>
 
-  <app-task-list
-    *ngIf="!isLoadingTasks"
-    [tasks]="dataSource"
-    [selection]="selection"
-    [sortBy]="sortBy"
-    [isDesc]="isDesc"
-    (editTask)="editTask($event)"
-    (deleteTask)="openDeleteConfirm($event.id, $event.event)"
-    (sortChange)="onSortChange($event)">
-  </app-task-list>
+  <ng-container *ngIf="!isLoadingTasks && viewMode === 'table'">
+    <app-task-list
+      [tasks]="dataSource"
+      [selection]="selection"
+      [sortBy]="sortBy"
+      [isDesc]="isDesc"
+      (editTask)="editTask($event)"
+      (deleteTask)="openDeleteConfirm($event.id, $event.event)"
+      (sortChange)="onSortChange($event)">
+    </app-task-list>
 
-  <app-pagination
-    *ngIf="!isLoadingTasks"
-    [currentPage]="currentPage"
-    [totalPages]="totalPages"
-    [totalCount]="totalCount"
-    [pageSize]="pageSize"
-    (pageChange)="onPageChange($event)">
-  </app-pagination>
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      [totalCount]="totalCount"
+      [pageSize]="pageSize"
+      (pageChange)="onPageChange($event)">
+    </app-pagination>
+  </ng-container>
+
+  <app-task-board
+    *ngIf="!isLoadingTasks && viewMode === 'board'"
+    [tasks]="dataSource"
+    (statusChange)="onBoardStatusChange($event)">
+  </app-task-board>
 
   <!-- Silme onay penceresi -->
 <ng-template #deleteDialog>
