@@ -172,12 +172,13 @@ export class Tasks implements OnInit {
     this.loadTasks();
   }
 
-  togglePrioritySort() {
-    if (this.sortBy === 'Priority') {
+  // TaskList'teki herhangi bir sütun başlığına tıklanınca tetiklenir
+  onSortChange(field: string) {
+    if (this.sortBy === field) {
       this.isDesc = !this.isDesc;
     } else {
-      this.sortBy = 'Priority';
-      this.isDesc = false; // default ascending
+      this.sortBy = field;
+      this.isDesc = false; // yeni sütun seçilince artan sıralamayla başla
     }
     this.loadTasks();
   }

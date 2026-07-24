@@ -19,9 +19,9 @@ export class TaskList {
 
   @Output() editTask = new EventEmitter<Task>();
   @Output() deleteTask = new EventEmitter<{ id: string; event: Event }>();
-  @Output() togglePrioritySort = new EventEmitter<void>();
+  @Output() sortChange = new EventEmitter<string>();
 
-  displayedColumns: string[] = ['select', 'id', 'title', 'category', 'priority', 'status', 'actions'];
+  displayedColumns: string[] = ['select', 'id', 'title', 'category', 'priority', 'dueDate', 'status', 'actions'];
 
   @ViewChild(MatTable) table!: MatTable<Task>;
 
@@ -53,8 +53,13 @@ export class TaskList {
     this.deleteTask.emit({ id, event });
   }
 
-  onTogglePrioritySort(): void {
-    this.togglePrioritySort.emit();
+  onSort(field: string): void {
+    this.sortChange.emit(field);
+  }
+
+  getSortIcon(field: string): string {
+    if (this.sortBy !== field) return 'swap_vert';
+    return this.isDesc ? 'arrow_downward' : 'arrow_upward';
   }
 
   getPriorityLabel(priority?: number | null): string {
@@ -66,5 +71,10 @@ export class TaskList {
       case 5: return 'Kritik';
       default: return '—';
     }
+  }
+
+  formatDate(dateStr?: string | null): string {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('tr-TR');
   }
 }

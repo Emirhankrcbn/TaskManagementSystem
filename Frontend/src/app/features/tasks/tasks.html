@@ -79,7 +79,7 @@
     [isDesc]="isDesc"
     (editTask)="editTask($event)"
     (deleteTask)="openDeleteConfirm($event.id, $event.event)"
-    (togglePrioritySort)="togglePrioritySort()">
+    (sortChange)="onSortChange($event)">
   </app-task-list>
 
   <!-- Silme onay penceresi -->
