@@ -95,6 +95,24 @@
   display: inline-block;
 }
 
+.board-card-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+
+  mat-progress-bar {
+    flex: 1;
+    border-radius: 4px;
+  }
+}
+
+.board-card-progress-text {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+
 .board-card-footer {
   display: flex;
   align-items: center;
@@ -155,6 +173,10 @@
   }
 
   .board-card-meta {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .board-card-progress-text {
     color: rgba(255, 255, 255, 0.6);
   }
 

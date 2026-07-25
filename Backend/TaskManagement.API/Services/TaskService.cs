@@ -23,6 +23,7 @@ namespace TaskManagement.API.Services
             var query = _context.Tasks
                 .AsNoTracking()
                 .Include(t => t.Category) // include category so AutoMapper maps it into DTO
+                .Include(t => t.SubTasks) // alt görevler ilerleme çubuğu için gerekli
                 .Where(t => t.UserId == userId && t.IsDeleted == false)
                 .AsQueryable();
 
@@ -78,6 +79,7 @@ namespace TaskManagement.API.Services
             var task = await _context.Tasks
                 .AsNoTracking()
                 .Include(t => t.Category)
+                .Include(t => t.SubTasks)
                 .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false); // Silinmişse bulma
 
             if (task == null)
@@ -314,6 +316,71 @@ namespace TaskManagement.API.Services
             };
         }
 
+        public async Task<SubTaskResponseDto> AddSubTaskAsync(Guid taskId, Guid userId, SubTaskCreateDto dto)
+        {
+            // Güvenlik: görev bu kullanıcıya mı ait
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false);
+            if (task == null) throw new Exception("Görev bulunamadı veya yetkiniz yok.");
+
+            var subTask = new Models.SubTask
+            {
+                TaskId = taskId,
+                Title = dto.Title,
+                Completed = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.SubTasks.AddAsync(subTask);
+            await _context.SaveChangesAsync();
+
+            return new SubTaskResponseDto
+            {
+                Id = subTask.Id,
+                TaskId = subTask.TaskId,
+                Title = subTask.Title,
+                Completed = subTask.Completed
+            };
+        }
+
+        public async Task<SubTaskResponseDto> UpdateSubTaskAsync(Guid taskId, Guid subTaskId, Guid userId, SubTaskUpdateDto dto)
+        {
+            // Güvenlik: görev bu kullanıcıya mı ait
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false);
+            if (task == null) throw new Exception("Görev bulunamadı veya yetkiniz yok.");
+
+            var subTask = await _context.SubTasks.FirstOrDefaultAsync(st => st.Id == subTaskId && st.TaskId == taskId);
+            if (subTask == null) throw new Exception("Alt görev bulunamadı.");
+
+            subTask.Title = dto.Title;
+            subTask.Completed = dto.Completed;
+
+            _context.SubTasks.Update(subTask);
+            await _context.SaveChangesAsync();
+
+            return new SubTaskResponseDto
+            {
+                Id = subTask.Id,
+                TaskId = subTask.TaskId,
+                Title = subTask.Title,
+                Completed = subTask.Completed
+            };
+        }
+
+        public async Task<bool> DeleteSubTaskAsync(Guid taskId, Guid subTaskId, Guid userId)
+        {
+            // Güvenlik: görev bu kullanıcıya mı ait
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false);
+            if (task == null) throw new Exception("Görev bulunamadı veya yetkiniz yok.");
+
+            var subTask = await _context.SubTasks.FirstOrDefaultAsync(st => st.Id == subTaskId && st.TaskId == taskId);
+            if (subTask == null) throw new Exception("Silinecek alt görev bulunamadı.");
+
+            _context.SubTasks.Remove(subTask);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
         public async Task<List<TaskResponseDto>> GetOverdueTasksAsync(Guid userId)
         {
             // Vadesi geçenleri bulma mantığı:
@@ -327,6 +394,7 @@ namespace TaskManagement.API.Services
                             t.DueDate < DateTime.UtcNow && 
                             (int)t.Status != 2)
                 .Include(t => t.Category)
+                .Include(t => t.SubTasks)
                 .OrderBy(t => t.DueDate) // En çok geciken en üstte çıksın diye tarihe göre sıralıyoruz
                 .ToListAsync();
 

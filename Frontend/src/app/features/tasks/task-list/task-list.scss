@@ -14,6 +14,25 @@ table {
   color: rgba(0, 0, 0, 0.6);
 }
 
+/* --- İLERLEME (ALT GÖREV TAMAMLANMA) SÜTUNU --- */
+.task-progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 100px;
+
+  mat-progress-bar {
+    flex: 1;
+    border-radius: 4px;
+  }
+}
+
+.task-progress-text {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+
 /* --- GÖREV DURUM ROZETLERİ (BADGES) --- */
 .status-badge {
   padding: 6px 12px;
@@ -50,5 +69,9 @@ table {
 }
 
 :host-context(.dark-theme) .empty-state {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+:host-context(.dark-theme) .task-progress-text {
   color: rgba(255, 255, 255, 0.6);
 }

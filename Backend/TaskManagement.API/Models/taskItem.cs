@@ -22,6 +22,7 @@ namespace TaskManagement.API.Models
         public Category? Category { get; set; }
         public ICollection<TaskAttachment> Attachments { get; set; } = new List<TaskAttachment>();
         public ICollection<TaskComment> Comments { get; set; } = new List<TaskComment>();
+        public ICollection<SubTask> SubTasks { get; set; } = new List<SubTask>();
         public bool IsDeleted { get; set; } = false;
     }
 }

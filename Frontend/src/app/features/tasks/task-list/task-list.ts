@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatTable } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MaterialModule } from '../../../shared/material.module';
-import { Task } from '../../../core/models/task.model';
+import { Task, getSubtaskProgress } from '../../../core/models/task.model';
 
 @Component({
   selector: 'app-task-list',
@@ -21,7 +21,7 @@ export class TaskList {
   @Output() deleteTask = new EventEmitter<{ id: string; event: Event }>();
   @Output() sortChange = new EventEmitter<string>();
 
-  displayedColumns: string[] = ['select', 'id', 'title', 'category', 'priority', 'dueDate', 'status', 'actions'];
+  displayedColumns: string[] = ['select', 'id', 'title', 'category', 'priority', 'progress', 'dueDate', 'status', 'actions'];
 
   @ViewChild(MatTable) table!: MatTable<Task>;
 
@@ -93,5 +93,9 @@ export class TaskList {
     if (diffDays < 0) return 'overdue';
     if (diffDays <= 2) return 'soon';
     return 'normal';
+  }
+
+  getSubtaskProgress(task: Task) {
+    return getSubtaskProgress(task);
   }
 }

@@ -16,6 +16,7 @@ namespace TaskManagement.API.Data
         public DbSet<TaskItem> Tasks { get; set; }
         public DbSet<TaskAttachment> TaskAttachments { get; set; }
         public DbSet<TaskComment> TaskComments { get; set; }
+        public DbSet<SubTask> SubTasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -71,6 +72,15 @@ namespace TaskManagement.API.Data
                 entity.HasOne(tc => tc.User)
                       .WithMany(u => u.Comments)
                       .HasForeignKey(tc => tc.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // SubTasks (alt görevler/checklist) tablosu konfigürasyonları
+            modelBuilder.Entity<SubTask>(entity =>
+            {
+                entity.HasOne(st => st.Task)
+                      .WithMany(t => t.SubTasks)
+                      .HasForeignKey(st => st.TaskId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
         }

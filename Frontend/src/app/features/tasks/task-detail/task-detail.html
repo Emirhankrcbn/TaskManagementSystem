@@ -13,16 +13,22 @@
   <div class="subtask-add-row">
     <mat-form-field appearance="outline" style="flex: 1;">
       <mat-label>Yeni Alt Görev Ekle</mat-label>
-      <input matInput [(ngModel)]="newSubTaskTitle" (keyup.enter)="addSubTask()" placeholder="Örn: Veritabanı tablolarını oluştur">
+      <input matInput [(ngModel)]="newSubTaskTitle" (keyup.enter)="addSubTask()" placeholder="Örn: Veritabanı tablolarını oluştur" [disabled]="isAddingSubTask">
     </mat-form-field>
-    <button mat-flat-button color="primary" (click)="addSubTask()" style="height: 56px;">Ekle</button>
+    <button mat-flat-button color="primary" (click)="addSubTask()" [disabled]="isAddingSubTask" style="height: 56px;">
+      {{ isAddingSubTask ? 'Ekleniyor...' : 'Ekle' }}
+    </button>
   </div>
 
   <div *ngFor="let sub of subTasks" class="subtask-row">
-    <mat-checkbox [(ngModel)]="sub.completed" color="primary">{{ sub.title }}</mat-checkbox>
-    <button mat-icon-button color="warn" (click)="removeSubTask(sub.id!)">
+    <mat-checkbox [checked]="sub.completed" (change)="toggleSubTask(sub)" color="primary">{{ sub.title }}</mat-checkbox>
+    <button mat-icon-button color="warn" (click)="removeSubTask(sub)" [disabled]="subTaskDeletingId === sub.id">
       <mat-icon>close</mat-icon>
     </button>
+  </div>
+
+  <div *ngIf="subTasks.length === 0" class="hint-text">
+    Henüz alt görev eklenmemiş.
   </div>
 </div>
 

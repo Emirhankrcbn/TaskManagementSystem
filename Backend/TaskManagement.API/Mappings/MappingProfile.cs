@@ -21,6 +21,9 @@ namespace TaskManagement.API.Mappings
             CreateMap<Category, CategoryResponseDto>();
             CreateMap<CategoryCreateDto, Category>();
             CreateMap<CategoryUpdateDto, Category>();
+
+            // Alt görev (SubTask) eşleştirmesi
+            CreateMap<SubTask, SubTaskResponseDto>();
         }
     }
 }

@@ -20,6 +20,10 @@
           </ng-container>
           <span *ngIf="!task.category">Kategori yok</span>
         </div>
+        <div class="board-card-progress" *ngIf="getSubtaskProgress(task) as progress">
+          <mat-progress-bar mode="determinate" [value]="progress.percent"></mat-progress-bar>
+          <span class="board-card-progress-text">{{ progress.completed }}/{{ progress.total }}</span>
+        </div>
         <div class="board-card-footer">
           <span class="priority-badge" [ngClass]="'priority-' + task.priority">{{ getPriorityLabel(task.priority) }}</span>
           <span class="due-date" *ngIf="task.dueDate" [ngClass]="'due-' + getDueDateStatus(task)">

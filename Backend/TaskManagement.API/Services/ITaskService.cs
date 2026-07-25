@@ -18,5 +18,8 @@ namespace TaskManagement.API.Services
         Task<List<TaskCommentResponseDto>> GetTaskCommentsAsync(Guid taskId, Guid userId); // yorumları listeleme (okuma) metodunun imzası
         Task<TaskStatisticsDto> GetTaskStatisticsAsync(Guid userId);
         Task<List<TaskResponseDto>> GetOverdueTasksAsync(Guid userId);
+        Task<SubTaskResponseDto> AddSubTaskAsync(Guid taskId, Guid userId, SubTaskCreateDto dto);
+        Task<SubTaskResponseDto> UpdateSubTaskAsync(Guid taskId, Guid subTaskId, Guid userId, SubTaskUpdateDto dto);
+        Task<bool> DeleteSubTaskAsync(Guid taskId, Guid subTaskId, Guid userId);
     }
 }

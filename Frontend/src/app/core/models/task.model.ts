@@ -2,6 +2,7 @@ import { Category } from './category.model';
 
 export interface SubTask {
   id?: string;
+  taskId?: string;
   title: string;
   completed: boolean;
 }
@@ -47,4 +48,12 @@ export interface PagedResult<T> {
   pageNumber: number;
   pageSize: number;
   totalPages: number;
+}
+
+// Görevin alt görev (checklist) tamamlanma yüzdesini hesaplar; alt görev yoksa null döner
+export function getSubtaskProgress(task: Task): { completed: number; total: number; percent: number } | null {
+  if (!task.subTasks || task.subTasks.length === 0) return null;
+  const total = task.subTasks.length;
+  const completed = task.subTasks.filter(st => st.completed).length;
+  return { completed, total, percent: Math.round((completed / total) * 100) };
 }

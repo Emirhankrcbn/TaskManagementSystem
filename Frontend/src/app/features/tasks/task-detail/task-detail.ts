@@ -31,6 +31,8 @@ export class TaskDetail implements OnInit {
 
   subTasks: SubTask[] = [];
   newSubTaskTitle: string = '';
+  isAddingSubTask: boolean = false;
+  subTaskDeletingId: string | null = null;
 
   attachments: TaskAttachment[] = [];
   isUploadingAttachment: boolean = false;
@@ -51,20 +53,68 @@ export class TaskDetail implements OnInit {
 
   // --- ALT GÖREV (SUBTASK) FONKSİYONLARI ---
   addSubTask(): void {
-    if (this.newSubTaskTitle.trim() === '') return;
+    const title = this.newSubTaskTitle.trim();
+    if (title === '' || !this.task?.id || this.isAddingSubTask) return;
 
-    const newSubTask: SubTask = {
-      id: Date.now().toString(),
-      title: this.newSubTaskTitle,
-      completed: false
-    };
-
-    this.subTasks.push(newSubTask);
-    this.newSubTaskTitle = '';
+    const taskId = this.task.id;
+    this.isAddingSubTask = true;
+    this.taskService.addSubTask(taskId, title).subscribe({
+      next: (subTask) => {
+        this.subTasks = [...this.subTasks, subTask];
+        this.newSubTaskTitle = '';
+        this.isAddingSubTask = false;
+        this.notification.showSuccess('Alt görev eklendi.');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Alt görev eklenirken hata oluştu:', err);
+        this.isAddingSubTask = false;
+        this.notification.showError(err.error?.error || 'Alt görev eklenirken bir hata oluştu.');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-  removeSubTask(subTaskId: string): void {
-    this.subTasks = this.subTasks.filter(st => st.id !== subTaskId);
+  toggleSubTask(subTask: SubTask): void {
+    if (!this.task?.id || !subTask.id) return;
+    const taskId = this.task.id;
+    const previousCompleted = subTask.completed;
+    subTask.completed = !subTask.completed;
+
+    this.taskService.updateSubTask(taskId, subTask.id, { title: subTask.title, completed: subTask.completed }).subscribe({
+      next: (updated) => {
+        subTask.completed = updated.completed;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Alt görev güncellenirken hata oluştu:', err);
+        subTask.completed = previousCompleted;
+        this.notification.showError(err.error?.error || 'Alt görev güncellenirken bir hata oluştu.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  removeSubTask(subTask: SubTask): void {
+    if (!this.task?.id || !subTask.id || this.subTaskDeletingId) return;
+    const taskId = this.task.id;
+    const subTaskId = subTask.id;
+
+    this.subTaskDeletingId = subTaskId;
+    this.taskService.deleteSubTask(taskId, subTaskId).subscribe({
+      next: () => {
+        this.subTasks = this.subTasks.filter(st => st.id !== subTaskId);
+        this.subTaskDeletingId = null;
+        this.notification.showSuccess('Alt görev silindi.');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Alt görev silinirken hata oluştu:', err);
+        this.subTaskDeletingId = null;
+        this.notification.showError(err.error?.error || 'Alt görev silinirken bir hata oluştu.');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // --- DOSYA EKİ (ATTACHMENT) FONKSİYONLARI ---

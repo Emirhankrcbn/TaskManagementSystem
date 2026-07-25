@@ -17,5 +17,6 @@ namespace TaskManagement.API.DTOs
         // YENİ EKLENEN KISIMLAR
         public Guid? CategoryId { get; set; }
         public CategoryResponseDto? Category { get; set; }
+        public List<SubTaskResponseDto> SubTasks { get; set; } = new List<SubTaskResponseDto>();
     }
 }

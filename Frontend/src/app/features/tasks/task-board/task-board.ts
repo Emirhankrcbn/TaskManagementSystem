@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MaterialModule } from '../../../shared/material.module';
-import { Task } from '../../../core/models/task.model';
+import { Task, getSubtaskProgress } from '../../../core/models/task.model';
 
 export interface TaskStatusChange {
   task: Task;
@@ -75,6 +75,10 @@ export class TaskBoard implements OnChanges {
     if (diffDays < 0) return 'overdue';
     if (diffDays <= 2) return 'soon';
     return 'normal';
+  }
+
+  getSubtaskProgress(task: Task) {
+    return getSubtaskProgress(task);
   }
 
   drop(event: CdkDragDrop<Task[]>, targetStatus: number): void {

@@ -58,6 +58,18 @@
     </td>
   </ng-container>
 
+  <!-- İlerleme Sütunu (Alt Görev Tamamlanma Yüzdesi) -->
+  <ng-container matColumnDef="progress">
+    <th mat-header-cell *matHeaderCellDef> İlerleme </th>
+    <td mat-cell *matCellDef="let task">
+      <div class="task-progress-cell" *ngIf="getSubtaskProgress(task) as progress; else noProgress">
+        <mat-progress-bar mode="determinate" [value]="progress.percent"></mat-progress-bar>
+        <span class="task-progress-text">{{ progress.completed }}/{{ progress.total }}</span>
+      </div>
+      <ng-template #noProgress>—</ng-template>
+    </td>
+  </ng-container>
+
   <!-- Bitiş Tarihi Sütunu -->
   <ng-container matColumnDef="dueDate">
     <th mat-header-cell *matHeaderCellDef (click)="onSort('DueDate')" style="cursor:pointer; user-select:none"> Bitiş Tarihi

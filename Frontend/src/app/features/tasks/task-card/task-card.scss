@@ -38,6 +38,25 @@
   display: inline-block;
 }
 
+.task-card-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 140px;
+  max-width: 100%;
+
+  mat-progress-bar {
+    flex: 1;
+    border-radius: 4px;
+  }
+}
+
+.task-card-progress-text {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+
 .task-card-badge {
   font-size: 12px;
   font-weight: 600;
@@ -59,6 +78,10 @@
   }
 
   .task-card-meta {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .task-card-progress-text {
     color: rgba(255, 255, 255, 0.6);
   }
 

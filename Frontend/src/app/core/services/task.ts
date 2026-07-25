@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Task, TaskAttachment, TaskStatistics, PagedResult } from '../models/task.model'; // Daha önce oluşturduğumuz model
+import { Task, TaskAttachment, TaskStatistics, PagedResult, SubTask } from '../models/task.model'; // Daha önce oluşturduğumuz model
 import { HttpParams } from '@angular/common/http';
 
 @Injectable({
@@ -88,5 +88,18 @@ export class TaskService {
   // 7. Süresi geçmiş görevler (Dashboard için)
   getOverdueTasks(): Observable<Task[]> {
     return this.http.get<Task[]>(`${this.apiUrl}/overdue`);
+  }
+
+  // 8. ALT GÖREV (SUBTASK) İŞLEMLERİ
+  addSubTask(taskId: string, title: string): Observable<SubTask> {
+    return this.http.post<SubTask>(`${this.apiUrl}/${taskId}/subtasks`, { title });
+  }
+
+  updateSubTask(taskId: string, subTaskId: string, data: { title: string; completed: boolean }): Observable<SubTask> {
+    return this.http.put<SubTask>(`${this.apiUrl}/${taskId}/subtasks/${subTaskId}`, data);
+  }
+
+  deleteSubTask(taskId: string, subTaskId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${taskId}/subtasks/${subTaskId}`);
   }
 }

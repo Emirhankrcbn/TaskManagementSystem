@@ -151,5 +151,50 @@ namespace TaskManagement.API.Controllers
             var result = await _taskService.GetOverdueTasksAsync(GetUserId());
             return Ok(result);
         }
+
+        // Göreve yeni alt görev (checklist maddesi) ekleme
+        [HttpPost("{taskId}/subtasks")]
+        public async Task<IActionResult> AddSubTask(Guid taskId, [FromBody] SubTaskCreateDto dto)
+        {
+            try
+            {
+                var result = await _taskService.AddSubTaskAsync(taskId, GetUserId(), dto);
+                return StatusCode(201, result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        // Alt görevi güncelleme (başlık değiştirme veya tamamlandı/tamamlanmadı işaretleme)
+        [HttpPut("{taskId}/subtasks/{subTaskId}")]
+        public async Task<IActionResult> UpdateSubTask(Guid taskId, Guid subTaskId, [FromBody] SubTaskUpdateDto dto)
+        {
+            try
+            {
+                var result = await _taskService.UpdateSubTaskAsync(taskId, subTaskId, GetUserId(), dto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        // Alt görev silme
+        [HttpDelete("{taskId}/subtasks/{subTaskId}")]
+        public async Task<IActionResult> DeleteSubTask(Guid taskId, Guid subTaskId)
+        {
+            try
+            {
+                await _taskService.DeleteSubTaskAsync(taskId, subTaskId, GetUserId());
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
     }
 }

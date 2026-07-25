@@ -8,6 +8,11 @@
       </ng-container>
       <span class="priority-badge" [ngClass]="'priority-' + task.priority">{{ getPriorityLabel(task.priority) }}</span>
     </span>
+
+    <div class="task-card-progress" *ngIf="subtaskProgress as progress">
+      <mat-progress-bar mode="determinate" [value]="progress.percent"></mat-progress-bar>
+      <span class="task-card-progress-text">{{ progress.completed }}/{{ progress.total }}</span>
+    </div>
   </div>
 
   <span *ngIf="badgeText" class="task-card-badge" [class.danger]="badgeVariant === 'danger'">

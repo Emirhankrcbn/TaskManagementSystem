@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../../../shared/material.module';
-import { Task } from '../../../core/models/task.model';
+import { Task, getSubtaskProgress } from '../../../core/models/task.model';
 
 @Component({
   selector: 'app-task-card',
@@ -25,5 +25,9 @@ export class TaskCard {
       case 5: return 'Kritik';
       default: return '—';
     }
+  }
+
+  get subtaskProgress() {
+    return getSubtaskProgress(this.task);
   }
 }
