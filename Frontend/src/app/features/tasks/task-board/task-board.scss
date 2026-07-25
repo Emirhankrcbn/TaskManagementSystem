@@ -95,6 +95,23 @@
   display: inline-block;
 }
 
+.board-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+
+  .due-date {
+    font-size: 11px;
+
+    &.due-normal {
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+}
+
 /* --- CDK sürükleme durumları --- */
 .cdk-drag-preview {
   box-sizing: border-box;
@@ -138,6 +155,10 @@
   }
 
   .board-card-meta {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .board-card-footer .due-date.due-normal {
     color: rgba(255, 255, 255, 0.6);
   }
 }

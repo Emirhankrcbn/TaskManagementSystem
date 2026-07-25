@@ -20,7 +20,13 @@
           </ng-container>
           <span *ngIf="!task.category">Kategori yok</span>
         </div>
-        <span class="priority-badge" [ngClass]="'priority-' + task.priority">{{ getPriorityLabel(task.priority) }}</span>
+        <div class="board-card-footer">
+          <span class="priority-badge" [ngClass]="'priority-' + task.priority">{{ getPriorityLabel(task.priority) }}</span>
+          <span class="due-date" *ngIf="task.dueDate" [ngClass]="'due-' + getDueDateStatus(task)">
+            <mat-icon *ngIf="getDueDateStatus(task) === 'overdue'" class="due-date-icon">warning</mat-icon>
+            {{ formatDate(task.dueDate) }}
+          </span>
+        </div>
       </div>
 
       <div class="board-column-empty" *ngIf="column.tasks.length === 0">

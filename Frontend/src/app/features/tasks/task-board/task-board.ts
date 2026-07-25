@@ -55,6 +55,28 @@ export class TaskBoard implements OnChanges {
     }
   }
 
+  formatDate(dateStr?: string | null): string {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('tr-TR');
+  }
+
+  // Tamamlanmış/iptal edilmiş görevler için bitiş tarihi uyarısı gösterilmez
+  getDueDateStatus(task: Task): 'overdue' | 'soon' | 'normal' {
+    if (!task.dueDate || task.status === 2 || task.status === 3) return 'normal';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(task.dueDate);
+    due.setHours(0, 0, 0, 0);
+
+    const dayMs = 1000 * 60 * 60 * 24;
+    const diffDays = Math.round((due.getTime() - today.getTime()) / dayMs);
+
+    if (diffDays < 0) return 'overdue';
+    if (diffDays <= 2) return 'soon';
+    return 'normal';
+  }
+
   drop(event: CdkDragDrop<Task[]>, targetStatus: number): void {
     if (event.previousContainer === event.container) {
       // Aynı sütun içinde sıra değişimi - sadece görsel, backend'de kalıcı bir sıra alanı yok

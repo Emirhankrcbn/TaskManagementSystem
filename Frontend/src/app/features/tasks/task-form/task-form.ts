@@ -88,6 +88,18 @@ export class TaskForm implements OnInit {
     this.emitValue();
   }
 
+  // Tamamlanmış/iptal edilmiş görevlerde geçmiş tarih uyarısı anlamsız, gösterilmez
+  get isDueDatePast(): boolean {
+    if (!this.dueDate || this.status === 2 || this.status === 3) return false;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(this.dueDate);
+    due.setHours(0, 0, 0, 0);
+
+    return due.getTime() < today.getTime();
+  }
+
   getPriorityLabel(priority?: number | null): string {
     switch (priority) {
       case 1: return 'Düşük';

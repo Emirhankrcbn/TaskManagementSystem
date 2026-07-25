@@ -51,6 +51,19 @@
   }
 }
 
+.due-date-warning {
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
+  color: #c62828 !important;
+
+  .due-date-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 600px) {
   .task-form:not(.embedded) {
