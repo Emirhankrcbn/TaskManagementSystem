@@ -87,4 +87,15 @@ export class TaskForm implements OnInit {
     this.submitted = false;
     this.emitValue();
   }
+
+  getPriorityLabel(priority?: number | null): string {
+    switch (priority) {
+      case 1: return 'Düşük';
+      case 2: return 'Normal';
+      case 3: return 'Yüksek';
+      case 4: return 'Acil';
+      case 5: return 'Kritik';
+      default: return '—';
+    }
+  }
 }

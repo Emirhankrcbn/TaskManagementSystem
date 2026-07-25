@@ -6,7 +6,7 @@
         <span class="color-dot" [style.backgroundColor]="task.category.color"></span>
         {{ task.category.name }} ·
       </ng-container>
-      Öncelik: {{ getPriorityLabel(task.priority) }}
+      <span class="priority-badge" [ngClass]="'priority-' + task.priority">{{ getPriorityLabel(task.priority) }}</span>
     </span>
   </div>
 

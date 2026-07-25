@@ -78,3 +78,37 @@ body {
   --mdc-snackbar-supporting-text-color: #ffffff;
   --mat-snack-bar-button-color: #ffffff;
 }
+
+/* --- GÖREV ÖNCELİK RENK KODLAMASI --- */
+/* Uygulama genelinde (tablo, kart, pano, form) tek bir renk şeması kullanılsın diye globalde tanımlı.
+   Öncelik arttıkça (Düşük -> Kritik) renk sakin yeşilden alarm kırmızısına doğru ilerler. */
+.priority-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.priority-1 { background-color: #e8f5e9; color: #2e7d32; } /* Düşük */
+.priority-2 { background-color: #e3f2fd; color: #1565c0; } /* Normal */
+.priority-3 { background-color: #fff3e0; color: #e65100; } /* Yüksek */
+.priority-4 { background-color: #fbe3d8; color: #d84315; } /* Acil */
+.priority-5 { background-color: #ffebee; color: #c62828; } /* Kritik */
+
+/* Select/dropdown seçeneklerinin yanında kullanılan küçük renkli nokta */
+.priority-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.priority-dot.priority-1 { background-color: #2e7d32; }
+.priority-dot.priority-2 { background-color: #1565c0; }
+.priority-dot.priority-3 { background-color: #e65100; }
+.priority-dot.priority-4 { background-color: #d84315; }
+.priority-dot.priority-5 { background-color: #c62828; }

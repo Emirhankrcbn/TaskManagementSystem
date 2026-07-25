@@ -25,11 +25,15 @@
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-col">
       <mat-label>Öncelik</mat-label>
       <mat-select [(ngModel)]="priority" (ngModelChange)="onFieldChange()">
-        <mat-option [value]="1">Düşük</mat-option>
-        <mat-option [value]="2">Normal</mat-option>
-        <mat-option [value]="3">Yüksek</mat-option>
-        <mat-option [value]="4">Acil</mat-option>
-        <mat-option [value]="5">Kritik</mat-option>
+        <mat-select-trigger>
+          <span class="priority-dot priority-{{ priority }}"></span>
+          {{ getPriorityLabel(priority) }}
+        </mat-select-trigger>
+        <mat-option [value]="1"><span class="priority-dot priority-1"></span> Düşük</mat-option>
+        <mat-option [value]="2"><span class="priority-dot priority-2"></span> Normal</mat-option>
+        <mat-option [value]="3"><span class="priority-dot priority-3"></span> Yüksek</mat-option>
+        <mat-option [value]="4"><span class="priority-dot priority-4"></span> Acil</mat-option>
+        <mat-option [value]="5"><span class="priority-dot priority-5"></span> Kritik</mat-option>
       </mat-select>
     </mat-form-field>
 
