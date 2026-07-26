@@ -273,14 +273,18 @@ namespace TaskManagement.API.Services
             await _context.TaskComments.AddAsync(comment);
             await _context.SaveChangesAsync();
 
+            var username = await _context.Users.Where(u => u.Id == userId).Select(u => u.Username).FirstOrDefaultAsync();
+
             // 4. Sonucu dön
             return new TaskCommentResponseDto
             {
                 Id = comment.Id,
                 TaskId = comment.TaskId,
                 UserId = comment.UserId,
+                Username = username ?? string.Empty,
                 Content = comment.Comment, // <-- DÜZELTME BURADA
-                CreatedAt = comment.CreatedAt
+                CreatedAt = comment.CreatedAt,
+                UpdatedAt = comment.UpdatedAt
             };
         }
 
@@ -292,9 +296,10 @@ namespace TaskManagement.API.Services
                 .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false);
             if (task == null) throw new Exception("Görev bulunamadı.");
 
-            // 2. Göreve ait tüm yorumları en yeniden en eskiye doğru sıralayarak getir
+            // 2. Göreve ait tüm yorumları en yeniden en eskiye doğru sıralayarak getir (yazan kullanıcının adıyla birlikte)
             var comments = await _context.TaskComments
                 .AsNoTracking()
+                .Include(c => c.User)
                 .Where(c => c.TaskId == taskId)
                 .OrderByDescending(c => c.CreatedAt)
                 .Select(c => new TaskCommentResponseDto
@@ -302,11 +307,59 @@ namespace TaskManagement.API.Services
                     Id = c.Id,
                     TaskId = c.TaskId,
                     UserId = c.UserId,
+                    Username = c.User != null ? c.User.Username : string.Empty,
                     Content = c.Comment,
-                    CreatedAt = c.CreatedAt
+                    CreatedAt = c.CreatedAt,
+                    UpdatedAt = c.UpdatedAt
                 }).ToListAsync();
 
             return comments;
+        }
+
+        public async Task<TaskCommentResponseDto> UpdateCommentAsync(Guid taskId, Guid commentId, Guid userId, TaskCommentUpdateDto commentDto)
+        {
+            // Güvenlik: görev bu kullanıcıya mı ait
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false);
+            if (task == null) throw new Exception("Görev bulunamadı veya yetkiniz yok.");
+
+            // Güvenlik: yorum bu göreve ait mi ve gerçekten bu kullanıcı tarafından mı yazılmış
+            var comment = await _context.TaskComments
+                .FirstOrDefaultAsync(c => c.Id == commentId && c.TaskId == taskId && c.UserId == userId);
+            if (comment == null) throw new Exception("Güncellenecek yorum bulunamadı veya bu yorumu düzenleme yetkiniz yok.");
+
+            comment.Comment = commentDto.Content;
+            comment.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            var username = await _context.Users.Where(u => u.Id == userId).Select(u => u.Username).FirstOrDefaultAsync();
+
+            return new TaskCommentResponseDto
+            {
+                Id = comment.Id,
+                TaskId = comment.TaskId,
+                UserId = comment.UserId,
+                Username = username ?? string.Empty,
+                Content = comment.Comment,
+                CreatedAt = comment.CreatedAt,
+                UpdatedAt = comment.UpdatedAt
+            };
+        }
+
+        public async Task<bool> DeleteCommentAsync(Guid taskId, Guid commentId, Guid userId)
+        {
+            // Güvenlik: görev bu kullanıcıya mı ait
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && t.IsDeleted == false);
+            if (task == null) throw new Exception("Görev bulunamadı veya yetkiniz yok.");
+
+            // Güvenlik: yorum bu göreve ait mi ve gerçekten bu kullanıcı tarafından mı yazılmış
+            var comment = await _context.TaskComments
+                .FirstOrDefaultAsync(c => c.Id == commentId && c.TaskId == taskId && c.UserId == userId);
+            if (comment == null) throw new Exception("Silinecek yorum bulunamadı veya bu yorumu silme yetkiniz yok.");
+
+            _context.TaskComments.Remove(comment);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<TaskStatisticsDto> GetTaskStatisticsAsync(Guid userId)

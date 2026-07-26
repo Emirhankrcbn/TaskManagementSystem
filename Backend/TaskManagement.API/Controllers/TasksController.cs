@@ -135,16 +135,60 @@ namespace TaskManagement.API.Controllers
         [HttpPost("{taskId}/comments")]
         public async Task<IActionResult> AddComment(Guid taskId, [FromBody] TaskCommentCreateDto commentDto)
         {
-            var result = await _taskService.AddCommentAsync(taskId, GetUserId(), commentDto);
-            return StatusCode(201, result); // 201 Created döner
+            try
+            {
+                var result = await _taskService.AddCommentAsync(taskId, GetUserId(), commentDto);
+                return StatusCode(201, result); // 201 Created döner
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         // Görevin yorumlarını listeleme
         [HttpGet("{taskId}/comments")]
         public async Task<IActionResult> GetTaskComments(Guid taskId)
         {
-            var result = await _taskService.GetTaskCommentsAsync(taskId, GetUserId());
-            return Ok(result); // 200 OK ile listeyi döner
+            try
+            {
+                var result = await _taskService.GetTaskCommentsAsync(taskId, GetUserId());
+                return Ok(result); // 200 OK ile listeyi döner
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+        }
+
+        // Yorumu güncelleme (düzenleme)
+        [HttpPut("{taskId}/comments/{commentId}")]
+        public async Task<IActionResult> UpdateComment(Guid taskId, Guid commentId, [FromBody] TaskCommentUpdateDto commentDto)
+        {
+            try
+            {
+                var result = await _taskService.UpdateCommentAsync(taskId, commentId, GetUserId(), commentDto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        // Yorum silme
+        [HttpDelete("{taskId}/comments/{commentId}")]
+        public async Task<IActionResult> DeleteComment(Guid taskId, Guid commentId)
+        {
+            try
+            {
+                await _taskService.DeleteCommentAsync(taskId, commentId, GetUserId());
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         [HttpGet("statistics")]

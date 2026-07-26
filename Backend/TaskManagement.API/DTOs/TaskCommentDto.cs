@@ -8,13 +8,21 @@ namespace TaskManagement.API.DTOs
         public required string Content { get; set; }
     }
 
+    // Yorum güncellenirken gönderilecek veri
+    public class TaskCommentUpdateDto
+    {
+        public required string Content { get; set; }
+    }
+
     // Bizim kullanıcıya göstereceğimiz paket
     public class TaskCommentResponseDto
     {
         public Guid Id { get; set; }
         public Guid TaskId { get; set; }
-        public Guid UserId { get; set; } 
+        public Guid UserId { get; set; }
+        public string Username { get; set; } = string.Empty;
         public required string Content { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

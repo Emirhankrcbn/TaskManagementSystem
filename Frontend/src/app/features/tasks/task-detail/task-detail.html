@@ -81,6 +81,66 @@
   </ng-container>
 </div>
 
+<mat-divider></mat-divider>
+
+<div class="comments-section">
+  <h3>Yorumlar</h3>
+
+  <div *ngIf="!task?.id" class="hint-text">
+    Yorum yapabilmek için önce görevi kaydedin.
+  </div>
+
+  <ng-container *ngIf="task?.id">
+    <div class="comment-add-row">
+      <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-label>Yorum Yaz</mat-label>
+        <textarea matInput rows="2" [(ngModel)]="newCommentContent" [disabled]="isAddingComment" placeholder="Bu görevle ilgili bir not veya güncelleme yazın..."></textarea>
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="addComment()" [disabled]="isAddingComment" style="height: 56px;">
+        {{ isAddingComment ? 'Ekleniyor...' : 'Gönder' }}
+      </button>
+    </div>
+
+    <div *ngFor="let comment of comments" class="comment-row">
+      <div class="comment-header">
+        <span class="comment-author">{{ comment.username }}</span>
+        <span class="comment-time">
+          {{ formatRelativeTime(comment.createdAt) }}
+          <ng-container *ngIf="comment.updatedAt">(düzenlendi)</ng-container>
+        </span>
+      </div>
+
+      <ng-container *ngIf="editingCommentId === comment.id; else viewMode">
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <textarea matInput rows="2" [(ngModel)]="editingCommentContent" [disabled]="isSavingCommentEdit"></textarea>
+        </mat-form-field>
+        <div class="comment-edit-actions">
+          <button mat-button (click)="cancelEditComment()" [disabled]="isSavingCommentEdit">İptal</button>
+          <button mat-flat-button color="primary" (click)="saveEditComment(comment)" [disabled]="isSavingCommentEdit">
+            {{ isSavingCommentEdit ? 'Kaydediliyor...' : 'Kaydet' }}
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-template #viewMode>
+        <p class="comment-content">{{ comment.content }}</p>
+        <div class="comment-actions" *ngIf="isOwnComment(comment)">
+          <button mat-icon-button (click)="startEditComment(comment)" aria-label="Yorumu düzenle">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="openDeleteCommentConfirm(comment)" aria-label="Yorumu sil">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </ng-template>
+    </div>
+
+    <div *ngIf="comments.length === 0" class="hint-text">
+      Henüz yorum yapılmamış.
+    </div>
+  </ng-container>
+</div>
+
 <!-- Dosya silme onay penceresi -->
 <ng-template #deleteAttachmentDialog>
   <h2 mat-dialog-title>Dosyayı Sil</h2>
@@ -94,6 +154,23 @@
     <button mat-button mat-dialog-close [disabled]="isDeletingAttachment">İptal</button>
     <button mat-flat-button color="warn" (click)="confirmDeleteAttachment()" [disabled]="isDeletingAttachment">
       {{ isDeletingAttachment ? 'Siliniyor...' : 'Evet, Sil' }}
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Yorum silme onay penceresi -->
+<ng-template #deleteCommentDialog>
+  <h2 mat-dialog-title>Yorumu Sil</h2>
+
+  <mat-dialog-content>
+    Bu yorumu silmek istediğinize emin misiniz? <br>
+    <small style="color: gray;">Bu işlem geri alınamaz.</small>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close [disabled]="isDeletingComment">İptal</button>
+    <button mat-flat-button color="warn" (click)="confirmDeleteComment()" [disabled]="isDeletingComment">
+      {{ isDeletingComment ? 'Siliniyor...' : 'Evet, Sil' }}
     </button>
   </mat-dialog-actions>
 </ng-template>

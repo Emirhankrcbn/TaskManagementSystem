@@ -7,8 +7,9 @@ import { MaterialModule } from '../../../shared/material.module';
 import { TaskForm, TaskFormValue } from '../task-form/task-form';
 import { TaskService } from '../../../core/services/task';
 import { Category } from '../../../core/models/category.model';
-import { Task, SubTask, TaskAttachment } from '../../../core/models/task.model';
+import { Task, SubTask, TaskAttachment, TaskComment } from '../../../core/models/task.model';
 import { NotificationService } from '../../../core/services/notification';
+import { TokenService } from '../../../core/services/token';
 
 // Yüklenmekte olan bir dosyanın anlık ilerleme durumunu tutar (henüz sunucudan attachment dönmedi)
 interface UploadingFile {
@@ -43,8 +44,10 @@ export class TaskDetail implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
+  private tokenService = inject(TokenService);
 
   @ViewChild('deleteAttachmentDialog') deleteAttachmentDialog!: TemplateRef<any>;
+  @ViewChild('deleteCommentDialog') deleteCommentDialog!: TemplateRef<any>;
 
   subTasks: SubTask[] = [];
   newSubTaskTitle: string = '';
@@ -59,10 +62,22 @@ export class TaskDetail implements OnInit {
   private activeDialogRef: MatDialogRef<any> | null = null;
   private uploadIdCounter = 0;
 
+  comments: TaskComment[] = [];
+  newCommentContent: string = '';
+  isAddingComment: boolean = false;
+  editingCommentId: string | null = null;
+  editingCommentContent: string = '';
+  isSavingCommentEdit: boolean = false;
+  isDeletingComment: boolean = false;
+  commentToDelete: TaskComment | null = null;
+  currentUserId: string | null = null;
+
   ngOnInit(): void {
     this.subTasks = this.task?.subTasks ? [...this.task.subTasks] : [];
+    this.currentUserId = this.tokenService.getUserId();
     if (this.task?.id) {
       this.loadAttachments(this.task.id);
+      this.loadComments(this.task.id);
     }
   }
 
@@ -309,5 +324,133 @@ export class TaskDetail implements OnInit {
       unitIndex++;
     }
     return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+  }
+
+  // --- YORUM (COMMENT) FONKSİYONLARI ---
+  loadComments(taskId: string): void {
+    this.taskService.getComments(taskId).subscribe({
+      next: (data) => {
+        this.comments = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Yorumlar yüklenirken hata oluştu:', err);
+        this.notification.showError('Yorumlar yüklenirken bir hata oluştu.');
+      }
+    });
+  }
+
+  addComment(): void {
+    const content = this.newCommentContent.trim();
+    if (content === '' || !this.task?.id || this.isAddingComment) return;
+
+    const taskId = this.task.id;
+    this.isAddingComment = true;
+    this.taskService.addComment(taskId, content).subscribe({
+      next: (comment) => {
+        this.comments = [comment, ...this.comments];
+        this.newCommentContent = '';
+        this.isAddingComment = false;
+        this.notification.showSuccess('Yorum eklendi.');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Yorum eklenirken hata oluştu:', err);
+        this.isAddingComment = false;
+        this.notification.showError(err.error?.error || 'Yorum eklenirken bir hata oluştu.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  isOwnComment(comment: TaskComment): boolean {
+    return !!this.currentUserId && comment.userId === this.currentUserId;
+  }
+
+  startEditComment(comment: TaskComment): void {
+    this.editingCommentId = comment.id;
+    this.editingCommentContent = comment.content;
+  }
+
+  cancelEditComment(): void {
+    this.editingCommentId = null;
+    this.editingCommentContent = '';
+  }
+
+  saveEditComment(comment: TaskComment): void {
+    const content = this.editingCommentContent.trim();
+    if (content === '' || !this.task?.id || this.isSavingCommentEdit) return;
+
+    const taskId = this.task.id;
+    this.isSavingCommentEdit = true;
+    this.taskService.updateComment(taskId, comment.id, content).subscribe({
+      next: (updated) => {
+        const index = this.comments.findIndex(c => c.id === comment.id);
+        if (index !== -1) this.comments[index] = updated;
+        this.isSavingCommentEdit = false;
+        this.editingCommentId = null;
+        this.editingCommentContent = '';
+        this.notification.showSuccess('Yorum güncellendi.');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Yorum güncellenirken hata oluştu:', err);
+        this.isSavingCommentEdit = false;
+        this.notification.showError(err.error?.error || 'Yorum güncellenirken bir hata oluştu.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  openDeleteCommentConfirm(comment: TaskComment): void {
+    this.commentToDelete = comment;
+    this.isDeletingComment = false;
+    this.activeDialogRef = this.dialog.open(this.deleteCommentDialog, {
+      width: '350px',
+      maxWidth: '95vw'
+    });
+
+    this.activeDialogRef.afterClosed().subscribe(() => {
+      this.commentToDelete = null;
+    });
+  }
+
+  confirmDeleteComment(): void {
+    if (!this.task?.id || !this.commentToDelete || this.isDeletingComment) return;
+    const taskId = this.task.id;
+    const comment = this.commentToDelete;
+
+    this.isDeletingComment = true;
+    this.taskService.deleteComment(taskId, comment.id).subscribe({
+      next: () => {
+        this.comments = this.comments.filter(c => c.id !== comment.id);
+        this.isDeletingComment = false;
+        this.notification.showSuccess('Yorum silindi.');
+        this.activeDialogRef?.close();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Yorum silinirken hata oluştu:', err);
+        this.isDeletingComment = false;
+        this.notification.showError(err.error?.error || 'Yorum silinirken bir hata oluştu.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // Yorum zamanını "3 dakika önce" gibi göreceli bir metne çevirir
+  formatRelativeTime(dateStr: string): string {
+    const date = new Date(dateStr);
+    const diffMs = Date.now() - date.getTime();
+    const diffSec = Math.round(diffMs / 1000);
+
+    if (diffSec < 60) return 'az önce';
+    const diffMin = Math.round(diffSec / 60);
+    if (diffMin < 60) return `${diffMin} dakika önce`;
+    const diffHour = Math.round(diffMin / 60);
+    if (diffHour < 24) return `${diffHour} saat önce`;
+    const diffDay = Math.round(diffHour / 24);
+    if (diffDay < 30) return `${diffDay} gün önce`;
+    return date.toLocaleDateString('tr-TR');
   }
 }

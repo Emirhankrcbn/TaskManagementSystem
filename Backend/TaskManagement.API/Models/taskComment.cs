@@ -9,6 +9,7 @@ namespace TaskManagement.API.Models
         public Guid UserId { get; set; }
         public string Comment { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
 
         // Navigation Properties
         public TaskItem? Task { get; set; }

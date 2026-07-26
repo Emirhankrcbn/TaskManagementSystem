@@ -11,15 +11,17 @@ h3 {
 }
 
 .subtasks-section,
-.attachments-section {
+.attachments-section,
+.comments-section {
   margin-top: 15px;
 }
 
 .subtask-add-row,
-.attachment-upload-row {
+.attachment-upload-row,
+.comment-add-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   margin-bottom: 15px;
 }
@@ -130,10 +132,59 @@ h3 {
   font-size: 13px;
 }
 
+.comment-row {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.comment-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.comment-author {
+  font-weight: 600;
+}
+
+.comment-time {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.comment-content {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.comment-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.comment-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
 :host-context(.dark-theme) {
   .attachment-size,
-  .hint-text {
+  .hint-text,
+  .comment-time {
     color: rgba(255, 255, 255, 0.5);
+  }
+
+  .comment-row {
+    border-bottom-color: rgba(255, 255, 255, 0.15);
   }
 
   .attachment-dropzone {

@@ -7,6 +7,16 @@ export interface SubTask {
   completed: boolean;
 }
 
+export interface TaskComment {
+  id: string;
+  taskId: string;
+  userId: string;
+  username: string;
+  content: string;
+  createdAt: string;
+  updatedAt?: string | null;
+}
+
 export interface TaskAttachment {
   id: string;
   fileName: string;

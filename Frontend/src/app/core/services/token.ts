@@ -55,6 +55,19 @@ export class TokenService {
         }
     }
 
+    // Token içindeki "sub" claim'inden mevcut kullanıcının ID'sini döner
+  getUserId(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.sub ?? null;
+    } catch {
+      return null;
+    }
+  }
+
     // Token'ın bitmesine kaç milisaniye kaldığını hesaplar
   getTokenRemainingTime(): number {
     const token = this.getToken();

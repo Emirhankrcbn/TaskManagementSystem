@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpEvent, HttpParams, HttpRequest } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Task, TaskAttachment, TaskStatistics, PagedResult, SubTask } from '../models/task.model'; // Daha önce oluşturduğumuz model
+import { Task, TaskAttachment, TaskStatistics, PagedResult, SubTask, TaskComment } from '../models/task.model'; // Daha önce oluşturduğumuz model
 
 @Injectable({
   providedIn: 'root'
@@ -103,5 +103,22 @@ export class TaskService {
 
   deleteSubTask(taskId: string, subTaskId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${taskId}/subtasks/${subTaskId}`);
+  }
+
+  // 9. YORUM (COMMENT) İŞLEMLERİ
+  getComments(taskId: string): Observable<TaskComment[]> {
+    return this.http.get<TaskComment[]>(`${this.apiUrl}/${taskId}/comments`);
+  }
+
+  addComment(taskId: string, content: string): Observable<TaskComment> {
+    return this.http.post<TaskComment>(`${this.apiUrl}/${taskId}/comments`, { content });
+  }
+
+  updateComment(taskId: string, commentId: string, content: string): Observable<TaskComment> {
+    return this.http.put<TaskComment>(`${this.apiUrl}/${taskId}/comments/${commentId}`, { content });
+  }
+
+  deleteComment(taskId: string, commentId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${taskId}/comments/${commentId}`);
   }
 }
