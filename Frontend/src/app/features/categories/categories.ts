@@ -110,9 +110,10 @@ export class CategoriesComponent implements OnInit {
       next: () => {
         this.categories = this.categories.filter(c => c.id !== id);
         this.deletingId = null;
+        // Dialog'u kapatmadan/bildirim göstermeden önce view'ı güncel duruma göre kontrol ettiriyoruz (NG0100'ü önler)
+        this.cdr.detectChanges();
         this.notification.showSuccess('Kategori silindi.');
         this.activeDialogRef?.close();
-        this.cdr.detectChanges(); // Silince ekranı yenile
       },
       error: (err) => {
         console.error('Kategori silinirken hata oluştu:', err);

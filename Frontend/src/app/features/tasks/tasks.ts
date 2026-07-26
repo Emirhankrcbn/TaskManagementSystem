@@ -177,8 +177,8 @@ export class Tasks implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Görevler çekilirken hata oluştu:', err);
         this.isLoadingTasks = false;
-        this.notification.showError('Görevler yüklenirken bir hata oluştu.');
         this.cdr.detectChanges();
+        this.notification.showError('Görevler yüklenirken bir hata oluştu.');
       }
     });
   }
@@ -297,16 +297,16 @@ export class Tasks implements OnInit, OnDestroy {
     this.taskService.createTask(newTask).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isCreating = false;
-        this.loadTasks(); // Listeyi yenile
         this.createFormComponent.resetForm(); // Formu temizle
-        this.notification.showSuccess('Görev eklendi.');
         this.cdr.detectChanges();
+        this.loadTasks(); // Listeyi yenile
+        this.notification.showSuccess('Görev eklendi.');
       },
       error: (err) => {
         console.error('Görev eklenirken hata:', err);
         this.isCreating = false;
-        this.notification.showError(err.error?.error || 'Görev eklenirken bir hata oluştu.');
         this.cdr.detectChanges();
+        this.notification.showError(err.error?.error || 'Görev eklenirken bir hata oluştu.');
       }
     });
   }
@@ -328,6 +328,9 @@ export class Tasks implements OnInit, OnDestroy {
     this.activeDialogRef.afterClosed().subscribe((result: string) => {
       if (result !== 'save') {
         this.currentEditTask = null;
+        // Kaydet'e basılmasa bile alt görev/dosya eki/yorum işlemleri diyalog içinde zaten
+        // doğrudan sunucuya kaydedilmiş olabilir (örn. tamamlanma yüzdesi); listeyi tazeleyelim
+        this.loadTasks();
       }
       this.editFormValue = null;
       this.saveError = '';
@@ -359,8 +362,11 @@ export class Tasks implements OnInit, OnDestroy {
     this.taskService.updateTask(this.currentEditTask.id, updatedTask).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSaving = false;
-        this.loadTasks();
         this.currentEditTask = null;
+        // Dialog'u kapatmadan/bildirim göstermeden önce bu view'ı güncel duruma göre kontrol ettiriyoruz;
+        // aksi halde Material'ın kendi tetiklediği bir sonraki kontrolde "checked sonrası değişti" hatası (NG0100) oluşur
+        this.cdr.detectChanges();
+        this.loadTasks();
         this.activeDialogRef?.close('save');
         this.notification.showSuccess('Görev güncellendi.');
       },
@@ -397,6 +403,7 @@ export class Tasks implements OnInit, OnDestroy {
     this.taskService.deleteTask(this.pendingDeleteId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isDeleting = false;
+        this.cdr.detectChanges();
         this.loadTasks(); // Silindikten sonra güncel listeyi çek
         this.activeDialogRef?.close('confirm');
         this.notification.showSuccess('Görev silindi.');
@@ -404,8 +411,8 @@ export class Tasks implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Silme işlemi başarısız:', err);
         this.isDeleting = false;
-        this.notification.showError(err.error?.error || 'Görev silinirken bir hata oluştu.');
         this.cdr.detectChanges();
+        this.notification.showError(err.error?.error || 'Görev silinirken bir hata oluştu.');
       }
     });
   }
@@ -439,16 +446,17 @@ export class Tasks implements OnInit, OnDestroy {
       forkJoin(deleteRequests).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.isBulkDeleting = false;
-          this.loadTasks(); // Listeyi veritabanından yeniden taze çekmek en güvenlisidir
           this.selection.clear();
+          this.cdr.detectChanges();
+          this.loadTasks(); // Listeyi veritabanından yeniden taze çekmek en güvenlisidir
           this.activeDialogRef?.close('confirm');
           this.notification.showSuccess(`${deletedCount} görev silindi.`);
         },
         error: (err) => {
           console.error('Toplu silme sırasında bir hata oluştu:', err);
           this.isBulkDeleting = false;
-          this.notification.showError('Görevler silinirken bir hata oluştu.');
           this.cdr.detectChanges();
+          this.notification.showError('Görevler silinirken bir hata oluştu.');
         }
       });
     });

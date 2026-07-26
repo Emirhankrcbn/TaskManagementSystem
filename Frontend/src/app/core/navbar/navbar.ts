@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
@@ -18,6 +18,7 @@ export class Navbar implements OnInit {
   themeService = inject(ThemeService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
 
   displayName: string = '';
   private profileLoaded = false;
@@ -26,7 +27,7 @@ export class Navbar implements OnInit {
     this.refreshUser();
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
       this.refreshUser();
       this.cdr.detectChanges();
@@ -42,7 +43,7 @@ export class Navbar implements OnInit {
 
     if (this.profileLoaded) return;
 
-    this.authService.getProfile().subscribe({
+    this.authService.getProfile().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.displayName = data.firstName ? `${data.firstName} ${data.lastName}` : data.username;
         this.profileLoaded = true;

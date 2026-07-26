@@ -104,8 +104,8 @@ export class TaskDetail implements OnInit {
         this.subTasks = [...this.subTasks, subTask];
         this.newSubTaskTitle = '';
         this.isAddingSubTask = false;
-        this.notification.showSuccess('Alt görev eklendi.');
         this.cdr.detectChanges();
+        this.notification.showSuccess('Alt görev eklendi.');
       },
       error: (err) => {
         console.error('Alt görev eklenirken hata oluştu:', err);
@@ -130,8 +130,8 @@ export class TaskDetail implements OnInit {
       error: (err) => {
         console.error('Alt görev güncellenirken hata oluştu:', err);
         subTask.completed = previousCompleted;
-        this.notification.showError(err.error?.error || 'Alt görev güncellenirken bir hata oluştu.');
         this.cdr.detectChanges();
+        this.notification.showError(err.error?.error || 'Alt görev güncellenirken bir hata oluştu.');
       }
     });
   }
@@ -146,8 +146,8 @@ export class TaskDetail implements OnInit {
       next: () => {
         this.subTasks = this.subTasks.filter(st => st.id !== subTaskId);
         this.subTaskDeletingId = null;
-        this.notification.showSuccess('Alt görev silindi.');
         this.cdr.detectChanges();
+        this.notification.showSuccess('Alt görev silindi.');
       },
       error: (err) => {
         console.error('Alt görev silinirken hata oluştu:', err);
@@ -249,8 +249,8 @@ export class TaskDetail implements OnInit {
         } else if (event.type === HttpEventType.Response && event.body) {
           this.attachments = [event.body, ...this.attachments];
           this.uploadingFiles = this.uploadingFiles.filter(u => u.id !== uploadEntry.id);
-          this.notification.showSuccess(`"${file.name}" yüklendi.`);
           this.cdr.detectChanges();
+          this.notification.showSuccess(`"${file.name}" yüklendi.`);
         }
       },
       error: (err) => {
@@ -304,9 +304,9 @@ export class TaskDetail implements OnInit {
       next: () => {
         this.attachments = this.attachments.filter(a => a.id !== attachment.id);
         this.isDeletingAttachment = false;
+        this.cdr.detectChanges();
         this.notification.showSuccess('Dosya silindi.');
         this.activeDialogRef?.close();
-        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Dosya silinirken hata oluştu:', err);
@@ -358,8 +358,8 @@ export class TaskDetail implements OnInit {
         this.comments = [comment, ...this.comments];
         this.newCommentContent = '';
         this.isAddingComment = false;
-        this.notification.showSuccess('Yorum eklendi.');
         this.cdr.detectChanges();
+        this.notification.showSuccess('Yorum eklendi.');
       },
       error: (err) => {
         console.error('Yorum eklenirken hata oluştu:', err);
@@ -397,8 +397,8 @@ export class TaskDetail implements OnInit {
         this.isSavingCommentEdit = false;
         this.editingCommentId = null;
         this.editingCommentContent = '';
-        this.notification.showSuccess('Yorum güncellendi.');
         this.cdr.detectChanges();
+        this.notification.showSuccess('Yorum güncellendi.');
       },
       error: (err) => {
         console.error('Yorum güncellenirken hata oluştu:', err);
@@ -432,9 +432,9 @@ export class TaskDetail implements OnInit {
       next: () => {
         this.comments = this.comments.filter(c => c.id !== comment.id);
         this.isDeletingComment = false;
+        this.cdr.detectChanges();
         this.notification.showSuccess('Yorum silindi.');
         this.activeDialogRef?.close();
-        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Yorum silinirken hata oluştu:', err);
