@@ -20,7 +20,7 @@
     </button>
   </div>
 
-  <div *ngFor="let sub of subTasks" class="subtask-row">
+  <div *ngFor="let sub of subTasks; trackBy: trackById" class="subtask-row">
     <mat-checkbox [checked]="sub.completed" (change)="toggleSubTask(sub)" color="primary">{{ sub.title }}</mat-checkbox>
     <button mat-icon-button color="warn" (click)="removeSubTask(sub)" [disabled]="subTaskDeletingId === sub.id">
       <mat-icon>close</mat-icon>
@@ -57,13 +57,13 @@
       <span class="dropzone-hint">Maks. 10 MB · jpg, png, gif, webp, pdf, doc(x), xls(x), ppt(x), txt, csv, zip, rar</span>
     </div>
 
-    <div *ngFor="let upload of uploadingFiles" class="attachment-upload-progress">
+    <div *ngFor="let upload of uploadingFiles; trackBy: trackById" class="attachment-upload-progress">
       <span class="attachment-name">{{ upload.name }}</span>
       <mat-progress-bar mode="determinate" [value]="upload.progress"></mat-progress-bar>
       <span class="attachment-upload-percent">{{ upload.progress }}%</span>
     </div>
 
-    <div *ngFor="let file of attachments" class="attachment-row">
+    <div *ngFor="let file of attachments; trackBy: trackById" class="attachment-row">
       <a [href]="getAttachmentUrl(file.filePath)" target="_blank" class="attachment-link">
         <img *ngIf="isImageAttachment(file)" [src]="getAttachmentUrl(file.filePath)" class="attachment-thumbnail" alt="">
         <mat-icon *ngIf="!isImageAttachment(file)">{{ getFileIcon(file.fileName) }}</mat-icon>
@@ -101,7 +101,7 @@
       </button>
     </div>
 
-    <div *ngFor="let comment of comments" class="comment-row">
+    <div *ngFor="let comment of comments; trackBy: trackById" class="comment-row">
       <div class="comment-header">
         <span class="comment-author">{{ comment.username }}</span>
         <span class="comment-time">

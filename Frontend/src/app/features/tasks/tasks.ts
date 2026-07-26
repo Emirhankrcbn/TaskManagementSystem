@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../../shared/material.module';
 import { CategoryService } from '../../core/services/category'; // Kategori Servisi Eklendi
@@ -31,7 +31,7 @@ import { TaskPreferencesService } from '../../core/services/task-preferences';
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss'
 })
-export class Tasks implements OnInit {
+export class Tasks implements OnInit, OnDestroy {
   selection = new SelectionModel<Task>(true, []);
   @ViewChild(TaskList) taskListComponent!: TaskList;
   @ViewChild('createForm') createFormComponent!: TaskForm;
@@ -90,6 +90,14 @@ export class Tasks implements OnInit {
     this.loadCategories(); // Sayfa açılırken kategorileri çekiyoruz
   }
 
+  // Bileşen yok edilirken bekleyen arama debounce zamanlayıcısını temizler;
+  // aksi halde kullanıcı sayfadan ayrıldıktan sonra zamanlayıcı ateşlenip yok edilmiş bir bileşende işlem yapmaya çalışabilir
+  ngOnDestroy(): void {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+  }
+
   // Daha önce localStorage'a kaydedilmiş filtre/sıralama/görünüm tercihlerini geri yükler
   private restorePreferences(): void {
     const saved = this.taskPreferences.load();
@@ -116,6 +124,11 @@ export class Tasks implements OnInit {
       isDesc: this.isDesc,
       viewMode: this.viewMode
     });
+  }
+
+  // *ngFor trackBy: kategori dropdown'ı her değişiklik algılamada yeniden oluşturulmasın
+  trackByCategoryId(index: number, cat: Category): string {
+    return cat.id ?? index.toString();
   }
 
   // --- KATEGORİ FONKSİYONLARI ---

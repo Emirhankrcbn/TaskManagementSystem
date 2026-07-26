@@ -81,6 +81,16 @@ export class TaskBoard implements OnChanges {
     return getSubtaskProgress(task);
   }
 
+  // *ngFor trackBy: sütunlar durum koduna göre sabittir, hiç yeniden oluşturulmaz
+  trackByStatus(index: number, column: BoardColumn): number {
+    return column.status;
+  }
+
+  // *ngFor trackBy: kart sürüklenip sıra değiştiğinde tüm kartların değil sadece taşınanın DOM'da yeniden oluşturulmasını sağlar
+  trackByTaskId(index: number, task: Task): string {
+    return task.id ?? index.toString();
+  }
+
   drop(event: CdkDragDrop<Task[]>, targetStatus: number): void {
     if (event.previousContainer === event.container) {
       // Aynı sütun içinde sıra değişimi - sadece görsel, backend'de kalıcı bir sıra alanı yok

@@ -41,7 +41,7 @@
       <mat-label>Kategori</mat-label>
       <mat-select [(ngModel)]="categoryId" (ngModelChange)="onFieldChange()">
         <mat-option [value]="null">Kategori Yok</mat-option>
-        <mat-option *ngFor="let cat of categories" [value]="cat.id">
+        <mat-option *ngFor="let cat of categories; trackBy: trackByCategoryId" [value]="cat.id">
           {{ cat.name }}
         </mat-option>
       </mat-select>

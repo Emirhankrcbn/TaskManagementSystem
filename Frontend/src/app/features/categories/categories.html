@@ -42,7 +42,7 @@
       Henüz hiçbir kategori eklemedin.
     </div>
 
-    <div class="category-card" *ngFor="let cat of categories">
+    <div class="category-card" *ngFor="let cat of categories; trackBy: trackByCategoryId">
       <div class="card-left">
         <!-- Rengi yansıttığımız küçük yuvarlak -->
         <span class="color-dot" [style.backgroundColor]="cat.color"></span>

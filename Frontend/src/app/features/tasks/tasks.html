@@ -61,7 +61,7 @@
       <mat-label>Kategori</mat-label>
       <mat-select [(ngModel)]="selectedCategoryId" (selectionChange)="onCategoryFilterChange()">
         <mat-option [value]="null">Tümü</mat-option>
-        <mat-option *ngFor="let cat of categories" [value]="cat.id">
+        <mat-option *ngFor="let cat of categories; trackBy: trackByCategoryId" [value]="cat.id">
           {{ cat.name }}
         </mat-option>
       </mat-select>

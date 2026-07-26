@@ -85,6 +85,11 @@ export class TaskDetail implements OnInit {
     this.valueChange.emit(value);
   }
 
+  // *ngFor trackBy: liste öğeleri değiştiğinde tüm DOM'un değil sadece gerçekten değişen satırların yeniden oluşturulmasını sağlar
+  trackById(index: number, item: { id?: string }): string {
+    return item.id ?? index.toString();
+  }
+
   // --- ALT GÖREV (SUBTASK) FONKSİYONLARI ---
   addSubTask(): void {
     const title = this.newSubTaskTitle.trim();

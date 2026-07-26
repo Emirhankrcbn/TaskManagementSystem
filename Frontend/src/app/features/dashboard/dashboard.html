@@ -68,7 +68,7 @@
       </div>
 
       <app-task-card
-        *ngFor="let task of overdueTasks"
+        *ngFor="let task of overdueTasks; trackBy: trackByTaskId"
         [task]="task"
         [badgeText]="getDaysOverdue(task.dueDate) + ' gün gecikti'"
         badgeVariant="danger">

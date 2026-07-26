@@ -100,6 +100,11 @@ export class TaskForm implements OnInit {
     return due.getTime() < today.getTime();
   }
 
+  // *ngFor trackBy: kategori dropdown'ı her değişiklik algılamada yeniden oluşturulmasın
+  trackByCategoryId(index: number, cat: Category): string {
+    return cat.id ?? index.toString();
+  }
+
   getPriorityLabel(priority?: number | null): string {
     switch (priority) {
       case 1: return 'Düşük';

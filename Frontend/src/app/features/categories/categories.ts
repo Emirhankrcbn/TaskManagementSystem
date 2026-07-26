@@ -41,6 +41,11 @@ export class CategoriesComponent implements OnInit {
     this.loadCategories();
   }
 
+  // *ngFor trackBy: kategori kartları listesi her değişiklik algılamada yeniden oluşturulmasın
+  trackByCategoryId(index: number, cat: Category): string {
+    return cat.id ?? index.toString();
+  }
+
   loadCategories(): void {
     this.isLoadingList = true;
     this.categoryService.getCategories().subscribe({

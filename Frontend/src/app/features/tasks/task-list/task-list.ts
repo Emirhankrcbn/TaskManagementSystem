@@ -98,4 +98,9 @@ export class TaskList {
   getSubtaskProgress(task: Task) {
     return getSubtaskProgress(task);
   }
+
+  // mat-table trackBy: sıralama/filtreleme sonrası sadece değişen satırlar yeniden oluşturulsun
+  trackByTaskId(index: number, task: Task): string {
+    return task.id ?? index.toString();
+  }
 }

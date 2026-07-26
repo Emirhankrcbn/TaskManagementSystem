@@ -52,8 +52,13 @@ export class AuthService {
 
   // Otomatik çıkışı başlatan fonksiyon
   startAutoLogout(): void {
+    // Önceden kurulmuş bir zamanlayıcı varsa (örn. arka arkaya login çağrılırsa) önce onu iptal et, üst üste birikmesin
+    if (this.logoutTimer) {
+      clearTimeout(this.logoutTimer);
+    }
+
     const remainingTime = this.tokenService.getTokenRemainingTime();
-    
+
     if (remainingTime > 0) {
       // Süre dolduğunda logout fonksiyonunu otomatik tetikle
       this.logoutTimer = setTimeout(() => {

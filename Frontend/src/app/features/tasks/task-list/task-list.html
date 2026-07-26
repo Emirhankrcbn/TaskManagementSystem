@@ -1,5 +1,5 @@
 <div class="table-scroll">
-<table mat-table [dataSource]="tasks" class="mat-elevation-z8">
+<table mat-table [dataSource]="tasks" [trackBy]="trackByTaskId" class="mat-elevation-z8">
 
   <!-- Çoklu Seçim Sütunu -->
   <ng-container matColumnDef="select">

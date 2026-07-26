@@ -82,6 +82,11 @@ export class Dashboard implements OnInit {
     return Math.round((this.statistics.completedTasks / this.statistics.totalTasks) * 100);
   }
 
+  // *ngFor trackBy: gecikmiş görevler listesi her değişiklik algılamada yeniden oluşturulmasın
+  trackByTaskId(index: number, task: Task): string {
+    return task.id ?? index.toString();
+  }
+
   getDaysOverdue(dueDate?: string | null): number {
     if (!dueDate) return 0;
     const diffMs = new Date().getTime() - new Date(dueDate).getTime();
