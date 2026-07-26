@@ -141,6 +141,16 @@ namespace TaskManagement.API.Services
             return true;
         }
 
+        // İzin verilen dosya uzantıları (güvenlik: .exe, .html, .js gibi çalıştırılabilir/betik dosyaları reddedilir)
+        private static readonly HashSet<string> AllowedAttachmentExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp",
+            ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+            ".txt", ".csv", ".zip", ".rar"
+        };
+
+        private const long MaxAttachmentSizeBytes = 10 * 1024 * 1024; // 10 MB
+
         // aynı isimli dosyaların birbirini ezmemesi için başlarına rastgele bir GUID ekler
         public async Task<TaskAttachmentResponseDto> UploadAttachmentAsync(Guid taskId, Guid userId, IFormFile file)
         {
@@ -149,6 +159,12 @@ namespace TaskManagement.API.Services
             if (task == null) throw new Exception("Görev bulunamadı veya yetkiniz yok.");
 
             if (file == null || file.Length == 0) throw new Exception("Lütfen geçerli bir dosya seçin.");
+
+            if (file.Length > MaxAttachmentSizeBytes) throw new Exception("Dosya boyutu 10 MB sınırını aşıyor.");
+
+            var extension = Path.GetExtension(file.FileName);
+            if (string.IsNullOrEmpty(extension) || !AllowedAttachmentExtensions.Contains(extension))
+                throw new Exception($"Desteklenmeyen dosya türü: {extension}");
 
             // 2. klasör ayarlama (ProjeDizini/wwwroot/uploads)
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");

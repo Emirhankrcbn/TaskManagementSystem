@@ -85,11 +85,20 @@ namespace TaskManagement.API.Controllers
         // Dosya yükleme için yeni bir endpointi
         [HttpPost("{taskId}/attachments")]
         [Consumes("multipart/form-data")] // Sadece dosya yükleme isteklerini kabul et
+        [RequestFormLimits(MultipartBodyLengthLimit = 10 * 1024 * 1024)]
+        [RequestSizeLimit(10 * 1024 * 1024)]
         public async Task<IActionResult> UploadAttachment(Guid taskId, [FromForm] TaskAttachmentUploadDto uploadDto)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var result = await _taskService.UploadAttachmentAsync(taskId, userId, uploadDto.File);
-            return Ok(result);
+            try
+            {
+                var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                var result = await _taskService.UploadAttachmentAsync(taskId, userId, uploadDto.File);
+                return StatusCode(201, result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         // Göreve ait dosyaları listeleme

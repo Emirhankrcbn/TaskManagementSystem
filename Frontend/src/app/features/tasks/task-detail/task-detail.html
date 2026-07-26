@@ -42,18 +42,31 @@
   </div>
 
   <ng-container *ngIf="task?.id">
-    <div class="attachment-upload-row">
-      <button mat-stroked-button color="primary" (click)="fileInput.click()" [disabled]="isUploadingAttachment">
+    <div class="attachment-dropzone"
+         [class.dragging]="isDraggingOverAttachments"
+         (dragover)="onAttachmentDragOver($event)"
+         (dragleave)="onAttachmentDragLeave($event)"
+         (drop)="onAttachmentDrop($event)">
+      <mat-icon class="dropzone-icon">cloud_upload</mat-icon>
+      <span>Dosyaları buraya sürükleyin ya da</span>
+      <button mat-stroked-button color="primary" (click)="fileInput.click()">
         <mat-icon>attach_file</mat-icon>
         Dosya Seç
       </button>
-      <input #fileInput type="file" hidden (change)="onFileSelected($event)">
-      <mat-spinner *ngIf="isUploadingAttachment" diameter="20"></mat-spinner>
+      <input #fileInput type="file" hidden multiple (change)="onFileSelected($event)">
+      <span class="dropzone-hint">Maks. 10 MB · jpg, png, gif, webp, pdf, doc(x), xls(x), ppt(x), txt, csv, zip, rar</span>
+    </div>
+
+    <div *ngFor="let upload of uploadingFiles" class="attachment-upload-progress">
+      <span class="attachment-name">{{ upload.name }}</span>
+      <mat-progress-bar mode="determinate" [value]="upload.progress"></mat-progress-bar>
+      <span class="attachment-upload-percent">{{ upload.progress }}%</span>
     </div>
 
     <div *ngFor="let file of attachments" class="attachment-row">
       <a [href]="getAttachmentUrl(file.filePath)" target="_blank" class="attachment-link">
-        <mat-icon>description</mat-icon>
+        <img *ngIf="isImageAttachment(file)" [src]="getAttachmentUrl(file.filePath)" class="attachment-thumbnail" alt="">
+        <mat-icon *ngIf="!isImageAttachment(file)">{{ getFileIcon(file.fileName) }}</mat-icon>
         <span class="attachment-name">{{ file.fileName }}</span>
         <span class="attachment-size">({{ formatFileSize(file.fileSize) }})</span>
       </a>
@@ -62,7 +75,7 @@
       </button>
     </div>
 
-    <div *ngIf="attachments.length === 0" class="hint-text">
+    <div *ngIf="attachments.length === 0 && uploadingFiles.length === 0" class="hint-text">
       Henüz eklenmiş dosya yok.
     </div>
   </ng-container>

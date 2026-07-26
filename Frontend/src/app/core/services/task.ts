@@ -1,8 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpParams, HttpRequest } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Task, TaskAttachment, TaskStatistics, PagedResult, SubTask } from '../models/task.model'; // Daha önce oluşturduğumuz model
-import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -58,11 +57,14 @@ export class TaskService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  // 5. DOSYA EKLEME (Attachment Yükleme)
-  uploadAttachment(taskId: string, file: File): Observable<TaskAttachment> {
+  // 5. DOSYA EKLEME (Attachment Yükleme) - gerçek yükleme ilerlemesini (%) izleyebilmek için HttpEvent akışı döner
+  uploadAttachment(taskId: string, file: File): Observable<HttpEvent<TaskAttachment>> {
     const formData = new FormData();
     formData.append('File', file);
-    return this.http.post<TaskAttachment>(`${this.apiUrl}/${taskId}/attachments`, formData);
+    const req = new HttpRequest('POST', `${this.apiUrl}/${taskId}/attachments`, formData, {
+      reportProgress: true
+    });
+    return this.http.request<TaskAttachment>(req);
   }
 
   // 5.1 Göreve ait dosyaları listeleme

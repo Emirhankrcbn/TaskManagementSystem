@@ -50,6 +50,69 @@ h3 {
   min-width: 0;
 }
 
+.attachment-thumbnail {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.attachment-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 2px dashed rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  transition: border-color 150ms, background-color 150ms;
+
+  &.dragging {
+    border-color: #1565c0;
+    background-color: rgba(21, 101, 192, 0.06);
+  }
+}
+
+.dropzone-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.dropzone-hint {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.attachment-upload-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+
+  .attachment-name {
+    width: 140px;
+    flex-shrink: 0;
+  }
+
+  mat-progress-bar {
+    flex: 1;
+    border-radius: 4px;
+  }
+
+  .attachment-upload-percent {
+    font-size: 12px;
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+}
+
 .attachment-name {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -70,6 +133,23 @@ h3 {
 :host-context(.dark-theme) {
   .attachment-size,
   .hint-text {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .attachment-dropzone {
+    border-color: rgba(255, 255, 255, 0.25);
+
+    &.dragging {
+      border-color: #64b5f6;
+      background-color: rgba(100, 181, 246, 0.08);
+    }
+  }
+
+  .dropzone-icon {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .dropzone-hint {
     color: rgba(255, 255, 255, 0.5);
   }
 }

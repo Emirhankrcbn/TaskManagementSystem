@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpEventType } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MaterialModule } from '../../../shared/material.module';
 import { TaskForm, TaskFormValue } from '../task-form/task-form';
@@ -8,6 +9,22 @@ import { TaskService } from '../../../core/services/task';
 import { Category } from '../../../core/models/category.model';
 import { Task, SubTask, TaskAttachment } from '../../../core/models/task.model';
 import { NotificationService } from '../../../core/services/notification';
+
+// Yüklenmekte olan bir dosyanın anlık ilerleme durumunu tutar (henüz sunucudan attachment dönmedi)
+interface UploadingFile {
+  id: string;
+  name: string;
+  progress: number;
+  error?: string;
+}
+
+// Backend'deki AllowedAttachmentExtensions ile birebir aynı liste (client tarafında erken uyarı için)
+const ALLOWED_ATTACHMENT_EXTENSIONS = [
+  '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp',
+  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+  '.txt', '.csv', '.zip', '.rar'
+];
+const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
 @Component({
   selector: 'app-task-detail',
@@ -35,10 +52,12 @@ export class TaskDetail implements OnInit {
   subTaskDeletingId: string | null = null;
 
   attachments: TaskAttachment[] = [];
-  isUploadingAttachment: boolean = false;
+  uploadingFiles: UploadingFile[] = [];
+  isDraggingOverAttachments: boolean = false;
   isDeletingAttachment: boolean = false;
   attachmentToDelete: TaskAttachment | null = null;
   private activeDialogRef: MatDialogRef<any> | null = null;
+  private uploadIdCounter = 0;
 
   ngOnInit(): void {
     this.subTasks = this.task?.subTasks ? [...this.task.subTasks] : [];
@@ -133,28 +152,110 @@ export class TaskDetail implements OnInit {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0 || !this.task?.id) return;
+    if (!input.files || input.files.length === 0) return;
 
-    const file = input.files[0];
+    this.uploadFiles(input.files);
+    input.value = ''; // aynı dosyaları tekrar seçebilmek için input'u temizle
+  }
+
+  onAttachmentDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingOverAttachments = true;
+  }
+
+  onAttachmentDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingOverAttachments = false;
+  }
+
+  onAttachmentDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingOverAttachments = false;
+    if (event.dataTransfer?.files?.length) {
+      this.uploadFiles(event.dataTransfer.files);
+    }
+  }
+
+  // Dosya uzantısına göre küçük harf bir uzantı döner (nokta dahil), örn: ".pdf"
+  private getExtension(fileName: string): string {
+    const dotIndex = fileName.lastIndexOf('.');
+    return dotIndex >= 0 ? fileName.substring(dotIndex).toLowerCase() : '';
+  }
+
+  // Backend ile aynı kurallara göre erken (sunucuya gitmeden) doğrulama yapar
+  private validateFile(file: File): string | null {
+    if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+      return `"${file.name}" 10 MB sınırını aşıyor.`;
+    }
+    const extension = this.getExtension(file.name);
+    if (!extension || !ALLOWED_ATTACHMENT_EXTENSIONS.includes(extension)) {
+      return `"${file.name}" desteklenmeyen bir dosya türü (${extension || 'uzantısız'}).`;
+    }
+    return null;
+  }
+
+  private uploadFiles(fileList: FileList): void {
+    if (!this.task?.id) return;
     const taskId = this.task.id;
-    this.isUploadingAttachment = true;
+
+    Array.from(fileList).forEach(file => {
+      const validationError = this.validateFile(file);
+      if (validationError) {
+        this.notification.showError(validationError);
+        return;
+      }
+      this.uploadOneFile(taskId, file);
+    });
+  }
+
+  private uploadOneFile(taskId: string, file: File): void {
+    const uploadEntry: UploadingFile = {
+      id: `upload-${++this.uploadIdCounter}`,
+      name: file.name,
+      progress: 0
+    };
+    this.uploadingFiles = [...this.uploadingFiles, uploadEntry];
 
     this.taskService.uploadAttachment(taskId, file).subscribe({
-      next: (attachment) => {
-        this.attachments = [attachment, ...this.attachments];
-        this.isUploadingAttachment = false;
-        input.value = ''; // aynı dosyayı tekrar seçebilmek için input'u temizle
-        this.notification.showSuccess('Dosya yüklendi.');
-        this.cdr.detectChanges();
+      next: (event) => {
+        if (event.type === HttpEventType.UploadProgress && event.total) {
+          uploadEntry.progress = Math.round((100 * event.loaded) / event.total);
+          this.cdr.detectChanges();
+        } else if (event.type === HttpEventType.Response && event.body) {
+          this.attachments = [event.body, ...this.attachments];
+          this.uploadingFiles = this.uploadingFiles.filter(u => u.id !== uploadEntry.id);
+          this.notification.showSuccess(`"${file.name}" yüklendi.`);
+          this.cdr.detectChanges();
+        }
       },
       error: (err) => {
         console.error('Dosya yüklenirken hata oluştu:', err);
-        this.isUploadingAttachment = false;
-        input.value = '';
-        this.notification.showError(err.error?.error || 'Dosya yüklenirken bir hata oluştu.');
+        this.uploadingFiles = this.uploadingFiles.filter(u => u.id !== uploadEntry.id);
+        this.notification.showError(err.error?.error || `"${file.name}" yüklenirken bir hata oluştu.`);
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // Uzantıya göre Material ikon adı döner
+  getFileIcon(fileName: string): string {
+    const extension = this.getExtension(fileName);
+    if (['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'].includes(extension)) return 'image';
+    if (extension === '.pdf') return 'picture_as_pdf';
+    if (['.doc', '.docx'].includes(extension)) return 'description';
+    if (['.xls', '.xlsx', '.csv'].includes(extension)) return 'grid_on';
+    if (['.ppt', '.pptx'].includes(extension)) return 'slideshow';
+    if (['.zip', '.rar'].includes(extension)) return 'folder_zip';
+    if (extension === '.txt') return 'article';
+    return 'insert_drive_file';
+  }
+
+  isImageAttachment(attachment: TaskAttachment): boolean {
+    if (attachment.contentType?.startsWith('image/')) return true;
+    return ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'].includes(this.getExtension(attachment.fileName));
   }
 
   openDeleteAttachmentConfirm(attachment: TaskAttachment): void {
