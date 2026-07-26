@@ -14,6 +14,7 @@ import { TaskDetail } from './task-detail/task-detail';
 import { NotificationService } from '../../core/services/notification';
 import { Pagination } from '../../shared/pagination/pagination';
 import { TaskBoard, TaskStatusChange } from './task-board/task-board';
+import { TaskPreferencesService } from '../../core/services/task-preferences';
 
 @Component({
   selector: 'app-tasks',
@@ -73,6 +74,7 @@ export class Tasks implements OnInit {
   private categoryService = inject(CategoryService); // Kategori Servisi enjekte edildi
   private taskService = inject(TaskService); // Görev Servisi enjekte edildi
   private notification = inject(NotificationService);
+  private taskPreferences = inject(TaskPreferencesService);
 
   @ViewChild('deleteDialog') deleteDialog!: TemplateRef<any>;
   @ViewChild('editTaskDialog') editTaskDialog!: TemplateRef<any>;
@@ -83,8 +85,37 @@ export class Tasks implements OnInit {
   private pendingDeleteId: string | null = null;
 
   ngOnInit() {
+    this.restorePreferences();
     this.loadTasks();
     this.loadCategories(); // Sayfa açılırken kategorileri çekiyoruz
+  }
+
+  // Daha önce localStorage'a kaydedilmiş filtre/sıralama/görünüm tercihlerini geri yükler
+  private restorePreferences(): void {
+    const saved = this.taskPreferences.load();
+    if (!saved) return;
+
+    this.selectedPriority = saved.selectedPriority ?? null;
+    this.selectedStatus = saved.selectedStatus ?? null;
+    this.selectedCategoryId = saved.selectedCategoryId ?? null;
+    this.searchTerm = saved.searchTerm ?? '';
+    this.sortBy = saved.sortBy ?? null;
+    this.isDesc = saved.isDesc ?? false;
+    this.viewMode = saved.viewMode ?? 'table';
+    this.pageSize = this.viewMode === 'board' ? this.boardPageSize : this.tablePageSize;
+  }
+
+  // Mevcut filtre/sıralama/görünüm tercihlerini localStorage'a kaydeder
+  private savePreferences(): void {
+    this.taskPreferences.save({
+      selectedPriority: this.selectedPriority,
+      selectedStatus: this.selectedStatus,
+      selectedCategoryId: this.selectedCategoryId,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDesc: this.isDesc,
+      viewMode: this.viewMode
+    });
   }
 
   // --- KATEGORİ FONKSİYONLARI ---
@@ -100,6 +131,7 @@ export class Tasks implements OnInit {
 
   // --- GÖREV FONKSİYONLARI ---
   loadTasks() {
+    this.savePreferences();
     this.isLoadingTasks = true;
     this.taskService.getTasks({
       priority: this.selectedPriority,
