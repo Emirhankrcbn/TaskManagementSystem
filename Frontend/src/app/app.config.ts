@@ -4,12 +4,13 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http'; // w
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
+import { timingInterceptor } from './core/interceptors/timing-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(), 
+    provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    // HTTP istemcisine yazdığımız interceptor'ı tanıtıyoruz
-    provideHttpClient(withInterceptors([authInterceptor])) 
+    // HTTP istemcisine yazdığımız interceptor'ları tanıtıyoruz
+    provideHttpClient(withInterceptors([authInterceptor, timingInterceptor]))
   ],
 };

@@ -137,6 +137,12 @@ var app = builder.Build();
 // Hata yakalayıcı Middleware'imiz tüm istekleri en başta karşılasın
 app.UseMiddleware<TaskManagement.API.Middlewares.ExceptionMiddleware>();
 
+// Her isteğin süresini ölçüp yavaş olanları (>500ms) loglar
+app.UseMiddleware<TaskManagement.API.Middlewares.PerformanceMiddleware>();
+
+// Serilog: her isteğin metodu/yolu/durum kodu/süresini otomatik olarak tek satır log olarak yazar
+app.UseSerilogRequestLogging();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
