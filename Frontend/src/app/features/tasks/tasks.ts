@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, TemplateRef, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, ViewChild, inject, ChangeDetectorRef, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../../shared/material.module';
 import { CategoryService } from '../../core/services/category'; // Kategori Servisi Eklendi
@@ -75,6 +76,7 @@ export class Tasks implements OnInit, OnDestroy {
   private taskService = inject(TaskService); // Görev Servisi enjekte edildi
   private notification = inject(NotificationService);
   private taskPreferences = inject(TaskPreferencesService);
+  private destroyRef = inject(DestroyRef);
 
   @ViewChild('deleteDialog') deleteDialog!: TemplateRef<any>;
   @ViewChild('editTaskDialog') editTaskDialog!: TemplateRef<any>;
@@ -133,7 +135,7 @@ export class Tasks implements OnInit, OnDestroy {
 
   // --- KATEGORİ FONKSİYONLARI ---
   loadCategories() {
-    this.categoryService.getCategories().subscribe({
+    this.categoryService.getCategories().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => this.categories = data,
       error: (err) => {
         console.error('Kategoriler yüklenirken hata oluştu:', err);
@@ -155,7 +157,7 @@ export class Tasks implements OnInit, OnDestroy {
       isDescending: this.isDesc,
       pageNumber: this.currentPage,
       pageSize: this.pageSize
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.dataSource = data.items;
         this.totalCount = data.totalCount;
@@ -207,7 +209,7 @@ export class Tasks implements OnInit, OnDestroy {
       dueDate: change.task.dueDate || undefined
     };
 
-    this.taskService.updateTask(change.task.id, updatedTask).subscribe({
+    this.taskService.updateTask(change.task.id, updatedTask).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.showSuccess('Durum güncellendi.');
         this.loadTasks();
@@ -292,7 +294,7 @@ export class Tasks implements OnInit, OnDestroy {
       dueDate: value.dueDate || undefined
     };
 
-    this.taskService.createTask(newTask).subscribe({
+    this.taskService.createTask(newTask).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isCreating = false;
         this.loadTasks(); // Listeyi yenile
@@ -354,7 +356,7 @@ export class Tasks implements OnInit, OnDestroy {
       dueDate: this.editFormValue.dueDate || undefined
     };
 
-    this.taskService.updateTask(this.currentEditTask.id, updatedTask).subscribe({
+    this.taskService.updateTask(this.currentEditTask.id, updatedTask).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSaving = false;
         this.loadTasks();
@@ -392,7 +394,7 @@ export class Tasks implements OnInit, OnDestroy {
     if (!this.pendingDeleteId || this.isDeleting) return;
 
     this.isDeleting = true;
-    this.taskService.deleteTask(this.pendingDeleteId).subscribe({
+    this.taskService.deleteTask(this.pendingDeleteId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isDeleting = false;
         this.loadTasks(); // Silindikten sonra güncel listeyi çek
@@ -434,7 +436,7 @@ export class Tasks implements OnInit, OnDestroy {
 
     // Tüm silme isteklerinin tamamlanmasını bekliyoruz
     import('rxjs').then(({ forkJoin }) => {
-      forkJoin(deleteRequests).subscribe({
+      forkJoin(deleteRequests).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.isBulkDeleting = false;
           this.loadTasks(); // Listeyi veritabanından yeniden taze çekmek en güvenlisidir

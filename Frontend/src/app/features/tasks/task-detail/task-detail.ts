@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpEventType } from '@angular/common/http';
@@ -45,6 +46,7 @@ export class TaskDetail implements OnInit {
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
   private tokenService = inject(TokenService);
+  private destroyRef = inject(DestroyRef);
 
   @ViewChild('deleteAttachmentDialog') deleteAttachmentDialog!: TemplateRef<any>;
   @ViewChild('deleteCommentDialog') deleteCommentDialog!: TemplateRef<any>;
@@ -97,7 +99,7 @@ export class TaskDetail implements OnInit {
 
     const taskId = this.task.id;
     this.isAddingSubTask = true;
-    this.taskService.addSubTask(taskId, title).subscribe({
+    this.taskService.addSubTask(taskId, title).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (subTask) => {
         this.subTasks = [...this.subTasks, subTask];
         this.newSubTaskTitle = '';
@@ -120,7 +122,7 @@ export class TaskDetail implements OnInit {
     const previousCompleted = subTask.completed;
     subTask.completed = !subTask.completed;
 
-    this.taskService.updateSubTask(taskId, subTask.id, { title: subTask.title, completed: subTask.completed }).subscribe({
+    this.taskService.updateSubTask(taskId, subTask.id, { title: subTask.title, completed: subTask.completed }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (updated) => {
         subTask.completed = updated.completed;
         this.cdr.detectChanges();
@@ -140,7 +142,7 @@ export class TaskDetail implements OnInit {
     const subTaskId = subTask.id;
 
     this.subTaskDeletingId = subTaskId;
-    this.taskService.deleteSubTask(taskId, subTaskId).subscribe({
+    this.taskService.deleteSubTask(taskId, subTaskId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.subTasks = this.subTasks.filter(st => st.id !== subTaskId);
         this.subTaskDeletingId = null;
@@ -158,7 +160,7 @@ export class TaskDetail implements OnInit {
 
   // --- DOSYA EKİ (ATTACHMENT) FONKSİYONLARI ---
   loadAttachments(taskId: string): void {
-    this.taskService.getAttachments(taskId).subscribe({
+    this.taskService.getAttachments(taskId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.attachments = data;
         this.cdr.detectChanges();
@@ -239,7 +241,7 @@ export class TaskDetail implements OnInit {
     };
     this.uploadingFiles = [...this.uploadingFiles, uploadEntry];
 
-    this.taskService.uploadAttachment(taskId, file).subscribe({
+    this.taskService.uploadAttachment(taskId, file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (event) => {
         if (event.type === HttpEventType.UploadProgress && event.total) {
           uploadEntry.progress = Math.round((100 * event.loaded) / event.total);
@@ -298,7 +300,7 @@ export class TaskDetail implements OnInit {
     const attachment = this.attachmentToDelete;
 
     this.isDeletingAttachment = true;
-    this.taskService.deleteAttachment(taskId, attachment.id).subscribe({
+    this.taskService.deleteAttachment(taskId, attachment.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.attachments = this.attachments.filter(a => a.id !== attachment.id);
         this.isDeletingAttachment = false;
@@ -333,7 +335,7 @@ export class TaskDetail implements OnInit {
 
   // --- YORUM (COMMENT) FONKSİYONLARI ---
   loadComments(taskId: string): void {
-    this.taskService.getComments(taskId).subscribe({
+    this.taskService.getComments(taskId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.comments = data;
         this.cdr.detectChanges();
@@ -351,7 +353,7 @@ export class TaskDetail implements OnInit {
 
     const taskId = this.task.id;
     this.isAddingComment = true;
-    this.taskService.addComment(taskId, content).subscribe({
+    this.taskService.addComment(taskId, content).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (comment) => {
         this.comments = [comment, ...this.comments];
         this.newCommentContent = '';
@@ -388,7 +390,7 @@ export class TaskDetail implements OnInit {
 
     const taskId = this.task.id;
     this.isSavingCommentEdit = true;
-    this.taskService.updateComment(taskId, comment.id, content).subscribe({
+    this.taskService.updateComment(taskId, comment.id, content).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (updated) => {
         const index = this.comments.findIndex(c => c.id === comment.id);
         if (index !== -1) this.comments[index] = updated;
@@ -426,7 +428,7 @@ export class TaskDetail implements OnInit {
     const comment = this.commentToDelete;
 
     this.isDeletingComment = true;
-    this.taskService.deleteComment(taskId, comment.id).subscribe({
+    this.taskService.deleteComment(taskId, comment.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.comments = this.comments.filter(c => c.id !== comment.id);
         this.isDeletingComment = false;

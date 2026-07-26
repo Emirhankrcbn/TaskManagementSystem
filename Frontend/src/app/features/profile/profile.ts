@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { AuthService } from '../../core/services/auth';
@@ -13,6 +14,7 @@ export class Profile implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef); // YENİ: Ekranı zorla güncellemek için dedektifimiz
+  private destroyRef = inject(DestroyRef);
 
   profileForm!: FormGroup;
   isLoading = false;
@@ -46,7 +48,7 @@ export class Profile implements OnInit {
     console.log("1. İstek Backend'e doğru yola çıkıyor...");
     this.isLoading = true;
     
-    this.authService.getProfile().subscribe({
+    this.authService.getProfile().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         console.log("2. Backend'den veri BAŞARIYLA geldi:", data);
         
@@ -82,7 +84,7 @@ export class Profile implements OnInit {
 
     const formData = this.profileForm.value;
 
-    this.authService.updateProfile(formData).subscribe({
+    this.authService.updateProfile(formData).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.successMessage = 'Profilin başarıyla güncellendi!';
         this.isLoading = false;

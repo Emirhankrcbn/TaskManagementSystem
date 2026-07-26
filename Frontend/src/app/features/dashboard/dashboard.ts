@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MaterialModule } from '../../shared/material.module';
@@ -19,6 +20,7 @@ export class Dashboard implements OnInit {
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
   private notification = inject(NotificationService);
+  private destroyRef = inject(DestroyRef);
 
   isLoading = true;
   displayName: string = '';
@@ -39,7 +41,7 @@ export class Dashboard implements OnInit {
   }
 
   private loadUserName(): void {
-    this.authService.getProfile().subscribe({
+    this.authService.getProfile().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.displayName = data.firstName || data.username;
         this.cdr.detectChanges();
@@ -49,7 +51,7 @@ export class Dashboard implements OnInit {
   }
 
   private loadStatistics(): void {
-    this.taskService.getStatistics().subscribe({
+    this.taskService.getStatistics().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.statistics = data;
         this.isLoading = false;
@@ -65,7 +67,7 @@ export class Dashboard implements OnInit {
   }
 
   private loadOverdueTasks(): void {
-    this.taskService.getOverdueTasks().subscribe({
+    this.taskService.getOverdueTasks().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.overdueTasks = data;
         this.cdr.detectChanges();

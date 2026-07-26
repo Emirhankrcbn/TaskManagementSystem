@@ -1,4 +1,5 @@
-import { Component, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef } from '@angular/core'; // ChangeDetectorRef eklendi
+import { Component, OnInit, TemplateRef, ViewChild, inject, ChangeDetectorRef, DestroyRef } from '@angular/core'; // ChangeDetectorRef eklendi
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -19,6 +20,7 @@ export class CategoriesComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef); // Dedektifimiz eklendi
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
+  private destroyRef = inject(DestroyRef);
 
   @ViewChild('deleteCategoryDialog') deleteCategoryDialog!: TemplateRef<any>;
 
@@ -48,7 +50,7 @@ export class CategoriesComponent implements OnInit {
 
   loadCategories(): void {
     this.isLoadingList = true;
-    this.categoryService.getCategories().subscribe({
+    this.categoryService.getCategories().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.categories = data;
         this.isLoadingList = false;
@@ -69,7 +71,7 @@ export class CategoriesComponent implements OnInit {
     this.isLoading = true;
     const newCategory: Category = this.categoryForm.value;
 
-    this.categoryService.createCategory(newCategory).subscribe({
+    this.categoryService.createCategory(newCategory).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (createdCategory) => {
         this.categories.push(createdCategory);
         this.categoryForm.reset({ color: '#007bff' });
@@ -104,7 +106,7 @@ export class CategoriesComponent implements OnInit {
     if (!id || this.deletingId) return;
 
     this.deletingId = id;
-    this.categoryService.deleteCategory(id).subscribe({
+    this.categoryService.deleteCategory(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.categories = this.categories.filter(c => c.id !== id);
         this.deletingId = null;
