@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpEvent, HttpParams, HttpRequest } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay, tap } from 'rxjs';
 import { Task, TaskAttachment, TaskStatistics, PagedResult, SubTask, TaskComment } from '../models/task.model'; // Daha önce oluşturduğumuz model
 
 @Injectable({
@@ -13,11 +13,18 @@ export class TaskService {
   private baseUrl = 'http://localhost:5182';
   private apiUrl = `${this.baseUrl}/api/tasks`;
 
+  // Dashboard istatistikleri/gecikme listesi, bir görev oluşturulup/güncellenip/silinene kadar değişmez;
+  // bu yüzden önbelleğe alınır ve sadece bu üç işlemden sonra geçersiz kılınır
+  private statisticsCache$: Observable<TaskStatistics> | null = null;
+  private overdueCache$: Observable<Task[]> | null = null;
+
   constructor() { }
 
   // 1. CREATE (Yeni Görev Ekleme)
   createTask(task: Task): Observable<Task> {
-    return this.http.post<Task>(this.apiUrl, task);
+    return this.http.post<Task>(this.apiUrl, task).pipe(
+      tap(() => this.invalidateStatsCache())
+    );
   }
 
   // 2. READ (Tüm Görevleri Getirme) - opsiyonel filtre + sayfalama desteği
@@ -48,13 +55,17 @@ export class TaskService {
   // 3. UPDATE (Görevi Güncelleme)
   // Parametre string olarak güncellendi
   updateTask(id: string, task: Task): Observable<Task> {
-    return this.http.put<Task>(`${this.apiUrl}/${id}`, task);
+    return this.http.put<Task>(`${this.apiUrl}/${id}`, task).pipe(
+      tap(() => this.invalidateStatsCache())
+    );
   }
 
   // 4. DELETE (Görevi Silme)
   // Parametre string olarak güncellendi
   deleteTask(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => this.invalidateStatsCache())
+    );
   }
 
   // 5. DOSYA EKLEME (Attachment Yükleme) - gerçek yükleme ilerlemesini (%) izleyebilmek için HttpEvent akışı döner
@@ -82,14 +93,31 @@ export class TaskService {
     return `${this.baseUrl}${filePath}`;
   }
 
-  // 6. Görev istatistikleri (Dashboard için)
+  // 6. Görev istatistikleri (Dashboard için) - önbellekten, yoksa sunucudan çekip önbelleğe alarak
   getStatistics(): Observable<TaskStatistics> {
-    return this.http.get<TaskStatistics>(`${this.apiUrl}/statistics`);
+    if (!this.statisticsCache$) {
+      this.statisticsCache$ = this.http.get<TaskStatistics>(`${this.apiUrl}/statistics`).pipe(
+        shareReplay(1)
+      );
+    }
+    return this.statisticsCache$;
   }
 
-  // 7. Süresi geçmiş görevler (Dashboard için)
+  // 7. Süresi geçmiş görevler (Dashboard için) - önbellekten, yoksa sunucudan çekip önbelleğe alarak
   getOverdueTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.apiUrl}/overdue`);
+    if (!this.overdueCache$) {
+      this.overdueCache$ = this.http.get<Task[]>(`${this.apiUrl}/overdue`).pipe(
+        shareReplay(1)
+      );
+    }
+    return this.overdueCache$;
+  }
+
+  // Görev sayısını/durumunu etkileyen bir işlem (create/update/delete) sonrası çağrılır;
+  // bir sonraki getStatistics()/getOverdueTasks() çağrısı sunucudan taze veri çeker
+  private invalidateStatsCache(): void {
+    this.statisticsCache$ = null;
+    this.overdueCache$ = null;
   }
 
   // 8. ALT GÖREV (SUBTASK) İŞLEMLERİ
