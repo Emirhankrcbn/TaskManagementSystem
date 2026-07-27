@@ -240,6 +240,9 @@ export class TaskDetail implements OnInit {
       progress: 0
     };
     this.uploadingFiles = [...this.uploadingFiles, uploadEntry];
+    // Yükleme ilerleme çubuğunun en azından bir an için görünmesini sağlar;
+    // aksi halde çok hızlı (yerel) yüklemelerde satır hiç render edilmeden kaldırılabilir
+    this.cdr.detectChanges();
 
     this.taskService.uploadAttachment(taskId, file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (event) => {
