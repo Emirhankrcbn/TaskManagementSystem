@@ -88,15 +88,26 @@ namespace TaskManagement.API.Services
             return _mapper.Map<TaskResponseDto>(task);
         }
 
+        // Saat dilimi belirtilmeden gelen (Kind=Unspecified) tarihleri UTC olarak işaretler;
+        // PostgreSQL'in "timestamp with time zone" sütunları yalnızca UTC kabul eder, aksi halde yazma sırasında hata fırlatır
+        private static DateTime? NormalizeToUtc(DateTime? value)
+        {
+            if (value == null) return null;
+            return value.Value.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc)
+                : value.Value.ToUniversalTime();
+        }
+
         public async Task<TaskResponseDto> CreateTaskAsync(TaskCreateDto taskCreateDto, Guid userId)
 {
     var task = _mapper.Map<Models.TaskItem>(taskCreateDto);
-    
+
     // Görevi Token'dan gelen senin kimliğine atıyoruz
-    task.UserId = userId; 
-    
+    task.UserId = userId;
+
     task.CreatedAt = DateTime.UtcNow;
     task.IsDeleted = false;
+    task.DueDate = NormalizeToUtc(task.DueDate);
 
     _context.Tasks.Add(task);
     await _context.SaveChangesAsync();
@@ -116,7 +127,7 @@ namespace TaskManagement.API.Services
             existingTask.Description = taskUpdateDto.Description;
             existingTask.Priority = taskUpdateDto.Priority;
             existingTask.Status = taskUpdateDto.Status;
-            existingTask.DueDate = taskUpdateDto.DueDate;
+            existingTask.DueDate = NormalizeToUtc(taskUpdateDto.DueDate);
             existingTask.CategoryId = taskUpdateDto.CategoryId;
             existingTask.UpdatedAt = DateTime.UtcNow;
 
