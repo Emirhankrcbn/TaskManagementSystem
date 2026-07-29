@@ -1,4 +1,9 @@
+// Production build bu dosyayı kullanır (development derlemesinde angular.json'daki
+// fileReplacements ile environment.development.ts devreye girer).
+// Aynı origin üzerinden reverse-proxy (örn. nginx /api -> backend) ile deploy edildiği
+// varsayılıyor; gerçek bir alan adına özel ayrı bir origin gerekirse burası güncellenmeli.
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:5182/api' // Backend'in çalıştığı port buraya yazılmalı
+  production: true,
+  apiUrl: '/api',
+  baseUrl: ''
 };

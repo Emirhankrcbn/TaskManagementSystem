@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, shareReplay, tap } from 'rxjs';
 import { Category } from '../models/category.model'; // Modelin yolunun doğru olduğundan emin ol
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -9,8 +10,8 @@ import { Category } from '../models/category.model'; // Modelin yolunun doğru o
 export class CategoryService {
   private http = inject(HttpClient);
 
-  // Backend API adresimiz
-  private apiUrl = 'http://localhost:5182/api/categories';
+  // Backend API adresimiz (ortama göre environment.ts/environment.development.ts'ten gelir)
+  private apiUrl = `${environment.apiUrl}/categories`;
 
   // Kategoriler nadiren değiştiği için ilk çekildiğinde bellekte tutulur;
   // her sayfa ziyaretinde (Tasks, Categories) aynı isteği tekrar atmayı önler

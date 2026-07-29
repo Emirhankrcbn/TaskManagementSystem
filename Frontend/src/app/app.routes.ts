@@ -1,39 +1,37 @@
 import { Routes } from '@angular/router';
-import { Dashboard } from './features/dashboard/dashboard';
-import { Tasks } from './features/tasks/tasks';
-import { authGuard } from './core/guards/auth-guard'; 
-import { Login } from './features/auth/login/login';
-import { Register } from './features/auth/register/register';
-import { CategoriesComponent } from './features/categories/categories';
+import { authGuard } from './core/guards/auth-guard';
 
-// Profil bileşenini import ediyoruz
-import { Profile } from './features/profile/profile'; 
-
+// Rotalar lazy-load ediliyor (loadComponent) ki ilk açılışta tek bir dev main.js yerine
+// her sayfa kendi parçasında (chunk) indirilsin - production bundle boyutu limitini aşmamak için gerekli
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { 
-    path: 'dashboard', 
-    component: Dashboard,
-    canActivate: [authGuard] 
-  },
-  { 
-    path: 'tasks', 
-    component: Tasks,
-    canActivate: [authGuard] 
-  },
-  // Profil URL'si ve güvenlik duvarı
-  { 
-    path: 'profile', 
-    component: Profile,
-    canActivate: [authGuard] 
-  },
-  { path: 'login', component: Login },
-  { path: 'register', component: Register },
-
   {
-    path: 'categories',
-    component: CategoriesComponent,
+    path: 'dashboard',
+    loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard),
     canActivate: [authGuard]
   },
-  
+  {
+    path: 'tasks',
+    loadComponent: () => import('./features/tasks/tasks').then(m => m.Tasks),
+    canActivate: [authGuard]
+  },
+  // Profil URL'si ve güvenlik duvarı
+  {
+    path: 'profile',
+    loadComponent: () => import('./features/profile/profile').then(m => m.Profile),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./features/auth/login/login').then(m => m.Login)
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('./features/auth/register/register').then(m => m.Register)
+  },
+  {
+    path: 'categories',
+    loadComponent: () => import('./features/categories/categories').then(m => m.CategoriesComponent),
+    canActivate: [authGuard]
+  },
 ];

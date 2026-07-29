@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { TokenService } from './token';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -11,9 +12,9 @@ export class AuthService {
   private router = inject(Router);
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
-  
-  // Backend API adresimiz
-  private apiUrl = 'http://localhost:5182/api/auth';
+
+  // Backend API adresimiz (ortama göre environment.ts/environment.development.ts'ten gelir)
+  private apiUrl = `${environment.apiUrl}/auth`;
   
   // Zamanlayıcıyı hafızada tutacağımız değişken
   private logoutTimer: any;

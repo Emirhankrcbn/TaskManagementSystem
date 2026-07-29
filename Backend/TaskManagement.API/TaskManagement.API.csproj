@@ -22,4 +22,12 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Gerçek yerel sırları (DB şifresi, JWT anahtarı) içeren dosya publish çıktısına asla kopyalanmasın;
+         yalnızca "dotnet run"/"dotnet build" sırasında ASPNETCORE_ENVIRONMENT=Development ile yerelde kullanılır -->
+    <Content Update="appsettings.Development.json">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

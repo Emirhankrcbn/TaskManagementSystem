@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpEvent, HttpParams, HttpRequest } from '@angular/common/http';
 import { Observable, shareReplay, tap } from 'rxjs';
 import { Task, TaskAttachment, TaskStatistics, PagedResult, SubTask, TaskComment } from '../models/task.model'; // Daha önce oluşturduğumuz model
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -9,9 +10,9 @@ import { Task, TaskAttachment, TaskStatistics, PagedResult, SubTask, TaskComment
 export class TaskService {
   private http = inject(HttpClient);
 
-  // Backend API adresi
-  private baseUrl = 'http://localhost:5182';
-  private apiUrl = `${this.baseUrl}/api/tasks`;
+  // Backend API adresi (ortama göre environment.ts/environment.development.ts'ten gelir)
+  private baseUrl = environment.baseUrl;
+  private apiUrl = `${environment.apiUrl}/tasks`;
 
   // Dashboard istatistikleri/gecikme listesi, bir görev oluşturulup/güncellenip/silinene kadar değişmez;
   // bu yüzden önbelleğe alınır ve sadece bu üç işlemden sonra geçersiz kılınır

@@ -11,10 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 // --- Serilog Konfigürasyonu Başlangıç ---
 builder.Host.UseSerilog((context, configuration) =>
 {
+    // Production'da log hacmini/masrafını azaltmak için sadece Warning ve üstünü tut;
+    // Development'ta günlük geliştirme akışı için Information yeterli
+    var minimumLevel = context.HostingEnvironment.IsProduction()
+        ? Serilog.Events.LogEventLevel.Warning
+        : Serilog.Events.LogEventLevel.Information;
+
     configuration
         .WriteTo.Console() // Konsola yazmaya devam et
         .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day) // Her gün için yeni bir .txt dosyası oluştur
-        .MinimumLevel.Information() // Sadece Information ve daha ciddi (Warning, Error) logları tut
+        .MinimumLevel.Is(minimumLevel)
         .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning); // Microsoft'un gereksiz HTTP loglarını filtrele
 });
 // --- Serilog Konfigürasyonu Bitiş ---
