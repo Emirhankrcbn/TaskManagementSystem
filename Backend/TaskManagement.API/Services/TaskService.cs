@@ -59,9 +59,13 @@ namespace TaskManagement.API.Services
             var totalCount = await query.CountAsync();
 
             // 5. Sayfalama (Pagination) İşlemini Uygula ve Veriyi Çek
+            // 0 veya negatif pageNumber/pageSize gelirse Skip() negatif olur ve PostgreSQL "OFFSET must not be negative" hatasıyla çöker; bu yüzden güvenli değerlere sabitliyoruz
+            var pageNumber = filter.PageNumber < 1 ? 1 : filter.PageNumber;
+            var pageSize = filter.PageSize < 1 ? 10 : filter.PageSize;
+
             var tasks = await query
-                .Skip((filter.PageNumber - 1) * filter.PageSize)
-                .Take(filter.PageSize)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             // 6. Sonucu DTO'ya Dönüştür ve Paketle
@@ -69,8 +73,8 @@ namespace TaskManagement.API.Services
             {
                 Items = _mapper.Map<List<TaskResponseDto>>(tasks),
                 TotalCount = totalCount,
-                PageNumber = filter.PageNumber,
-                PageSize = filter.PageSize
+                PageNumber = pageNumber,
+                PageSize = pageSize
             };
         }
 
@@ -108,6 +112,7 @@ namespace TaskManagement.API.Services
     task.CreatedAt = DateTime.UtcNow;
     task.IsDeleted = false;
     task.DueDate = NormalizeToUtc(task.DueDate);
+    task.Status = taskCreateDto.Status ?? Models.TaskStatus.Pending;
 
     _context.Tasks.Add(task);
     await _context.SaveChangesAsync();
