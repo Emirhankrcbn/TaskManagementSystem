@@ -471,13 +471,15 @@ namespace TaskManagement.API.Services
             // Vadesi geçenleri bulma mantığı:
             // 1. kullanıcıya ait ve silinmemiş olacak
             // 2. bitiş tarihi (DueDate) şu anki zamandan (UtcNow) daha KÜÇÜK olacak
-            // 3. görev henüz "Tamamlandı" statüsünde olmayacak (Status enum'unda 2'nin tamamlandı varsayıyoruz)
-            
+            // 3. görev "Tamamlandı" veya "İptal Edildi" statüsünde OLMAYACAK - ikisi de artık "yapılması gereken" bir iş değil,
+            //    gecikmiş sayılmamalı (frontend'deki task-list.ts:getDueDateStatus ile aynı kural)
+
             var overdueTasks = await _context.Tasks
-                .Where(t => t.UserId == userId && 
-                            t.IsDeleted == false && 
-                            t.DueDate < DateTime.UtcNow && 
-                            (int)t.Status != 2)
+                .Where(t => t.UserId == userId &&
+                            t.IsDeleted == false &&
+                            t.DueDate < DateTime.UtcNow &&
+                            t.Status != Models.TaskStatus.Completed &&
+                            t.Status != Models.TaskStatus.Cancelled)
                 .Include(t => t.Category)
                 .Include(t => t.SubTasks)
                 .OrderBy(t => t.DueDate) // En çok geciken en üstte çıksın diye tarihe göre sıralıyoruz

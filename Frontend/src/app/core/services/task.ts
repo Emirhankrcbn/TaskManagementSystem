@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpEvent, HttpParams, HttpRequest } from '@angular/common/http';
-import { Observable, shareReplay, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Task, TaskAttachment, TaskStatistics, PagedResult, SubTask, TaskComment } from '../models/task.model'; // Daha önce oluşturduğumuz model
 import { environment } from '../../../environments/environment';
 
@@ -14,18 +14,11 @@ export class TaskService {
   private baseUrl = environment.baseUrl;
   private apiUrl = `${environment.apiUrl}/tasks`;
 
-  // Dashboard istatistikleri/gecikme listesi, bir görev oluşturulup/güncellenip/silinene kadar değişmez;
-  // bu yüzden önbelleğe alınır ve sadece bu üç işlemden sonra geçersiz kılınır
-  private statisticsCache$: Observable<TaskStatistics> | null = null;
-  private overdueCache$: Observable<Task[]> | null = null;
-
   constructor() { }
 
   // 1. CREATE (Yeni Görev Ekleme)
   createTask(task: Task): Observable<Task> {
-    return this.http.post<Task>(this.apiUrl, task).pipe(
-      tap(() => this.invalidateStatsCache())
-    );
+    return this.http.post<Task>(this.apiUrl, task);
   }
 
   // 2. READ (Tüm Görevleri Getirme) - opsiyonel filtre + sayfalama desteği
@@ -56,17 +49,13 @@ export class TaskService {
   // 3. UPDATE (Görevi Güncelleme)
   // Parametre string olarak güncellendi
   updateTask(id: string, task: Task): Observable<Task> {
-    return this.http.put<Task>(`${this.apiUrl}/${id}`, task).pipe(
-      tap(() => this.invalidateStatsCache())
-    );
+    return this.http.put<Task>(`${this.apiUrl}/${id}`, task);
   }
 
   // 4. DELETE (Görevi Silme)
   // Parametre string olarak güncellendi
   deleteTask(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => this.invalidateStatsCache())
-    );
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   // 5. DOSYA EKLEME (Attachment Yükleme) - gerçek yükleme ilerlemesini (%) izleyebilmek için HttpEvent akışı döner
@@ -94,31 +83,18 @@ export class TaskService {
     return `${this.baseUrl}${filePath}`;
   }
 
-  // 6. Görev istatistikleri (Dashboard için) - önbellekten, yoksa sunucudan çekip önbelleğe alarak
+  // 6. Görev istatistikleri (Dashboard için)
+  // Bilerek önbelleğe ALINMIYOR: "gecikmiş mi" durumu sadece veri değişikliğiyle değil, zamanın
+  // geçmesiyle de değişir (bugün öğlen gecikmemiş bir görev akşam gecikmiş olabilir). Sadece
+  // create/update/delete'te geçersiz kılınan bir önbellek bu durumu yakalayamaz ve Dashboard'da
+  // eski/yanlış "gecikmiş görev yok" sonucunu göstermeye devam ederdi.
   getStatistics(): Observable<TaskStatistics> {
-    if (!this.statisticsCache$) {
-      this.statisticsCache$ = this.http.get<TaskStatistics>(`${this.apiUrl}/statistics`).pipe(
-        shareReplay(1)
-      );
-    }
-    return this.statisticsCache$;
+    return this.http.get<TaskStatistics>(`${this.apiUrl}/statistics`);
   }
 
-  // 7. Süresi geçmiş görevler (Dashboard için) - önbellekten, yoksa sunucudan çekip önbelleğe alarak
+  // 7. Süresi geçmiş görevler (Dashboard için) - yukarıdaki sebeple önbelleksiz
   getOverdueTasks(): Observable<Task[]> {
-    if (!this.overdueCache$) {
-      this.overdueCache$ = this.http.get<Task[]>(`${this.apiUrl}/overdue`).pipe(
-        shareReplay(1)
-      );
-    }
-    return this.overdueCache$;
-  }
-
-  // Görev sayısını/durumunu etkileyen bir işlem (create/update/delete) sonrası çağrılır;
-  // bir sonraki getStatistics()/getOverdueTasks() çağrısı sunucudan taze veri çeker
-  private invalidateStatsCache(): void {
-    this.statisticsCache$ = null;
-    this.overdueCache$ = null;
+    return this.http.get<Task[]>(`${this.apiUrl}/overdue`);
   }
 
   // 8. ALT GÖREV (SUBTASK) İŞLEMLERİ
