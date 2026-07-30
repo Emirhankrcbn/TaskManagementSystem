@@ -47,7 +47,7 @@ services:
     ports:
       - "${FRONTEND_PORT:-8081}:80"
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 5s
       timeout: 5s
       retries: 10
