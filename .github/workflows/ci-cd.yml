@@ -1,0 +1,145 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-build:
+    name: Backend - build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        run: dotnet restore
+        working-directory: Backend/TaskManagement.API
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+        working-directory: Backend/TaskManagement.API
+
+  frontend-build-and-test:
+    name: Frontend - build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: Frontend
+
+      - name: Run unit tests
+        run: npx ng test --watch=false
+        working-directory: Frontend
+
+      - name: Build (production)
+        run: npm run build
+        working-directory: Frontend
+
+  compose-smoke-test:
+    name: Docker Compose - smoke test
+    runs-on: ubuntu-latest
+    needs: [backend-build, frontend-build-and-test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: .env oluştur (test amaçlı, geçici değerler)
+        run: |
+          {
+            echo "POSTGRES_DB=TaskManagementDb"
+            echo "POSTGRES_USER=postgres"
+            echo "POSTGRES_PASSWORD=ci_test_password"
+            echo "JWT_KEY=ci_test_key_at_least_32_characters_long"
+            echo "JWT_ISSUER=TaskManagementAPI"
+            echo "JWT_AUDIENCE=TaskManagementClient"
+            echo "FRONTEND_PORT=8081"
+          } > .env
+
+      - name: Build & ayağa kaldır
+        run: docker compose up -d --build
+
+      - name: Servislerin healthy olmasını bekle
+        run: |
+          for i in $(seq 1 30); do
+            backend_status=$(docker inspect --format='{{.State.Health.Status}}' "$(docker compose ps -q backend)")
+            frontend_status=$(docker inspect --format='{{.State.Health.Status}}' "$(docker compose ps -q frontend)")
+            echo "backend=$backend_status frontend=$frontend_status"
+
+            if [ "$backend_status" = "unhealthy" ] || [ "$frontend_status" = "unhealthy" ]; then
+              echo "Bir servis unhealthy durumuna geçti, çıkılıyor"; exit 1
+            fi
+            if [ "$backend_status" = "healthy" ] && [ "$frontend_status" = "healthy" ]; then
+              echo "Tüm servisler healthy"; break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "Zaman aşımı: servisler healthy olmadı"; exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Backend /health kontrolü (container içinden)
+        run: docker compose exec -T backend curl -f http://localhost:8080/health
+
+      - name: Frontend kontrolü (nginx üzerinden, host portundan)
+        run: curl -f http://localhost:8081/
+
+      - name: API reverse-proxy kontrolü (nginx -> backend)
+        run: curl -f http://localhost:8081/health
+
+      - name: Logları göster (hata durumunda teşhis için)
+        if: failure()
+        run: docker compose logs
+
+      - name: Durdur ve temizle
+        if: always()
+        run: docker compose down -v
+
+  docker-build-and-push:
+    name: Docker - build & push images
+    runs-on: ubuntu-latest
+    needs: [backend-build, frontend-build-and-test, compose-smoke-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ghcr.io imaj adları küçük harf olmak zorunda; repository owner/name büyük harf içerebiliyor
+      - name: Compute lowercase image base name
+        id: image
+        run: echo "base=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./Backend/TaskManagement.API
+          push: true
+          tags: ${{ steps.image.outputs.base }}/backend:latest,${{ steps.image.outputs.base }}/backend:${{ github.sha }}
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./Frontend
+          push: true
+          tags: ${{ steps.image.outputs.base }}/frontend:latest,${{ steps.image.outputs.base }}/frontend:${{ github.sha }}

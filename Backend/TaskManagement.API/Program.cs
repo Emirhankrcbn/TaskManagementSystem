@@ -88,6 +88,9 @@ builder.Services.AddScoped<TaskManagement.API.Services.IJwtService, TaskManageme
 
 builder.Services.AddResponseCaching();
 
+// Container orkestrasyonu (Docker healthcheck, CI smoke test) için basit canlılık ucu
+builder.Services.AddHealthChecks();
+
 builder.Services.AddControllers(); // Projenin Controller kullanacağını belirtiyoruz
 
 // --- Swagger ve JWT Butonu Konfigürasyonu Başlangıç ---
@@ -140,6 +143,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Docker Compose gibi tek komutla ayağa kalkması gereken ortamlarda migration'ları otomatik uygula.
+// Varsayılan olarak kapalı: yerel "dotnet run" akışını etkilemesin, sadece docker-compose.yml
+// içinde RunMigrationsOnStartup=true set edilerek devreye alınır.
+if (builder.Configuration.GetValue<bool>("RunMigrationsOnStartup"))
+{
+    using var migrationScope = app.Services.CreateScope();
+    var db = migrationScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
 // Hata yakalayıcı Middleware'imiz tüm istekleri en başta karşılasın
 app.UseMiddleware<TaskManagement.API.Middlewares.ExceptionMiddleware>();
 
@@ -165,6 +178,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting(); // Yönlendirmeyi başlat
+
+// Kimlik doğrulama gerektirmez; Docker healthcheck ve CI smoke testi burayı çağırır
+app.MapHealthChecks("/health");
 
 // CORS politikasını devreye al
 app.UseCors("AllowFrontend");

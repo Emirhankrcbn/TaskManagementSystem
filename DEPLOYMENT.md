@@ -63,12 +63,29 @@ kullandığı standart ayraçtır.)
   önerilir (örn. Azure Database for PostgreSQL bunu zorunlu kılar). Kesin değer, gerçek hosting
   sağlayıcısı netleşince belirlenmeli.
 
-## 4. SSL sertifika yapılandırması ⏳ Beklemede
+## 4. SSL sertifika yapılandırması ✅
 
-Hedef platform (Docker/nginx, belirli bir bulut sağlayıcısı, vb.) netleşmeden kesinleştirilemez —
-mentordan onay bekleniyor.
+Mentordan onay geldi: hedef platform Docker. `frontend` container'ı (nginx) şu an sadece HTTP (80)
+üzerinden yayın yapıyor; gerçek bir sunucuya deploy edilirken nginx'in önüne bir reverse-proxy/ingress
+(örn. Caddy, Traefik, ya da bulut sağlayıcısının kendi load balancer'ı) konup Let's Encrypt ile TLS
+sonlandırması oradan yapılması öneriliyor — sertifika yönetimini uygulama katmanından ayırmak,
+container image'larını sadeleştiriyor. Backend zaten HTTPS'i `UseHttpsRedirection()` ile teşvik ediyor
+ama container içinde sertifika bağlamıyor; TLS terminasyonu proxy katmanında yapılacaksa bu ayar
+kod tarafında değiştirilmesine gerek bırakmıyor.
 
-## 5. Deployment scriptleri ⏳ Beklemede
+## 5. Deployment scriptleri ✅
 
-Aynı şekilde hedef platforma bağlı (Docker Compose mi, bulut sağlayıcısına özel CLI/script mi).
-Mentordan onay bekleniyor.
+Docker Compose ile tek komutla ayağa kalkacak şekilde kuruldu:
+
+```bash
+cp .env.example .env   # gerçek DB şifresi / JWT anahtarı ile doldur
+docker compose up -d --build
+```
+
+- `docker-compose.yml` → `postgres` + `backend` + `frontend` (nginx) servisleri, DB ve upload
+  verisi için kalıcı volume'lar, `postgres` sağlıklı olana kadar `backend`'in beklemesi.
+- `backend`'de `RunMigrationsOnStartup=true` set edildiği için container ayağa kalkarken migration'lar
+  otomatik uygulanıyor (yerel `dotnet run` akışını etkilemiyor, sadece Docker Compose ortamında aktif).
+- `.github/workflows/ci-cd.yml` → her push/PR'da backend build, frontend build+test; `main`'e push'ta
+  ayrıca backend/frontend Docker image'ları GitHub Container Registry'ye (`ghcr.io`) otomatik push
+  ediliyor (ekstra registry secret'ı gerekmiyor, GitHub'ın kendi `GITHUB_TOKEN`'ı yeterli).
