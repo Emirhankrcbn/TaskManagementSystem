@@ -2,6 +2,7 @@
 
 Bu doküman, staj test dosyasındaki "Deployment Hazırlığı" bölümünün durumunu özetler.
 
+
 ## 1. Production build yapılandırması ✅
 
 **Frontend:** `ng build` (varsayılan config production) daha önce bundle boyutu limitini (1MB) aşarak
